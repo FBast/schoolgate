@@ -2,48 +2,43 @@
   <div class="register-page">
     <h2>Inscription</h2>
     <form @submit.prevent="registerUser">
-      <FormInput label="Adresse email" type="email" v-model="email" />
-      <FormInput label="Mot de passe" type="password" v-model="password" />
-      <FormInput label="Confirmez votre mot de passe" type="password" v-model="confirmPassword" />
+      <FormInput v-model="email" label="Adresse email" type="email" />
+      <FormInput v-model="password" label="Mot de passe" type="password" />
+      <FormInput v-model="confirmPassword" label="Confirmez votre mot de passe" type="password" />
       <button type="submit">S'inscrire</button>
     </form>
     <p v-if="message">{{ message }}</p>
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from 'vue';
 import axios from 'axios';
+import { useRouter } from 'vue-router';
 import FormInput from '@/components/FormInput.vue';
-import {config} from '@/config.js';
+import { config } from '@/config.js';
 
-export default {
-  components: {FormInput},
-  data() {
-    return {
-      email: '',
-      password: '',
-      confirmPassword: '',
-      message: ''
-    };
-  },
-  methods: {
-    async registerUser() {
-      if (this.password !== this.confirmPassword) {
-        this.message = 'Les mots de passe ne correspondent pas';
-        return;
-      }
+const email = ref('');
+const password = ref('');
+const confirmPassword = ref('');
+const message = ref('');
+const router = useRouter();
 
-      try {
-        const response = await axios.post(`${config.backendApi}/users`, {
-          email: this.email,
-          password: this.password
-        });
+const registerUser = async () => {
+  if (password.value !== confirmPassword.value) {
+    message.value = 'Les mots de passe ne correspondent pas';
+    return;
+  }
 
-        this.$router.push({path: '/verify', query: {email: this.email}});
-      } catch (error) {
-        this.message = 'Erreur lors de l\'inscription';
-      }
-    }
+  try {
+    const response = await axios.post(`${config.backendApi}/users`, {
+      email: email.value,
+      password: password.value
+    });
+
+    router.push({ path: '/verify', query: { email: email.value } });
+  } catch (error) {
+    message.value = 'Erreur lors de l\'inscription';
   }
 };
 </script>

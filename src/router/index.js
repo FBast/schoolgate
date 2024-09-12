@@ -2,23 +2,29 @@
 import Home from '@/views/Home.vue';
 import Register from '@/views/Register.vue';
 import Verify from '@/views/Verify.vue';
+import Dashboard from "@/views/Dashboard.vue";
 
 const routes = [
     {
         path: '/',
         name: 'Home',
-        component: Home,  // Page de connexion
+        component: Home,
     },
     {
         path: '/register',
         name: 'Register',
-        component: Register,  // Page d'inscription
+        component: Register,
     },
     {
         path: '/verify',
         name: 'Verify',
-        component: Verify,  // Page de validation
+        component: Verify,
     },
+    {
+        path: '/dashboard',
+        name: 'Dashboard',
+        component: Dashboard,
+    }
 ];
 
 const router = createRouter({

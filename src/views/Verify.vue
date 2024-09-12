@@ -10,51 +10,37 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import {ref} from 'vue';
+import {useRouter, useRoute} from 'vue-router';
 import axios from 'axios';
-import { config } from '@/config.js';
+import {config} from '@/config.js';
 import FormInput from '@/components/FormInput.vue';
 
-export default {
-  components: { FormInput },
-  data() {
-    return {
-      token: '',
-      email: this.$route.query.email,
-      message: '',
-      success: false
-    };
-  },
-  methods: {
-    async verifyUser() {
-      try {
-        const response = await axios.post(`${config.backendApi}/users/verify`, {
-          token: this.token,
-          email: this.email
-        });
+const token = ref('');
+const route = useRoute();
+const email = ref(route.query.email);
+const message = ref('');
+const success = ref(false);
+const router = useRouter();
 
-        localStorage.setItem('authToken', response.data.token);
-        
-        this.success = true;
-        this.message = 'Compte vérifié avec succès !';
+const verifyUser = async () => {
+  try {
+    const response = await axios.post(`${config.backendApi}/users/verify`, {
+      token: token.value,
+      email: email.value
+    });
 
-        await this.loginUser(this.email); // Fonction pour logguer l'utilisateur
-        this.$router.push('/home');
-      } 
-      catch (error) {
-        this.success = false;
-        this.message = 'Erreur lors de la vérification';
-      }
-    },
+    localStorage.setItem('authToken', response.data.token);
 
-    async loginUser(email) {
-      const response = await axios.post(`${config.backendApi}/users/login`, {
-        email: email,
-        password: 'dummy_password_for_login'
-      });
+    success.value = true;
+    message.value = 'Compte vérifié avec succès !';
 
-      localStorage.setItem('authToken', response.data.token);
-    }
+    await router.push('/dashboard');
+  }
+  catch (error) {
+    success.value = false;
+    message.value = 'Erreur lors de la vérification';
   }
 };
 </script>

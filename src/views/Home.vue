@@ -6,33 +6,51 @@
       <FormInput label="Mot de passe" type="password" v-model="password" />
       <button type="submit">Se connecter</button>
     </form>
-    <p v-if="message">{{ message }}</p>
+    <p v-if="message" :class="{ 'error-message': !success, 'success-message': success }">{{ message }}</p>
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import axios from 'axios';
 import FormInput from '@/components/FormInput.vue';
+import { config } from '@/config.js';
 
-export default {
-  components: {FormInput},
-  data() {
-    return {
-      email: '',
-      password: '',
-      message: ''
-    };
-  },
-  methods: {
-    loginUser() {
-      // Simule la connexion, à adapter avec l'authentification réelle
-      if (this.email === 'test@example.com' && this.password === 'password') {
-        this.message = 'Connexion réussie';
-        this.$router.push('/dashboard');  // Redirection après connexion réussie
-      } 
-      else {
-        this.message = 'Email ou mot de passe incorrect';
-      }
+const email = ref('');
+const password = ref('');
+const message = ref('');
+const success = ref(false);
+const router = useRouter();
+
+const loginUser = async () => {
+  try {
+    const response = await axios.post(`${config.backendApi}/users/login`, {
+      email: email.value,
+      password: password.value
+    });
+
+    // Si l'utilisateur est trouvé et l'authentification réussie
+    const { token, status } = response.data;
+
+    if (status === 'unverified') {
+      // Si l'email n'est pas encore vérifié
+      message.value = 'Veuillez vérifier votre adresse email avant de vous connecter.';
+      await router.push({path: '/verify', query: {email: email.value}});
     }
+    else {
+      // Si l'email est vérifié, sauvegarder le JWT dans localStorage
+      localStorage.setItem('authToken', token);
+      success.value = true;
+      message.value = 'Connexion réussie';
+
+      // Rediriger vers le tableau de bord si l'email est vérifié
+      await router.push('/dashboard');
+    }
+  }
+  catch (error) {
+    success.value = false;
+    message.value = 'Email ou mot de passe incorrect';
   }
 };
 </script>
@@ -62,6 +80,14 @@ button:hover {
 }
 
 p {
+  margin-top: 10px;
+}
+
+.success-message {
+  color: green;
+}
+
+.error-message {
   color: red;
 }
 </style>
