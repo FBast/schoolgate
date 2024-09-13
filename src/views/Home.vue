@@ -11,9 +11,9 @@
 </template>
 
 <script setup>
+import axiosInstance from '../utils/axiosInstance.js';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import axios from 'axios';
 import FormInput from '@/components/FormInput.vue';
 import { config } from '@/config.js';
 
@@ -25,7 +25,7 @@ const router = useRouter();
 
 const loginUser = async () => {
   try {
-    const response = await axios.post(`${config.backendApi}/users/login`, {
+    const response = await axiosInstance.post(`${config.backendApi}/users/login`, {
       email: email.value,
       password: password.value
     });
