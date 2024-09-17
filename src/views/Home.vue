@@ -11,11 +11,10 @@
 </template>
 
 <script setup>
-import axiosInstance from '../utils/axiosInstance.js';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import FormInput from '@/components/FormInput.vue';
-import { config } from '@/config.js';
+import {ApiService} from "@/utils/apiService.js";
 
 const email = ref('');
 const password = ref('');
@@ -25,13 +24,8 @@ const router = useRouter();
 
 const loginUser = async () => {
   try {
-    const response = await axiosInstance.post(`${config.backendApi}/users/login`, {
-      email: email.value,
-      password: password.value
-    });
-
     // Si l'utilisateur est trouvé et l'authentification réussie
-    const { token, status } = response.data;
+    const { token, status } = await ApiService.loginUser(email.value, password.value);
 
     if (status === 'unverified') {
       // Si l'email n'est pas encore vérifié

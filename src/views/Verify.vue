@@ -13,9 +13,8 @@
 <script setup>
 import {ref} from 'vue';
 import {useRouter, useRoute} from 'vue-router';
-import axios from 'axios';
-import {config} from '@/config.js';
 import FormInput from '@/components/FormInput.vue';
+import {ApiService} from "@/utils/apiService.js";
 
 const token = ref('');
 const route = useRoute();
@@ -26,12 +25,9 @@ const router = useRouter();
 
 const verifyUser = async () => {
   try {
-    const response = await axios.post(`${config.backendApi}/users/verify`, {
-      token: token.value,
-      email: email.value
-    });
+    const responseData = await ApiService.verifyUser(token.value, email.value);
 
-    localStorage.setItem('authToken', response.data.token);
+    localStorage.setItem('authToken', responseData.token);
 
     success.value = true;
     message.value = 'Compte vérifié avec succès !';

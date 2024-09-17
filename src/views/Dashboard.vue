@@ -23,7 +23,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import axios from 'axios';
 
 // Composants enfants pour différents statuts
 import PendingInfos from "@/components/PendingInfos.vue";
@@ -31,6 +30,7 @@ import ExamWaiting from "@/components/ExamWaiting.vue"; // Examen en attente
 import ExamPending from "@/components/ExamPending.vue"; // Épreuve en cours
 import ExamDone from "@/components/ExamDone.vue"; // Épreuve terminée
 import ErrorComponent from "@/components/ErrorComponent.vue";
+import {ApiService} from "@/utils/apiService.js";
 
 // Variables de statut et d'erreur
 const status = ref('');
@@ -41,7 +41,7 @@ const title = ref('Chargement...');
 // Fonction pour déterminer quel composant afficher en fonction du statut utilisateur
 const currentComponent = computed(() => {
   switch (status.value) {
-    case 'pending_infos':
+    case 'verified':
       return PendingInfos;
     case 'waiting_exam':
       return ExamWaiting;
@@ -58,12 +58,8 @@ const currentComponent = computed(() => {
 // Charger le statut de l'utilisateur depuis le backend
 const fetchUserStatus = async () => {
   try {
-    const response = await axios.get(`${config.backendApi}/users/status`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('authToken')}`
-      }
-    });
-    status.value = response.data.status;
+    const responseData = await ApiService.getUserProfile();
+    status.value = responseData.status;
     title.value = determineTitle(status.value);
   } catch (error) {
     errorMessage.value = 'Erreur lors de la récupération du statut utilisateur.';
@@ -76,7 +72,7 @@ const fetchUserStatus = async () => {
 // Fonction pour définir le titre en fonction du statut utilisateur
 const determineTitle = (status) => {
   switch (status) {
-    case 'pending_infos':
+    case 'verified':
       return 'Remplissez vos informations';
     case 'waiting_exam':
       return 'En attente de l\'épreuve';

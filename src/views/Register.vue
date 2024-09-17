@@ -13,10 +13,9 @@
 
 <script setup>
 import { ref } from 'vue';
-import axios from 'axios';
 import { useRouter } from 'vue-router';
 import FormInput from '@/components/FormInput.vue';
-import { config } from '@/config.js';
+import {ApiService} from "@/utils/apiService.js";
 
 const email = ref('');
 const password = ref('');
@@ -31,13 +30,11 @@ const registerUser = async () => {
   }
 
   try {
-    const response = await axios.post(`${config.backendApi}/users`, {
-      email: email.value,
-      password: password.value
-    });
+    await ApiService.createUser(email.value, password.value);
 
-    router.push({ path: '/verify', query: { email: email.value } });
-  } catch (error) {
+    await router.push({path: '/verify', query: {email: email.value}});
+  }
+  catch (error) {
     message.value = 'Erreur lors de l\'inscription';
   }
 };

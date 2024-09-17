@@ -17,8 +17,7 @@
 import { ref } from 'vue';
 import FormInput from '@/components/FormInput.vue';
 import FormSelect from '@/components/FormSelect.vue';
-import axios from 'axios';
-import { config } from '@/config.js';
+import {ApiService} from "@/utils/apiService.js";
 
 const firstName = ref('');
 const lastName = ref('');
@@ -33,18 +32,21 @@ const years = ref([1, 2, 3, 4]);
 
 const submitForm = async () => {
   try {
-    await axios.post(`${config.backendApi}/users/update-infos`, {
+    // Utiliser PUT pour mettre à jour l'utilisateur
+    await ApiService.updateUserProfile({
       firstName: firstName.value,
       lastName: lastName.value,
       birthDate: birthDate.value,
       requestedFormation: requestedFormation.value,
       requestedYear: requestedYear.value,
-    });
+      status: 'waiting_exam'
+    })
     message.value = 'Informations enregistrées avec succès';
   } catch (error) {
     message.value = 'Erreur lors de l\'enregistrement des informations';
   }
 };
+
 </script>
 
 <style scoped>
