@@ -37,6 +37,8 @@ button {
   padding: $spacing-sm $spacing-md;
   border-radius: $border-radius;
   transition: background-color 0.3s ease;
+  color: white;
+  font-weight: bold;
 
   &:hover {
     background-color: lighten($accent-color, 20%);

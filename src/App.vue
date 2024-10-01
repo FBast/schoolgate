@@ -1,18 +1,15 @@
 ﻿<template>
   <div id="app">
-    <!-- En-tête global -->
     <header>
       <nav>
         <img src="@/assets/logo.png" alt="Logo ENSI" class="logo">
       </nav>
     </header>
 
-    <!-- Contenu principal rendu par le routeur -->
     <main>
       <router-view />
     </main>
 
-    <!-- Pied de page global -->
     <footer>
       <p>&copy; 2024 École des Nouvelles Images</p>
     </footer>
@@ -20,19 +17,36 @@
 </template>
 
 <script>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+
 export default {
   name: 'App',
+  setup() {
+    const isAuthenticated = ref(!!localStorage.getItem('authToken'));
+    const router = useRouter();
+
+    const logout = () => {
+      localStorage.removeItem('authToken');
+      isAuthenticated.value = false;
+      router.push('/login');
+    };
+
+    return {
+      isAuthenticated,
+      logout,
+    };
+  }
 };
 </script>
 
 <style scoped>
 @import "@/styles/main.scss";
 
-/* Style global du projet */
 #app {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* Utiliser toute la hauteur de la page */
+  min-height: 100vh;
   font-family: Avenir, Helvetica, Arial, sans-serif;
 }
 
@@ -59,7 +73,7 @@ nav a {
 }
 
 main {
-  flex: 1; /* Le contenu principal prend tout l'espace disponible */
+  flex: 1;
   padding: 20px;
   margin-top: 20px;
 }

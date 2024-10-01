@@ -1,13 +1,13 @@
 <template>
   <div class="pending-infos">
-    <h2>Veuillez remplir vos informations</h2>
+    <h2>Informations</h2>
     <form @submit.prevent="submitForm">
       <FormInput v-model="firstName" label="Prénom" type="text" />
       <FormInput v-model="lastName" label="Nom" type="text" />
       <FormInput v-model="birthDate" label="Date de naissance" type="date" />
       <FormSelect v-model="requestedFormation" :options="formations" label="Formation demandée" />
       <FormSelect v-model="requestedYear" :options="years" label="Année demandée" />
-      <button type="submit">Valider</button>
+      <FormButton type="submit">Valider</FormButton>
     </form>
     <p v-if="message">{{ message }}</p>
   </div>
@@ -18,6 +18,7 @@ import { ref } from 'vue';
 import FormInput from '@/components/FormInput.vue';
 import FormSelect from '@/components/FormSelect.vue';
 import {ApiService} from "@/utils/apiService.js";
+import FormButton from "@/components/FormButton.vue";
 
 const firstName = ref('');
 const lastName = ref('');
@@ -49,12 +50,14 @@ const submitForm = async () => {
 
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import "@/styles/utils/_variables.scss";
+@import "@/styles/utils/_mixins.scss";
+
 .pending-infos {
-  max-width: 600px;
   margin: 0 auto;
   padding: 20px;
-  background-color: #f0f0f0;
+  background-color: $primary-color;
   border-radius: 8px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -75,6 +78,6 @@ button:hover {
 }
 
 p {
-  color: red;
+  color: $success-color;
 }
 </style>

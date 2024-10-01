@@ -2,7 +2,7 @@
   <div class="dashboard">
     <header>
       <nav class="progress-indicator">
-        <div v-for="(step, index) in Object.values(stepMap)" :key="index" :class="{ 'active-step': step.active, 'step': true }">
+        <div v-for="(step, key, index) in stepMap" :key="index" :class="{ 'active-step': key === status, 'step': true }">
           <span class="step-number">{{ index + 1 }}</span>
           <span class="step-label">{{ step.label }}</span>
         </div>
@@ -30,46 +30,35 @@ import ErrorComponent from "@/components/ErrorComponent.vue";
 import FormButton from '@/components/FormButton.vue';
 import { ApiService } from "@/utils/apiService.js";
 
-// Map avec le statut comme clé, et les informations correspondantes
-const stepMap = ref({
-  verified: { label: 'Informations', component: PendingInfos, active: false },
-  waiting_exam: { label: 'Épreuve en attente', component: ExamWaiting, active: false },
-  pending_exam: { label: 'Épreuve en cours', component: ExamPending, active: false },
-  exam_done: { label: 'Épreuve terminée', component: ExamDone, active: false },
-  interview: { label: 'Entretien', component: Interview, active: false },
-  results: { label: 'Résultats', component: Results, active: false }
-});
+const stepMap = {
+  verified: { label: 'Informations', component: PendingInfos },
+  waiting_exam: { label: 'Épreuve en attente', component: ExamWaiting },
+  pending_exam: { label: 'Épreuve en cours', component: ExamPending },
+  exam_done: { label: 'Épreuve terminée', component: ExamDone },
+  interview: { label: 'Entretien', component: Interview },
+  results: { label: 'Résultats', component: Results }
+};
 
-const status = ref('');
+const status = ref('verified');
 const errorMessage = ref('');
 const loading = ref(true);
 
 // Composant à afficher selon le statut actuel
 const currentComponent = computed(() => {
-  const step = stepMap.value[status.value];
+  const step = stepMap[status.value];
   return step ? step.component : ErrorComponent;
 });
 
-const fetchUserStatus = async () => {
+const updateStatus = async () => {
   try {
     const responseData = await ApiService.getUserProfile();
     status.value = responseData.status;
-
-    // Mise à jour de l'étape active selon le statut
-    updateSteps(status.value);
   } catch (error) {
     errorMessage.value = 'Erreur lors de la récupération du statut utilisateur.';
     status.value = 'error';
   } finally {
     loading.value = false;
   }
-};
-
-// Mise à jour des étapes pour activer la bonne
-const updateSteps = (currentStatus) => {
-  Object.keys(stepMap.value).forEach(key => {
-    stepMap.value[key].active = (key === currentStatus);
-  });
 };
 
 const router = useRouter();
@@ -79,7 +68,7 @@ const logout = () => {
 };
 
 onMounted(() => {
-  fetchUserStatus();
+  updateStatus();
 });
 </script>
 
@@ -98,59 +87,40 @@ header {
 
   .progress-indicator {
     display: flex;
-    flex-grow: 1;
-    justify-content: flex-start;
-    align-items: center;
     gap: $spacing-md;
-  }
-
-  .step {
-    display: flex;
     align-items: center;
-    position: relative;
-    text-align: center;
-  }
 
-  .step-number {
-    background-color: $primary-color;
-    color: white;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    margin-right: $spacing-sm;
-    transition: background-color 0.3s ease;
-  }
+    .step {
+      display: flex;
+      align-items: center;
+      text-align: center;
 
-  .active-step .step-number {
-    background-color: $primary-color;
-  }
+      .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        color: white;
+        background-color: $primary-color;
+        margin-right: $spacing-sm;
+      }
 
-  .step-label {
-    color: $text-color;
-    font-weight: bold;
-    margin-left: $spacing-xs;
-    transition: color 0.3s ease;
-  }
+      .step-label {
+        color: $text-color;
+        font-weight: bold;
+      }
+    }
 
-  .active-step .step-label {
-    color: $primary-color;
-  }
+    .active-step .step-number {
+      background-color: $accent-color;
+    }
 
-  .step-connector {
-    width: 50px;
-    height: 4px;
-    background-color: $secondary-color;
-    margin-left: $spacing-sm;
-    margin-right: $spacing-sm;
-    transition: background-color 0.3s ease;
-  }
-
-  .active-step ~ .step .step-number {
-    background-color: lighten($accent-color, 10%);
+    .active-step .step-label {
+      color: $accent-color;
+    }
   }
 
   button {
