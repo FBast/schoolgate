@@ -4,9 +4,16 @@
     <form @submit.prevent="loginUser">
       <FormInput label="Adresse email" type="email" v-model="email" />
       <FormInput label="Mot de passe" type="password" v-model="password" />
-      <button type="submit">Se connecter</button>
+      <FormButton type="submit">Se connecter</FormButton>
     </form>
     <p v-if="message" :class="{ 'error-message': !success, 'success-message': success }">{{ message }}</p>
+    <p class="forgot-password">
+      <router-link to="/forgot-password">Mot de passe oublié ?</router-link>
+    </p>
+
+    <div class="signup-link">
+      <FormButton @click="signupLink">Créer un compte</FormButton>
+    </div>
   </div>
 </template>
 
@@ -14,7 +21,8 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import FormInput from '@/components/FormInput.vue';
-import {ApiService} from "@/utils/apiService.js";
+import FormButton from '@/components/FormButton.vue';  // Import du composant Button
+import { ApiService } from '@/utils/apiService.js';
 
 const email = ref('');
 const password = ref('');
@@ -24,64 +32,50 @@ const router = useRouter();
 
 const loginUser = async () => {
   try {
-    // Si l'utilisateur est trouvé et l'authentification réussie
     const { token, status } = await ApiService.loginUser(email.value, password.value);
 
     if (status === 'unverified') {
-      // Si l'email n'est pas encore vérifié
       message.value = 'Veuillez vérifier votre adresse email avant de vous connecter.';
-      await router.push({path: '/verify', query: {email: email.value}});
-    }
-    else {
-      // Si l'email est vérifié, sauvegarder le JWT dans localStorage
+      await router.push({ path: '/verify', query: { email: email.value } });
+    } else {
       localStorage.setItem('authToken', token);
       success.value = true;
       message.value = 'Connexion réussie';
-
-      // Rediriger vers le tableau de bord si l'email est vérifié
       await router.push('/dashboard');
     }
-  }
-  catch (error) {
+  } catch (error) {
     success.value = false;
     message.value = 'Email ou mot de passe incorrect';
   }
 };
+
+const signupLink = () => {
+  router.push('/register');
+};
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import "@/styles/utils/_variables.scss";
+
 .login-page {
   max-width: 400px;
   margin: 0 auto;
-  padding: 20px;
-  background-color: #e10946;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-button {
-  width: 100%;
-  padding: 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #0056b3;
+  padding: $spacing-md;
+  background-color: $primary-color;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
 }
 
 p {
-  margin-top: 10px;
-}
-
-.success-message {
-  color: green;
+  margin-top: $spacing-sm;
 }
 
 .error-message {
-  color: red;
+  color: $error-color;
 }
+
+.success-message {
+  color: $success-color;
+}
+
 </style>

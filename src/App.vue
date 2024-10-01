@@ -4,7 +4,6 @@
     <header>
       <nav>
         <img src="@/assets/logo.png" alt="Logo ENSI" class="logo">
-        <router-link to="/">Se connecter</router-link>
       </nav>
     </header>
 
@@ -27,6 +26,8 @@ export default {
 </script>
 
 <style scoped>
+@import "@/styles/main.scss";
+
 /* Style global du projet */
 #app {
   display: flex;

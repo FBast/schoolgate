@@ -5,17 +5,25 @@
       <FormInput v-model="email" label="Adresse email" type="email" />
       <FormInput v-model="password" label="Mot de passe" type="password" />
       <FormInput v-model="confirmPassword" label="Confirmez votre mot de passe" type="password" />
-      <button type="submit">S'inscrire</button>
+      <FormButton type="submit">S'inscrire</FormButton>
     </form>
     <p v-if="message">{{ message }}</p>
+
+    <Separator text="ou" />
+
+    <div class="login-link">
+      <FormButton @click="loginLink">Se connecter avec un compte existant</FormButton>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import {ref} from 'vue';
+import {useRouter} from 'vue-router';
 import FormInput from '@/components/FormInput.vue';
-import {ApiService} from "@/utils/apiService.js";
+import FormButton from '@/components/FormButton.vue';  // Import du composant Button
+import {ApiService} from '@/utils/apiService.js';
+import Separator from "@/components/Separator.vue";
 
 const email = ref('');
 const password = ref('');
@@ -31,40 +39,30 @@ const registerUser = async () => {
 
   try {
     await ApiService.createUser(email.value, password.value);
-
     await router.push({path: '/verify', query: {email: email.value}});
-  }
-  catch (error) {
+  } catch (error) {
     message.value = 'Erreur lors de l\'inscription';
   }
 };
+
+const loginLink = () => {
+  router.push('/');
+};
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import "@/styles/utils/_variables.scss";
+
 .register-page {
   max-width: 400px;
   margin: 0 auto;
-  padding: 20px;
-  background-color: #e10946;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-button {
-  width: 100%;
-  padding: 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #0056b3;
+  padding: $spacing-md;
+  background-color: $primary-color;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
 }
 
 p {
-  color: red;
+  color: $error-color;
 }
 </style>

@@ -1,18 +1,15 @@
 <template>
   <div class="dashboard">
     <header>
-      <h2>{{ title }}</h2>
-      <nav>
-        <router-link to="/dashboard">Accueil</router-link>
-        <router-link to="/exam-pending">Épreuve en cours</router-link>
-        <router-link to="/exam-done">Épreuve terminée</router-link>
-        <router-link to="/interview">Entretien</router-link>
-        <router-link to="/results">Résultats</router-link>
-        <button @click="logout">Déconnexion</button>
+      <nav class="progress-indicator">
+        <div v-for="(step, index) in Object.values(stepMap)" :key="index" :class="{ 'active-step': step.active, 'step': true }">
+          <span class="step-number">{{ index + 1 }}</span>
+          <span class="step-label">{{ step.label }}</span>
+        </div>
       </nav>
+      <FormButton @click="logout">Déconnexion</FormButton>
     </header>
 
-    <!-- Composant interne modifié en fonction du statut -->
     <section class="content">
       <div v-if="loading">Chargement...</div>
       <component v-else :is="currentComponent" :message="errorMessage"></component>
@@ -23,114 +20,147 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-
-// Composants enfants pour différents statuts
 import PendingInfos from "@/components/PendingInfos.vue";
-import ExamWaiting from "@/components/ExamWaiting.vue"; // Examen en attente
-import ExamPending from "@/components/ExamPending.vue"; // Épreuve en cours
-import ExamDone from "@/components/ExamDone.vue"; // Épreuve terminée
+import ExamWaiting from "@/components/ExamWaiting.vue";
+import ExamPending from "@/components/ExamPending.vue";
+import ExamDone from "@/components/ExamDone.vue";
+import Interview from "@/components/Interview.vue";
+import Results from "@/components/Results.vue";
 import ErrorComponent from "@/components/ErrorComponent.vue";
-import {ApiService} from "@/utils/apiService.js";
+import FormButton from '@/components/FormButton.vue';
+import { ApiService } from "@/utils/apiService.js";
 
-// Variables de statut et d'erreur
-const status = ref('');
-const errorMessage = ref('');
-const loading = ref(true); // Indicateur de chargement
-const title = ref('Chargement...');
-
-// Fonction pour déterminer quel composant afficher en fonction du statut utilisateur
-const currentComponent = computed(() => {
-  switch (status.value) {
-    case 'verified':
-      return PendingInfos;
-    case 'waiting_exam':
-      return ExamWaiting;
-    case 'pending_exam':
-      return ExamPending;
-    case 'exam_done':
-      return ExamDone;
-    default:
-      errorMessage.value = `Le statut "${status.value}" est inconnu. Veuillez contacter l'assistance.`;
-      return ErrorComponent; // Composant pour gérer un statut non reconnu
-  }
+// Map avec le statut comme clé, et les informations correspondantes
+const stepMap = ref({
+  verified: { label: 'Informations', component: PendingInfos, active: false },
+  waiting_exam: { label: 'Épreuve en attente', component: ExamWaiting, active: false },
+  pending_exam: { label: 'Épreuve en cours', component: ExamPending, active: false },
+  exam_done: { label: 'Épreuve terminée', component: ExamDone, active: false },
+  interview: { label: 'Entretien', component: Interview, active: false },
+  results: { label: 'Résultats', component: Results, active: false }
 });
 
-// Charger le statut de l'utilisateur depuis le backend
+const status = ref('');
+const errorMessage = ref('');
+const loading = ref(true);
+
+// Composant à afficher selon le statut actuel
+const currentComponent = computed(() => {
+  const step = stepMap.value[status.value];
+  return step ? step.component : ErrorComponent;
+});
+
 const fetchUserStatus = async () => {
   try {
     const responseData = await ApiService.getUserProfile();
     status.value = responseData.status;
-    title.value = determineTitle(status.value);
+
+    // Mise à jour de l'étape active selon le statut
+    updateSteps(status.value);
   } catch (error) {
     errorMessage.value = 'Erreur lors de la récupération du statut utilisateur.';
     status.value = 'error';
   } finally {
-    loading.value = false; // Terminer le chargement
+    loading.value = false;
   }
 };
 
-// Fonction pour définir le titre en fonction du statut utilisateur
-const determineTitle = (status) => {
-  switch (status) {
-    case 'verified':
-      return 'Remplissez vos informations';
-    case 'waiting_exam':
-      return 'En attente de l\'épreuve';
-    case 'pending_exam':
-      return 'Épreuve en cours';
-    case 'exam_done':
-      return 'Épreuve terminée';
-    default:
-      return 'Erreur';
-  }
+// Mise à jour des étapes pour activer la bonne
+const updateSteps = (currentStatus) => {
+  Object.keys(stepMap.value).forEach(key => {
+    stepMap.value[key].active = (key === currentStatus);
+  });
 };
 
-// Déconnexion
 const router = useRouter();
 const logout = () => {
   localStorage.removeItem('authToken');
   router.push('/');
 };
 
-// Charger les données lors du montage du composant
 onMounted(() => {
   fetchUserStatus();
 });
 </script>
 
-<style scoped>
-/* Styles du dashboard parent */
+<style scoped lang="scss">
+@import "@/styles/utils/_variables.scss";
+
 .dashboard {
-  padding: 20px;
+  padding: $spacing-md;
 }
 
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-}
+  margin-bottom: $spacing-md;
 
-nav a {
-  margin: 0 10px;
-  color: #e10947;
-  text-decoration: none;
-  font-weight: bold;
-}
+  .progress-indicator {
+    display: flex;
+    flex-grow: 1;
+    justify-content: flex-start;
+    align-items: center;
+    gap: $spacing-md;
+  }
 
-button {
-  margin-left: auto;
-  background-color: #e10947;
-  color: white;
-  border: none;
-  cursor: pointer;
-  padding: 10px;
-  border-radius: 5px;
+  .step {
+    display: flex;
+    align-items: center;
+    position: relative;
+    text-align: center;
+  }
+
+  .step-number {
+    background-color: $primary-color;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    margin-right: $spacing-sm;
+    transition: background-color 0.3s ease;
+  }
+
+  .active-step .step-number {
+    background-color: $primary-color;
+  }
+
+  .step-label {
+    color: $text-color;
+    font-weight: bold;
+    margin-left: $spacing-xs;
+    transition: color 0.3s ease;
+  }
+
+  .active-step .step-label {
+    color: $primary-color;
+  }
+
+  .step-connector {
+    width: 50px;
+    height: 4px;
+    background-color: $secondary-color;
+    margin-left: $spacing-sm;
+    margin-right: $spacing-sm;
+    transition: background-color 0.3s ease;
+  }
+
+  .active-step ~ .step .step-number {
+    background-color: lighten($accent-color, 10%);
+  }
+
+  button {
+    width: auto;
+    max-width: 200px;
+    margin-left: $spacing-lg;
+  }
 }
 
 .content {
-  margin-top: 20px;
+  margin-top: $spacing-md;
 }
-
-/* Ajouter les styles nécessaires pour les composants */
 </style>
