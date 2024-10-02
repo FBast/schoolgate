@@ -1,5 +1,5 @@
 ﻿<template>
-  <div class="login-page">
+  <div class="login">
     <h2>Connexion</h2>
     <form @submit.prevent="loginUser">
       <FormInput label="Adresse email" type="email" v-model="email" />
@@ -11,6 +11,8 @@
       <router-link to="/forgot-password">Mot de passe oublié ?</router-link>
     </p>
 
+    <Separator text="ou" />
+    
     <div class="signup-link">
       <FormButton @click="signupLink">Créer un compte</FormButton>
     </div>
@@ -23,6 +25,7 @@ import { useRouter } from 'vue-router';
 import FormInput from '@/components/FormInput.vue';
 import FormButton from '@/components/FormButton.vue';  // Import du composant Button
 import { ApiService } from '@/utils/apiService.js';
+import Separator from "@/components/Separator.vue";
 
 const email = ref('');
 const password = ref('');
@@ -57,7 +60,7 @@ const signupLink = () => {
 <style scoped lang="scss">
 @import "@/styles/utils/_variables.scss";
 
-.login-page {
+.login {
   max-width: 400px;
   margin: 0 auto;
   padding: $spacing-md;

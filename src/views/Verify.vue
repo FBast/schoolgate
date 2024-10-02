@@ -1,5 +1,5 @@
 ﻿<template>
-  <div class="verify-page">
+  <div class="verify">
     <h2>Vérification de votre compte</h2>
     <form @submit.prevent="verifyUser">
       <p>Entrez le code à 6 chiffres envoyé à {{ email }}</p>
@@ -44,7 +44,7 @@ const verifyUser = async () => {
 <style scoped lang="scss">
 @import "@/styles/utils/_variables.scss";
 
-.verify-page {
+.verify {
   max-width: 400px;
   margin: 0 auto;
   padding: $spacing-md;

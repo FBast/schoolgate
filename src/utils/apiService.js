@@ -21,6 +21,16 @@ export const ApiService = {
         }
     },
 
+    // Récupération de mot de passe
+    async resetEmail(email) {
+        try {
+            const response = await axiosInstance.post('/users/reset', { email });
+            return response.data;
+        } catch (error) {
+            throw new Error('Erreur lors du reset de l\'utilisateur');
+        }
+    },
+    
     // Vérification du code de validation
     async verifyUser(token, email) {
         try {

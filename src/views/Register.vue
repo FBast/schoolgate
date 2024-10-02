@@ -1,5 +1,5 @@
 ﻿<template>
-  <div class="register-page">
+  <div class="register">
     <h2>Inscription</h2>
     <form @submit.prevent="registerUser">
       <FormInput v-model="email" label="Adresse email" type="email" />
@@ -21,7 +21,7 @@
 import {ref} from 'vue';
 import {useRouter} from 'vue-router';
 import FormInput from '@/components/FormInput.vue';
-import FormButton from '@/components/FormButton.vue';  // Import du composant Button
+import FormButton from '@/components/FormButton.vue';
 import {ApiService} from '@/utils/apiService.js';
 import Separator from "@/components/Separator.vue";
 
@@ -53,7 +53,7 @@ const loginLink = () => {
 <style scoped lang="scss">
 @import "@/styles/utils/_variables.scss";
 
-.register-page {
+.register {
   max-width: 400px;
   margin: 0 auto;
   padding: $spacing-md;

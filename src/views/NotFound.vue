@@ -1,5 +1,5 @@
 <template>
-  <div class="not-found-page">
+  <div class="not-found">
     <h1>404 - Page non trouvée</h1>
     <p>Désolé, la page que vous recherchez n'existe pas.</p>
     <router-link to="/">Retour à l'accueil</router-link>
@@ -13,7 +13,7 @@
 <style scoped lang="scss">
 @import '../styles/utils/_variables.scss';
 
-.not-found-page {
+.not-found {
   text-align: center;
   margin-top: $spacing-xl;
 

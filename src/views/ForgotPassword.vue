@@ -1,5 +1,5 @@
 <template>
-  <div class="forgot-password-page">
+  <div class="forgot-password">
     <h2>Mot de passe oublié</h2>
     <form @submit.prevent="sendResetEmail">
       <FormInput label="Adresse email" type="email" v-model="email" />
@@ -13,7 +13,8 @@
 import { ref } from 'vue';
 import { ApiService } from '@/utils/apiService.js';
 import FormInput from "@/components/FormInput.vue";
-import FormButton from "@/components/FormButton.vue";  // Import du composant Button
+import FormButton from "@/components/FormButton.vue";
+import router from "@/router/index.js";
 
 const email = ref('');
 const message = ref('');
@@ -21,6 +22,8 @@ const success = ref(false);
 
 const sendResetEmail = async () => {
   try {
+    await ApiService.resetEmail(email.value);
+    
     success.value = true;
     message.value = 'Un email de réinitialisation a été envoyé à votre adresse.';
   } catch (error) {
@@ -34,7 +37,7 @@ const sendResetEmail = async () => {
 @import "@/styles/utils/_variables.scss";
 @import "@/styles/utils/_mixins.scss";
 
-.forgot-password-page {
+.forgot-password {
   max-width: 400px;
   margin: 0 auto;
   padding: $spacing-md;
