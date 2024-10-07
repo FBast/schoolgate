@@ -1,7 +1,7 @@
 ﻿<template>
   <div class="verify">
     <h2>Vérification de votre compte</h2>
-    <form @submit.prevent="verifyUser">
+    <form @submit.prevent="submitCode">
       <p>Entrez le code à 6 chiffres envoyé à {{ email }}</p>
       <FormInput label="Code de validation" type="text" v-model="token" required />
       <FormButton type="submit">Valider</FormButton>
@@ -24,7 +24,7 @@ const message = ref('');
 const success = ref(false);
 const router = useRouter();
 
-const verifyUser = async () => {
+const submitCode = async () => {
   try {
     const responseData = await ApiService.verifyUser(token.value, email.value);
 

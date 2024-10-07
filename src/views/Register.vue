@@ -7,7 +7,7 @@
       <FormInput v-model="confirmPassword" label="Confirmez votre mot de passe" type="password" />
       <FormButton type="submit">S'inscrire</FormButton>
     </form>
-    <p v-if="message">{{ message }}</p>
+    <p v-if="message" :class="{'success-message': success, 'error-message': !success}">{{ message }}</p>
 
     <Separator text="ou" />
 
@@ -29,10 +29,12 @@ const email = ref('');
 const password = ref('');
 const confirmPassword = ref('');
 const message = ref('');
+const success = ref(false);
 const router = useRouter();
 
 const registerUser = async () => {
   if (password.value !== confirmPassword.value) {
+    success.value = false;
     message.value = 'Les mots de passe ne correspondent pas';
     return;
   }
@@ -41,6 +43,7 @@ const registerUser = async () => {
     await ApiService.createUser(email.value, password.value);
     await router.push({path: '/verify', query: {email: email.value}});
   } catch (error) {
+    success.value = false;
     message.value = 'Erreur lors de l\'inscription';
   }
 };
@@ -62,7 +65,11 @@ const loginLink = () => {
   box-shadow: $box-shadow;
 }
 
-p {
+.success-message {
+  color: $success-color;
+}
+
+.error-message {
   color: $error-color;
 }
 </style>

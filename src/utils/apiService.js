@@ -1,16 +1,6 @@
 import axiosInstance from './axiosInstance';
 
 export const ApiService = {
-    // Authentification de l'utilisateur (connexion)
-    async loginUser(email, password) {
-        try {
-            const response = await axiosInstance.post('/users/login', { email, password });
-            return response.data;
-        } catch (error) {
-            throw new Error('Erreur lors de la connexion');
-        }
-    },
-
     // Création d'un utilisateur
     async createUser(email, password) {
         try {
@@ -20,7 +10,17 @@ export const ApiService = {
             throw new Error('Erreur lors de la création de l\'utilisateur');
         }
     },
-
+    
+    // Authentification de l'utilisateur (connexion)
+    async loginUser(email, password) {
+        try {
+            const response = await axiosInstance.post('/users/login', { email, password });
+            return response.data;
+        } catch (error) {
+            throw new Error('Erreur lors de la connexion');
+        }
+    },
+    
     // Récupération de mot de passe
     async resetEmail(email) {
         try {
@@ -31,7 +31,7 @@ export const ApiService = {
         }
     },
     
-    // Vérification du code de validation
+    // Vérification du code de validation pour création utilisateur
     async verifyUser(token, email) {
         try {
             const response = await axiosInstance.post('/users/verify', { token, email });

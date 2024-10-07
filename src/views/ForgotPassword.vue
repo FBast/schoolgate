@@ -23,9 +23,9 @@ const success = ref(false);
 const sendResetEmail = async () => {
   try {
     await ApiService.resetEmail(email.value);
-    
     success.value = true;
     message.value = 'Un email de réinitialisation a été envoyé à votre adresse.';
+    await router.push({path: '/verifyEmail', query: {email: email.value}});
   } catch (error) {
     success.value = false;
     message.value = 'Erreur lors de l\'envoi de l\'email. Veuillez réessayer.';
