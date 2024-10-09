@@ -12,7 +12,7 @@
 
     <section class="content">
       <div v-if="loading">Chargement...</div>
-      <component v-else :is="currentComponent" :message="errorMessage"></component>
+      <component v-else :is="currentComponent" @statusChanged="updateStatus" :message="errorMessage"></component>
     </section>
   </div>
 </template>

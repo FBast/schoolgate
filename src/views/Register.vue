@@ -41,8 +41,9 @@ const registerUser = async () => {
 
   try {
     await ApiService.createUser(email.value, password.value);
-    await router.push({path: '/verify', query: {email: email.value}});
-  } catch (error) {
+    await router.push({path: '/verifyEmail', query: {email: email.value}});
+  } 
+  catch (error) {
     success.value = false;
     message.value = 'Erreur lors de l\'inscription';
   }

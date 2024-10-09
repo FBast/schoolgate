@@ -23,9 +23,10 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import FormInput from '@/components/FormInput.vue';
-import FormButton from '@/components/FormButton.vue';  // Import du composant Button
+import FormButton from '@/components/FormButton.vue';
 import { ApiService } from '@/utils/apiService.js';
 import Separator from "@/components/Separator.vue";
+import {jwtDecode} from "jwt-decode";
 
 const email = ref('');
 const password = ref('');
@@ -35,18 +36,22 @@ const router = useRouter();
 
 const loginUser = async () => {
   try {
-    const { token, status } = await ApiService.loginUser(email.value, password.value);
-
-    if (status === 'unverified') {
+    const { token } = await ApiService.loginUser(email.value, password.value);
+    const decodedToken = jwtDecode(token);
+    
+    if (decodedToken.status === 'unverified') {
       message.value = 'Veuillez vérifier votre adresse email avant de vous connecter.';
-      await router.push({ path: '/verify', query: { email: email.value } });
-    } else {
+      await router.push({ path: '/verifyEmail', query: { email: email.value } });
+    } 
+    else {
       localStorage.setItem('authToken', token);
       success.value = true;
       message.value = 'Connexion réussie';
-      await router.push('/dashboard');
+      
+      await router.push('/');
     }
-  } catch (error) {
+  } 
+  catch (error) {
     success.value = false;
     message.value = 'Email ou mot de passe incorrect';
   }

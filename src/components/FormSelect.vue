@@ -5,6 +5,7 @@
       <option disabled value="">Veuillez choisir</option>
       <option v-for="option in options" :key="option">{{ option }}</option>
     </select>
+    <span v-if="error" class="error-message">{{ error }}</span>
   </div>
 </template>
 
@@ -14,11 +15,14 @@ export default {
     label: String,
     modelValue: String,
     options: Array,
+    error: String
   },
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import "@/styles/utils/_variables.scss";
+
 .form-group {
   display: flex;
   flex-direction: column;
@@ -36,5 +40,10 @@ select {
   border-radius: 4px;
   width: 100%;
   box-sizing: border-box;
+}
+
+.error-message {
+  padding-top: 5px;
+  color: $error-color;
 }
 </style>

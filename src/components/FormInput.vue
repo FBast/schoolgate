@@ -2,6 +2,7 @@
   <div class="form-group">
     <label>{{ label }}</label>
     <input :type="type" :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" />
+    <span v-if="error" class="error-message">{{ error }}</span>
   </div>
 </template>
 
@@ -10,6 +11,7 @@ export default {
   props: {
     label: String,
     modelValue: String,
+    error: String, 
     type: {
       type: String,
       default: 'text',
@@ -18,7 +20,9 @@ export default {
 };
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+@import "@/styles/utils/_variables.scss";
+
 .form-group {
   display: flex;
   flex-direction: column;
@@ -36,5 +40,10 @@ input {
   border-radius: 4px;
   width: 100%;
   box-sizing: border-box;
+}
+
+.error-message {
+  padding-top: 5px;
+  color: $error-color;
 }
 </style>
