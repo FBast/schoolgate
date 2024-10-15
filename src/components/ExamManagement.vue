@@ -3,26 +3,30 @@
     <div class="section topic">
       <h2>Sujets</h2>
       <div class="items-list">
-        <div v-for="topic in topics" :key="topic._id" class="item">
+        <div v-for="topic in topics" :key="topic._id" class="item"
+             :class="{ active: topic._id === selectedTopicId.value }"
+             @click="fetchExercises(topic._id)">
           {{ topic.title }}
-          <button @click="deleteTopic(topic._id)">Supprimer</button>
-          <button @click="updateTopic(topic._id)">Modifier</button>
+          <button @click.stop="deleteTopic(topic._id)">Supprimer</button>
+          <button @click.stop="updateTopic(topic._id)">Modifier</button>
         </div>
       </div>
       <div class="actions">
-        <button @click="AddTopic">+</button>
+        <button @click="addTopic">+</button>
       </div>
     </div>
 
     <div class="section exercices">
       <h2>Exercices</h2>
       <div class="items-list">
-        <div v-for="exercice in exercises" :key="exercice.id" class="item">
-          {{ exercice.title }}
+        <div v-for="exercise in exercises" :key="exercise._id" class="item">
+          {{ exercise.title }}
+          <button @click.stop="deleteExercise(exercise._id)">Supprimer</button>
+          <button @click.stop="updateExercise(exercise._id)">Modifier</button>
         </div>
       </div>
       <div class="actions">
-        <button @click="addExercice">+</button>
+        <button @click="addExercise(selectedTopicId)">+</button>
       </div>
     </div>
 
@@ -52,21 +56,39 @@ const topics = ref([]);
 const exercises = ref([]);
 const enonce = ref('Lorem ipsum dolor sit amet...');
 const uploadedFileName = ref('');
+const selectedTopicId = ref(null);
 
 const fetchTopics = async () => {
   try {
-    const response = await ApiService.getTopics();
-    topics.value = response;
+    const responseData = await ApiService.getTopics();
+    topics.value = responseData;
+
+    if (topics.value.length > 0) {
+      selectedTopicId.value = topics.value[0]._id;
+      await fetchExercises(selectedTopicId.value);
+    }
   } catch (error) {
     console.error('Error fetching topics:', error);
   }
 };
 
-const AddTopic = async () => {
+
+const fetchExercises = async (topicId = null) => {
+  selectedTopicId.value = topicId;
+  try {
+    const responseData = await ApiService.getExercises(topicId);
+    exercises.value = responseData;
+  } catch (error) {
+    console.error('Error fetching exercises:', error);
+  }
+};
+
+
+const addTopic = async () => {
   const newExam = { title: `Nouvelle Epreuve ${topics.value.length + 1}` };
   try {
-    const response = await ApiService.createExam(newExam);
-    topics.value.push(response);
+    const responseData = await ApiService.createTopic(newExam);
+    topics.value.push(responseData.topic);
   } catch (error) {
     console.error('Error creating topic:', error);
   }
@@ -75,7 +97,7 @@ const AddTopic = async () => {
 const deleteTopic = async (id) => {
   try {
     await ApiService.deleteTopic(id);
-    topics.value = topics.value.filter((exam) => exam._id !== id);
+    topics.value = topics.value.filter((topic) => topic._id !== id);
   } catch (error) {
     console.error('Error deleting topic:', error);
   }
@@ -86,17 +108,48 @@ const updateTopic = async (id) => {
   if (!newTitle) return;
 
   try {
-    const updatedExam = await ApiService.updateTopic(id, { title: newTitle });
-    const index = topics.value.findIndex((exam) => exam._id === id);
-    topics.value[index] = updatedExam;
+    const responseData = await ApiService.updateTopic(id, { title: newTitle });
+    const index = topics.value.findIndex((topic) => topic._id === id);
+    topics.value[index] = responseData.topic;
   } catch (error) {
-    console.error('Error updating exam:', error);
+    console.error('Error updating topic:', error);
   }
 };
 
-const addExercice = () => {
-  const newId = exercises.value.length + 1;
-  exercises.value.push({ id: newId, title: `Nouvel Exercice ${newId}` });
+const addExercise = async (topicId) => {
+  const newExercise = {
+    title: `Nouvel Exercice ${exercises.value.length + 1}`,
+    text: 'Description de l\'exercice...'
+  };
+
+  try {
+    const responseData = await ApiService.createExercise(topicId, newExercise);
+    exercises.value.push(responseData.exercise);
+  } catch (error) {
+    console.error('Error creating exercise:', error);
+  }
+};
+
+const deleteExercise = async (id) => {
+  try {
+    await ApiService.deleteExercise(id);
+    exercises.value = exercises.value.filter((exercise) => exercise._id !== id);
+  } catch (error) {
+    console.error('Error deleting exercise:', error);
+  }
+};
+
+const updateExercise = async (id) => {
+  const newTitle = prompt('Modifier le titre de l\'exercice :');
+  if (!newTitle) return;
+
+  try {
+    const responseData = await ApiService.updateExercise(id, { title: newTitle });
+    const index = exercises.value.findIndex((exercise) => exercise._id === id);
+    exercises.value[index] = responseData.exercise;
+  } catch (error) {
+    console.error('Error updating exercise:', error);
+  }
 };
 
 const handleFileUpload = (event) => {

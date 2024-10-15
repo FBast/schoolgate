@@ -126,9 +126,8 @@ export const ApiService = {
         }
     },
 
-    // Exam API methods
-    
-    async createExam(topicData) {
+    // Topic API methods
+    async createTopic(topicData) {
         try {
             const response = await axiosInstance.post('/topics', topicData, {
                 headers: {
@@ -192,4 +191,71 @@ export const ApiService = {
             throw new Error('Error deleting topic');
         }
     },
+
+    // Exercise API methods
+    async createExercise(topicId, exerciseData) {
+        try {
+            const response = await axiosInstance.post('/exercises', { ...exerciseData, topicId }, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw new Error('Error creating exercise');
+        }
+    },
+
+    async getExercises(topicId = null) {
+        try {
+            const url = topicId ? `/exercises?topicId=${topicId}` : '/exercises';
+            const response = await axiosInstance.get(url, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw new Error(`Error retrieving exercises: ${error.response?.data?.message || error.message}`);
+        }
+    },
+
+    async getExercise(exerciseId) {
+        try {
+            const response = await axiosInstance.get(`/exercises/${exerciseId}`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw new Error('Error retrieving exercise');
+        }
+    },
+
+    async updateExercise(exerciseId, exerciseData) {
+        try {
+            const response = await axiosInstance.put(`/exercises/${exerciseId}`, exerciseData, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw new Error('Error updating exercise');
+        }
+    },
+
+    async deleteExercise(exerciseId) {
+        try {
+            const response = await axiosInstance.delete(`/exercises/${exerciseId}`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw new Error('Error deleting exercise');
+        }
+    }
 }
