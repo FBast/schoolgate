@@ -1,14 +1,19 @@
 ﻿<template>
   <div class="exam-container">
+    <!-- Topic column -->
     <div class="section topic">
-      <h2>Sujets</h2>
+      <h2>Topics</h2>
       <div class="items-list">
-        <div v-for="topic in topics" :key="topic._id" class="item"
-             :class="{ active: topic._id === selectedTopicId.value }"
-             @click="fetchExercises(topic._id)">
+        <div
+            v-for="topic in topics"
+            :key="topic._id"
+            class="item"
+            :class="{ active: topic._id === selectedTopic?._id }"
+            @click="selectTopic(topic)"
+        >
           {{ topic.title }}
-          <button @click.stop="deleteTopic(topic._id)">Supprimer</button>
-          <button @click.stop="updateTopic(topic._id)">Modifier</button>
+          <button @click.stop="deleteTopic(topic._id)">Delete</button>
+          <button @click.stop="updateTopic(topic._id)">Edit</button>
         </div>
       </div>
       <div class="actions">
@@ -16,13 +21,20 @@
       </div>
     </div>
 
-    <div class="section exercices">
-      <h2>Exercices</h2>
+    <!-- Exercises column -->
+    <div v-if="selectedTopic" class="section exercises">
+      <h2>Exercises</h2>
       <div class="items-list">
-        <div v-for="exercise in exercises" :key="exercise._id" class="item">
+        <div
+            v-for="exercise in exercises"
+            :key="exercise._id"
+            class="item"
+            :class="{ active: exercise._id === selectedExercise?._id }"
+            @click="selectExercise(exercise._id)"
+        >
           {{ exercise.title }}
-          <button @click.stop="deleteExercise(exercise._id)">Supprimer</button>
-          <button @click.stop="updateExercise(exercise._id)">Modifier</button>
+          <button @click.stop="deleteExercise(exercise._id)">Delete</button>
+          <button @click.stop="updateExercise(exercise._id)">Edit</button>
         </div>
       </div>
       <div class="actions">
@@ -30,19 +42,14 @@
       </div>
     </div>
 
-    <div class="section enonce">
-      <h2>Enoncé</h2>
+    <!-- Exercise details column -->
+    <div v-if="selectedExercise" class="section enonce">
+      <h2>Details</h2>
       <div class="content-box">
-        {{ enonce }}
-      </div>
-    </div>
-
-    <div class="section parameters">
-      <h2>Paramètres</h2>
-      <div class="parametres-box">
-        <label for="file-upload">Image jointe :</label>
+        <textarea v-model="selectedExercise.text" placeholder="Enter the exercise content..."></textarea>
+        <label for="file-upload">Attached image:</label>
         <input type="file" id="file-upload" @change="handleFileUpload" />
-        <span>{{ uploadedFileName }}</span>
+        <span v-if="selectedExercise.image">{{ selectedExercise.image }}</span>
       </div>
     </div>
   </div>
@@ -54,57 +61,85 @@ import { ApiService } from '@/utils/apiService';
 
 const topics = ref([]);
 const exercises = ref([]);
-const enonce = ref('Lorem ipsum dolor sit amet...');
-const uploadedFileName = ref('');
-const selectedTopicId = ref(null);
+const selectedTopic = ref(null);
+const selectedExercise = ref(null);
 
 const fetchTopics = async () => {
   try {
     const responseData = await ApiService.getTopics();
     topics.value = responseData;
-
     if (topics.value.length > 0) {
-      selectedTopicId.value = topics.value[0]._id;
-      await fetchExercises(selectedTopicId.value);
+      selectedTopic.value = topics.value[0];
+      await selectTopic(selectedTopic.value);
     }
   } catch (error) {
     console.error('Error fetching topics:', error);
   }
 };
 
-
-const fetchExercises = async (topicId = null) => {
-  selectedTopicId.value = topicId;
+// Select a topic and load its exercises
+const selectTopic = async (topic) => {
+  selectedTopic.value = topic;
+  selectedExercise.value = null;
   try {
-    const responseData = await ApiService.getExercises(topicId);
+    const responseData = await ApiService.getExercises(topic._id);
     exercises.value = responseData;
   } catch (error) {
     console.error('Error fetching exercises:', error);
   }
 };
 
+// Select an exercise and load its details
+const selectExercise = (exerciseId) => {
+  const exercise = exercises.value.find((ex) => ex._id === exerciseId);
+  if (exercise) {
+    selectedExercise.value = exercise;
+  } else {
+    console.error('Exercise not found:', exerciseId);
+  }
+};
 
+// Add a new topic
 const addTopic = async () => {
-  const newExam = { title: `Nouvelle Epreuve ${topics.value.length + 1}` };
+  const newTopic = { title: `New Topic ${topics.value.length + 1}` };
   try {
-    const responseData = await ApiService.createTopic(newExam);
-    topics.value.push(responseData.topic);
+    const responseData = await ApiService.createTopic(newTopic);
+    const createdTopic = responseData.topic;
+    topics.value.push(createdTopic);
+
+    // Select the newly created topic
+    selectedTopic.value = createdTopic;
+    exercises.value = []; // Reset exercises
+    selectedExercise.value = null; // Reset selected exercise
+
+    // Fetch exercises for the newly created topic
+    await selectTopic(createdTopic);
   } catch (error) {
     console.error('Error creating topic:', error);
   }
 };
 
+// Delete a topic
 const deleteTopic = async (id) => {
   try {
     await ApiService.deleteTopic(id);
     topics.value = topics.value.filter((topic) => topic._id !== id);
+
+    // If the deleted topic was the currently selected one, reset selection
+    if (selectedTopic.value && selectedTopic.value._id === id) {
+      selectedTopic.value = topics.value.length > 0 ? topics.value[0] : null;
+      exercises.value = [];
+      selectedExercise.value = null;
+      if (selectedTopic.value) await selectTopic(selectedTopic.value);
+    }
   } catch (error) {
     console.error('Error deleting topic:', error);
   }
 };
 
+// Update a topic title
 const updateTopic = async (id) => {
-  const newTitle = prompt('Modifier le titre de l\'épreuve :');
+  const newTitle = prompt('Edit the topic title:');
   if (!newTitle) return;
 
   try {
@@ -116,31 +151,39 @@ const updateTopic = async (id) => {
   }
 };
 
-const addExercise = async (topicId) => {
+// Add a new exercise to the selected topic
+const addExercise = async () => {
+  if (!selectedTopic.value) return;
   const newExercise = {
-    title: `Nouvel Exercice ${exercises.value.length + 1}`,
-    text: 'Description de l\'exercice...'
+    title: `New Exercise ${exercises.value.length + 1}`,
+    text: 'Exercise description...'
   };
 
   try {
-    const responseData = await ApiService.createExercise(topicId, newExercise);
+    const responseData = await ApiService.createExercise(selectedTopic.value._id, newExercise);
     exercises.value.push(responseData.exercise);
+    selectExercise(responseData.exercise._id); // Auto-select the new exercise
   } catch (error) {
     console.error('Error creating exercise:', error);
   }
 };
 
+// Delete an exercise
 const deleteExercise = async (id) => {
   try {
     await ApiService.deleteExercise(id);
     exercises.value = exercises.value.filter((exercise) => exercise._id !== id);
+    if (selectedExercise.value && selectedExercise.value._id === id) {
+      selectedExercise.value = null;
+    }
   } catch (error) {
     console.error('Error deleting exercise:', error);
   }
 };
 
+// Update an exercise title
 const updateExercise = async (id) => {
-  const newTitle = prompt('Modifier le titre de l\'exercice :');
+  const newTitle = prompt('Edit the exercise title:');
   if (!newTitle) return;
 
   try {
@@ -152,8 +195,11 @@ const updateExercise = async (id) => {
   }
 };
 
+// Handle file upload for the selected exercise
 const handleFileUpload = (event) => {
-  uploadedFileName.value = event.target.files[0].name;
+  if (selectedExercise.value) {
+    selectedExercise.value.image = event.target.files[0].name;
+  }
 };
 
 onMounted(fetchTopics);
@@ -161,12 +207,15 @@ onMounted(fetchTopics);
 
 <style scoped lang="scss">
 .exam-container {
-  display: grid;
-  grid-template-columns: 1fr 1fr 2fr;
-  grid-gap: 20px;
+  display: flex;
+  flex-direction: row;
   padding: 20px;
+  gap: 20px;
 
   .section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
     border: 1px solid #ccc;
     padding: 10px;
     border-radius: 8px;
@@ -188,8 +237,16 @@ onMounted(fetchTopics);
         border: 1px solid $primary-color;
         margin-bottom: 5px;
         cursor: pointer;
+        transition: background-color 0.3s, border-color 0.3s;
+
         &:hover {
           background-color: lighten($primary-color, 20%);
+        }
+
+        &.active {
+          background-color: $primary-color;
+          color: #fff;
+          border-color: darken($primary-color, 10%);
         }
 
         button {
@@ -209,22 +266,12 @@ onMounted(fetchTopics);
       overflow-y: auto;
       padding: 10px;
       background-color: #f9f9f9;
-    }
 
-    .parametres-box {
-      display: flex;
-      align-items: center;
-
-      label {
-        margin-right: 10px;
-      }
-
-      input[type="file"] {
-        margin-right: 10px;
-      }
-
-      span {
-        font-style: italic;
+      textarea {
+        width: 100%;
+        height: 100px;
+        margin-top: 10px;
+        resize: vertical;
       }
     }
   }

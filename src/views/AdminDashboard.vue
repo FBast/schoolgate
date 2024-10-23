@@ -2,7 +2,7 @@
   <div class="admin-dashboard">
     <header>
       <nav class="admin-nav">
-        <FormButton v-for="(step, key, index) in stepMap" :key="index" 
+        <FormButton v-for="(step, key, index) in stepMap" :key="index"
                     :class="{ 'active-step': key === currentView }" @click="currentView = key">
           {{ step.label }}
         </FormButton>
@@ -25,10 +25,12 @@ import FormButton from '@/components/FormButton.vue';
 import UserManagement from '@/components/UserManagement.vue';
 import ErrorComponent from '@/components/ErrorComponent.vue';
 import ExamManagement from "@/components/ExamManagement.vue";
+import FormationManagement from "@/components/FormationManagement.vue";
 
 const stepMap = {
   user_management: { label: 'Gestion des utilisateurs', component: UserManagement },
   exam_management: { label: 'Gestion des épreuves', component: ExamManagement },
+  formation_management: { label: 'Gestion des formations', component: FormationManagement },
 };
 
 const currentView = ref('user_management');

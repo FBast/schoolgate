@@ -257,5 +257,124 @@ export const ApiService = {
         } catch (error) {
             throw new Error('Error deleting exercise');
         }
-    }
+    },
+
+    // Formation API methods
+    async createFormation(formationData) {
+        try {
+            const response = await axiosInstance.post('/formations', formationData, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw new Error(`Error creating formation: ${error.response?.data?.message || error.message}`);
+        }
+    },
+
+    async getFormations() {
+        try {
+            const response = await axiosInstance.get('/formations', {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw new Error(`Error retrieving formations: ${error.response?.data?.message || error.message}`);
+        }
+    },
+
+    async updateFormation(formationId, formationData) {
+        try {
+            const response = await axiosInstance.put(`/formations/${formationId}`, formationData, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw new Error(`Error updating formation: ${error.response?.data?.message || error.message}`);
+        }
+    },
+
+    async deleteFormation(formationId) {
+        try {
+            const response = await axiosInstance.delete(`/formations/${formationId}`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw new Error(`Error deleting formation: ${error.response?.data?.message || error.message}`);
+        }
+    },
+
+    // Grade API methods
+    async createGrade(gradeData) {
+        try {
+            const response = await axiosInstance.post('/grades', gradeData, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw new Error(`Error creating grade: ${error.response?.data?.message || error.message}`);
+        }
+    },
+
+    async getGrades(formationId) {
+        try {
+            const response = await axiosInstance.get(`/grades?formationId=${formationId}`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw new Error(`Error retrieving grades: ${error.response?.data?.message || error.message}`);
+        }
+    },
+
+    async updateGrade(gradeId, gradeData) {
+        try {
+            const response = await axiosInstance.put(`/grades/${gradeId}`, gradeData, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw new Error(`Error updating grade: ${error.response?.data?.message || error.message}`);
+        }
+    },
+
+    async deleteGrade(gradeId) {
+        try {
+            const response = await axiosInstance.delete(`/grades/${gradeId}`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw new Error(`Error deleting grade: ${error.response?.data?.message || error.message}`);
+        }
+    },
+
+    async generateExam(gradeId) {
+        try {
+            const response = await axiosInstance.get(`/grades/${gradeId}/generate`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw new Error('Error generating exam');
+        }
+    },
 }
