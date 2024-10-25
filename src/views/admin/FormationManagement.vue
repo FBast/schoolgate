@@ -1,5 +1,5 @@
 ﻿<template>
-  <div class="management-container">
+  <div class="formation-management-container">
     <!-- Formations column -->
     <div class="section formations">
       <h2>Formations</h2>
@@ -22,7 +22,7 @@
     </div>
 
     <!-- Grades column -->
-    <div v-if="selectedFormation" class="section grades">
+    <div class="section grades" :class="{ disabled: !selectedFormation }">
       <h2>Grades</h2>
       <div class="items-list">
         <div
@@ -44,7 +44,7 @@
     </div>
 
     <!-- Topics column -->
-    <div v-if="selectedGrade" class="section topics">
+    <div class="section topics" :class="{ disabled: !selectedGrade }">
       <h2>Topics</h2>
       <div class="items-list">
         <div
@@ -63,77 +63,78 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { ApiService } from '@/utils/apiService';
+import { ApiService } from '@/utils/apiService.js';
 
 const formations = ref([]);
 const grades = ref([]);
 const topics = ref([]);
 const selectedFormation = ref(null);
 const selectedGrade = ref(null);
-const selectedTopics = ref([]); // Array to hold selected topic IDs
+const selectedTopics = ref([]);
 
+// Fetch formations
 const fetchFormations = async () => {
   try {
     const responseData = await ApiService.getFormations();
     formations.value = responseData;
     if (formations.value.length > 0) {
       selectedFormation.value = formations.value[0];
-      await selectFormation(selectedFormation.value);
+      await fetchGrades();
     }
   } catch (error) {
     console.error('Error fetching formations:', error);
   }
 };
 
-// Select a formation and load its grades
-const selectFormation = async (formation) => {
-  selectedFormation.value = formation;
-  selectedGrade.value = null;
-  selectedTopics.value = [];
+// Fetch grades based on selectedFormation
+const fetchGrades = async () => {
+  if (!selectedFormation.value) return;
+
   try {
-    const responseData = await ApiService.getGrades(formation._id);
+    const responseData = await ApiService.getGrades(selectedFormation.value._id);
     grades.value = responseData;
+    if (grades.value.length > 0) {
+      selectedGrade.value = grades.value[0];
+      await fetchTopics();
+    }
   } catch (error) {
     console.error('Error fetching grades:', error);
   }
 };
 
-// Select a grade and load the available topics
-const selectGrade = async (grade) => {
-  selectedGrade.value = grade;
-  selectedTopics.value = [];
+// Fetch topics based on selectedGrade
+const fetchTopics = async () => {
+  if (!selectedGrade.value) return;
+
   try {
     const responseData = await ApiService.getTopics();
     topics.value = responseData;
+
+    // Set selected topics based on the topics associated with the grade
+    selectedTopics.value = selectedGrade.value.topics || [];
   } catch (error) {
     console.error('Error fetching topics:', error);
   }
 };
 
-// Generate exam for a grade
-const generateExam = async (gradeId) => {
-  try {
-    await ApiService.generateExam(gradeId);
-    alert('Exam generated successfully!');
-  } catch (error) {
-    console.error('Error generating exam:', error);
-    alert('Error generating exam');
-  }
+// Select a formation and fetch its grades
+const selectFormation = async (formation) => {
+  selectedFormation.value = formation;
+  selectedGrade.value = null;
+  selectedTopics.value = [];
+  await fetchGrades();
 };
 
-// Toggle topic selection
-const toggleTopicSelection = (topic) => {
-  const index = selectedTopics.value.indexOf(topic._id);
-  if (index === -1) {
-    selectedTopics.value.push(topic._id);
-  } else {
-    selectedTopics.value.splice(index, 1);
-  }
+// Select a grade and fetch its topics
+const selectGrade = async (grade) => {
+  selectedGrade.value = grade;
+  selectedTopics.value = grade.topics || [];
+  await fetchTopics();
 };
 
 // Add a new formation
 const addFormation = async () => {
-  const newFormation = {title: `New Formation ${formations.value.length + 1}`};
+  const newFormation = { title: `New Formation ${formations.value.length + 1}` };
   try {
     const responseData = await ApiService.createFormation(newFormation);
     formations.value.push(responseData.formation);
@@ -170,7 +171,7 @@ const deleteFormation = async (id) => {
       grades.value = [];
       selectedGrade.value = null;
       selectedTopics.value = [];
-      if (selectedFormation.value) await selectFormation(selectedFormation.value);
+      if (selectedFormation.value) await fetchGrades();
     }
   } catch (error) {
     console.error('Error deleting formation:', error);
@@ -178,9 +179,9 @@ const deleteFormation = async (id) => {
 };
 
 // Add a new grade to the selected formation
-const addGrade = async (formation) => {
-  if (!formation) return;
-  const newGrade = {grade: `Grade ${grades.value.length + 1}`, formationId: formation._id};
+const addGrade = async () => {
+  if (!selectedFormation.value) return;
+  const newGrade = { grade: `Grade ${grades.value.length + 1}`, formationId: selectedFormation.value._id };
   try {
     const responseData = await ApiService.createGrade(newGrade);
     grades.value.push(responseData.grade);
@@ -215,10 +216,64 @@ const deleteGrade = async (id) => {
     if (selectedGrade.value && selectedGrade.value._id === id) {
       selectedGrade.value = grades.value.length > 0 ? grades.value[0] : null;
       selectedTopics.value = [];
-      if (selectedGrade.value) await selectGrade(selectedGrade.value);
+      if (selectedGrade.value) await fetchTopics();
     }
   } catch (error) {
     console.error('Error deleting grade:', error);
+  }
+};
+
+// Generate exam for a grade
+const generateExam = async (gradeId) => {
+  try {
+    const response = await ApiService.generateExam(gradeId);
+    const pdfBase64 = response.pdf;
+
+    // Convertir la chaîne base64 en un Blob
+    const byteCharacters = atob(pdfBase64);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    const blob = new Blob([byteArray], { type: 'application/pdf' });
+
+    // Créer un lien de téléchargement
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'exam.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    alert('Exam generated and downloaded successfully!');
+  } catch (error) {
+    console.error('Error generating exam:', error);
+    alert('Error generating exam');
+  }
+};
+
+// Toggle topic selection
+const toggleTopicSelection = async (topic) => {
+  const index = selectedTopics.value.indexOf(topic._id);
+  if (index === -1) {
+    selectedTopics.value.push(topic._id);
+  } else {
+    selectedTopics.value.splice(index, 1);
+  }
+
+  if (selectedGrade.value) {
+    try {
+      const gradeData = {
+        grade: selectedGrade.value.grade,
+        topics: selectedTopics.value,
+      };
+
+      const responseData = await ApiService.updateGrade(selectedGrade.value._id, gradeData);
+      selectedGrade.value = responseData.grade;
+    } catch (error) {
+      console.error('Error updating grade:', error);
+    }
   }
 };
 
@@ -227,10 +282,9 @@ onMounted(fetchFormations);
 </script>
 
 <style scoped lang="scss">
-.management-container {
+.formation-management-container {
   display: flex;
   flex-direction: row;
-  padding: 20px;
   gap: 20px;
 
   .section {
@@ -242,6 +296,11 @@ onMounted(fetchFormations);
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 
+    &.disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
     h2 {
       color: $primary-color;
       font-weight: bold;
@@ -249,7 +308,6 @@ onMounted(fetchFormations);
     }
 
     .items-list {
-      max-height: 200px;
       overflow-y: auto;
       margin-bottom: 10px;
 

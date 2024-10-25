@@ -377,4 +377,58 @@ export const ApiService = {
             throw new Error('Error generating exam');
         }
     },
+    
+    // Session API Methods
+
+    async getSessions() {
+        try {
+            const response = await axiosInstance.get('/sessions', {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw new Error('Erreur lors de la récupération des sessions');
+        }
+    },
+
+    async createSession(sessionData) {
+        try {
+            const response = await axiosInstance.post('/sessions', sessionData, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw new Error('Erreur lors de la création de la session');
+        }
+    },
+
+    async updateSession(sessionId, sessionData) {
+        try {
+            const response = await axiosInstance.put(`/sessions/${sessionId}`, sessionData, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw new Error('Erreur lors de la mise à jour de la session');
+        }
+    },
+
+    async deleteSession(sessionId) {
+        try {
+            const response = await axiosInstance.delete(`/sessions/${sessionId}`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw new Error('Erreur lors de la suppression de la session');
+        }
+    }
 }

@@ -20,13 +20,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import PendingInfos from "@/components/PendingInfos.vue";
-import ExamWaiting from "@/components/ExamWaiting.vue";
-import ExamPending from "@/components/ExamPending.vue";
-import ExamDone from "@/components/ExamDone.vue";
-import Interview from "@/components/Interview.vue";
-import Results from "@/components/Results.vue";
-import ErrorComponent from "@/components/ErrorComponent.vue";
+import PendingInfos from "@/views/user/PendingInfos.vue";
+import ExamWaiting from "@/views/user/ExamWaiting.vue";
+import ExamPending from "@/views/user/ExamPending.vue";
+import ExamDone from "@/views/user/ExamDone.vue";
+import Interview from "@/views/user/Interview.vue";
+import Results from "@/views/user/Results.vue";
+import ErrorComponent from "@/views/user/ErrorComponent.vue";
 import FormButton from '@/components/FormButton.vue';
 import { ApiService } from "@/utils/apiService.js";
 

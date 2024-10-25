@@ -1,5 +1,5 @@
 ﻿<template>
-  <div class="exam-container">
+  <div class="exam-management-container">
     <!-- Topic column -->
     <div class="section topic">
       <h2>Topics</h2>
@@ -56,8 +56,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { ApiService } from '@/utils/apiService';
+import {ref, onMounted, watch} from 'vue';
+import { ApiService } from '@/utils/apiService.js';
 
 const topics = ref([]);
 const exercises = ref([]);
@@ -88,6 +88,22 @@ const selectTopic = async (topic) => {
     console.error('Error fetching exercises:', error);
   }
 };
+
+// Watch for changes in the selected exercise text and update the backend
+watch(
+    () => selectedExercise.value?.text,
+    async (newText) => {
+      if (selectedExercise.value && newText !== undefined) {
+        try {
+          await ApiService.updateExercise(selectedExercise.value._id, {
+            text: newText,
+          });
+        } catch (error) {
+          console.error('Error updating exercise content:', error);
+        }
+      }
+    }
+);
 
 // Select an exercise and load its details
 const selectExercise = (exerciseId) => {
@@ -206,10 +222,9 @@ onMounted(fetchTopics);
 </script>
 
 <style scoped lang="scss">
-.exam-container {
+.exam-management-container {
   display: flex;
   flex-direction: row;
-  padding: 20px;
   gap: 20px;
 
   .section {
@@ -228,7 +243,6 @@ onMounted(fetchTopics);
     }
 
     .items-list {
-      max-height: 200px;
       overflow-y: auto;
       margin-bottom: 10px;
 

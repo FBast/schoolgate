@@ -22,15 +22,17 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { ApiService } from '@/utils/apiService.js';
 import FormButton from '@/components/FormButton.vue';
-import UserManagement from '@/components/UserManagement.vue';
-import ErrorComponent from '@/components/ErrorComponent.vue';
-import ExamManagement from "@/components/ExamManagement.vue";
-import FormationManagement from "@/components/FormationManagement.vue";
+import UserManagement from '@/views/admin/UserManagement.vue';
+import ErrorComponent from '@/views/user/ErrorComponent.vue';
+import ExamManagement from "@/views/admin/ExamManagement.vue";
+import FormationManagement from "@/views/admin/FormationManagement.vue";
+import SessionManagement from "@/views/admin/SessionManagement.vue";
 
 const stepMap = {
   user_management: { label: 'Gestion des utilisateurs', component: UserManagement },
   exam_management: { label: 'Gestion des épreuves', component: ExamManagement },
   formation_management: { label: 'Gestion des formations', component: FormationManagement },
+  date_management: { label: 'Gestion des sessions', component: SessionManagement },
 };
 
 const currentView = ref('user_management');
@@ -69,8 +71,6 @@ const logout = () => {
 @import "@/styles/utils/_variables.scss";
 
 .admin-dashboard {
-  padding: $spacing-md;
-
   header {
     display: flex;
     justify-content: space-between;
