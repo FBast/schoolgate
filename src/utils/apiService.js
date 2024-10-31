@@ -6,7 +6,7 @@ export const ApiService = {
         try {
             const response = await axiosInstance.post('/users', { email, password });
             return response.data;
-        } 
+        }
         catch (error) {
             throw new Error('Erreur lors de la création de l\'utilisateur');
         }
@@ -16,19 +16,36 @@ export const ApiService = {
         try {
             const response = await axiosInstance.post('/users/login', { email, password });
             return response.data;
-        } 
+        }
         catch (error) {
             throw new Error('Erreur lors de la connexion');
         }
     },
-    
-    async resetEmail(email) {
+
+    async resendVerificationCode(email) {
         try {
-            const response = await axiosInstance.post('/users/reset', { email });
+            const response = await axiosInstance.post('/users/resend', { email });
             return response.data;
-        } 
-        catch (error) {
-            throw new Error('Erreur lors du reset de l\'utilisateur');
+        } catch (error) {
+            throw new Error('Erreur lors de l\'envoi du code de vérification');
+        }
+    },
+
+    async requestPasswordReset(email) {
+        try {
+            const response = await axiosInstance.post('/users/request-password-reset', { email });
+            return response.data;
+        } catch (error) {
+            throw new Error(error.response?.data?.message || 'Erreur lors de la demande de réinitialisation du mot de passe');
+        }
+    },
+
+    async resetPassword(email, validationToken, newPassword) {
+        try {
+            const response = await axiosInstance.post('/users/reset-password', { email, validationToken, newPassword });
+            return response.data;
+        } catch (error) {
+            throw new Error(error.response?.data?.message || 'Erreur lors de la réinitialisation du mot de passe');
         }
     },
     

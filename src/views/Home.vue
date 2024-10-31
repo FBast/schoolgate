@@ -21,7 +21,7 @@ const checkAuthentication = () => {
 
       if (decodedToken.exp < now) {
         localStorage.removeItem('authToken');
-        router.push('/login');
+        router.push('/auth');
       } 
       else if (decodedToken.role === 'admin') {
         router.push('/adminDashboard');
@@ -32,11 +32,11 @@ const checkAuthentication = () => {
     } 
     catch (error) {
       localStorage.removeItem('authToken');
-      router.push('/login');
+      router.push('/auth');
     }
   } 
   else {
-    router.push('/login');
+    router.push('/auth');
   }
 };
 
