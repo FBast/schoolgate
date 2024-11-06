@@ -26,7 +26,7 @@ import ExamPending from "@/views/user/ExamPending.vue";
 import ExamDone from "@/views/user/ExamDone.vue";
 import Interview from "@/views/user/Interview.vue";
 import Results from "@/views/user/Results.vue";
-import ErrorComponent from "@/views/user/ErrorComponent.vue";
+import ErrorComponent from "@/components/ErrorComponent.vue";
 import FormButton from '@/components/FormButton.vue';
 import { ApiService } from "@/utils/apiService.js";
 

@@ -1,12 +1,15 @@
 // _variables.scss
 
 // Colors
-$primary-color: #e10946;
-$secondary-color: #1f9e2c;
-$accent-color: #1f58e0;
-$text-color: #2c3e50;
-$error-color: #ff0000;
-$success-color: #28a745;
+$background: #ffffff;
+$primary-color: #4f4f4f;
+$secondary-color: #737373;
+$accent-color: #a5a5a5;
+$text-color: #ffffff;
+$text-alt-color: #333333;
+$error-color: #a0a0a0;
+$success-color: #7a7a7a;
+$border-color: #d3d3d3;
 
 // Typography
 $font-family: 'Arial', sans-serif;
@@ -19,6 +22,26 @@ $spacing-sm: 8px;
 $spacing-md: 16px;
 $spacing-lg: 32px;
 $spacing-xl: 64px;
+
+// Font Sizes
+$font-size-xs: 12px;  // Très petite police
+$font-size-sm: 14px;  // Petite police
+$font-size-md: 16px;  // Police de base (par défaut)
+$font-size-lg: 20px;  // Grande police
+$font-size-xl: 24px;  // Très grande police
+$font-size-xxl: 32px; // Extra grande police pour les titres ou bannières
+
+// Font Weights
+$font-weight-light: 300;
+$font-weight-normal: 400;
+$font-weight-bold: 700;
+
+// Line Heights
+$line-height-xs: 1.2;
+$line-height-sm: 1.4;
+$line-height-md: 1.6;
+$line-height-lg: 1.8;
+$line-height-xl: 2;
 
 // Border
 $border-radius: 5px;

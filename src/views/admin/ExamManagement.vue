@@ -1,8 +1,13 @@
 ﻿<template>
-  <div class="exam-management-container">
+  <div class="container">
     <!-- Topic column -->
-    <div class="section topic">
-      <h2>Topics</h2>
+    <div class="panel topic">
+      <div class="header">
+        <h2 class="title">Topics</h2>
+        <div class="actions">
+          <a @click="addTopic"><i class="fa-regular fa-square-plus"></i></a>
+        </div>
+      </div>
       <div class="items-list">
         <div
             v-for="topic in topics"
@@ -11,19 +16,23 @@
             :class="{ active: topic._id === selectedTopic?._id }"
             @click="selectTopic(topic)"
         >
-          {{ topic.title }}
-          <button @click.stop="deleteTopic(topic._id)">Delete</button>
-          <button @click.stop="updateTopic(topic._id)">Edit</button>
+          <label>{{ topic.title }}</label>
+          <div class="actions">
+            <a @click.stop="updateTopic(topic._id)"><i class="fa-solid fa-pen-to-square"></i></a>
+            <a @click.stop="deleteTopic(topic._id)"><i class="fa-solid fa-trash"></i></a>
+          </div>
         </div>
-      </div>
-      <div class="actions">
-        <button @click="addTopic">+</button>
       </div>
     </div>
 
     <!-- Exercises column -->
-    <div v-if="selectedTopic" class="section exercises">
-      <h2>Exercises</h2>
+    <div v-if="selectedTopic" class="panel exercises">
+      <div class="header">
+        <h2 class="title">Exercises</h2>
+        <div class="actions">
+          <a @click="addExercise"><i class="fa-regular fa-square-plus"></i></a>
+        </div>
+      </div>
       <div class="items-list">
         <div
             v-for="exercise in exercises"
@@ -32,26 +41,39 @@
             :class="{ active: exercise._id === selectedExercise?._id }"
             @click="selectExercise(exercise._id)"
         >
-          {{ exercise.title }}
-          <button @click.stop="deleteExercise(exercise._id)">Delete</button>
-          <button @click.stop="updateExercise(exercise._id)">Edit</button>
+          <label>{{ exercise.title }}</label>
+          <div class="actions">
+            <a @click.stop="deleteExercise(exercise._id)"><i class="fa-solid fa-pen-to-square"></i></a>
+            <a @click.stop="updateExercise(exercise._id)"><i class="fa-solid fa-trash"></i></a>
+          </div>
         </div>
-      </div>
-      <div class="actions">
-        <button @click="addExercise(selectedTopicId)">+</button>
       </div>
     </div>
 
     <!-- Exercise details column -->
-    <div v-if="selectedExercise" class="section enonce">
-      <h2>Details</h2>
-      <div class="content-box">
-        <textarea v-model="selectedExercise.text" placeholder="Enter the exercise content..."></textarea>
+    <div v-if="selectedExercise" class="panel enonce">
+      <div class="header">
+        <h2 class="title">Details</h2>
+      </div>
+      <div class="form-group">
+        <label for="exercise-content">Exercise Content:</label>
+        <textarea
+            id="exercise-content"
+            v-model="selectedExercise.text"
+            placeholder="Enter the exercise content..."
+        ></textarea>
+      </div>
+
+      <div class="form-group">
         <label for="file-upload">Attached image:</label>
         <input type="file" id="file-upload" @change="handleFileUpload" />
-        <span v-if="selectedExercise.image">{{ selectedExercise.image }}</span>
+      </div>
+
+      <div v-if="selectedExercise.image" class="form-group">
+        <span class="file-name">{{ selectedExercise.image }}</span>
       </div>
     </div>
+
   </div>
 </template>
 
@@ -220,74 +242,3 @@ const handleFileUpload = (event) => {
 
 onMounted(fetchTopics);
 </script>
-
-<style scoped lang="scss">
-.exam-management-container {
-  display: flex;
-  flex-direction: row;
-  gap: 20px;
-
-  .section {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    border: 1px solid #ccc;
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-
-    h2 {
-      color: $primary-color;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-
-    .items-list {
-      overflow-y: auto;
-      margin-bottom: 10px;
-
-      .item {
-        padding: 8px;
-        border: 1px solid $primary-color;
-        margin-bottom: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s, border-color 0.3s;
-
-        &:hover {
-          background-color: lighten($primary-color, 20%);
-        }
-
-        &.active {
-          background-color: $primary-color;
-          color: #fff;
-          border-color: darken($primary-color, 10%);
-        }
-
-        button {
-          margin-left: 10px;
-        }
-      }
-    }
-
-    .actions {
-      display: flex;
-      justify-content: flex-end;
-    }
-
-    .content-box {
-      height: 200px;
-      border: 1px solid $primary-color;
-      overflow-y: auto;
-      padding: 10px;
-      background-color: #f9f9f9;
-
-      textarea {
-        width: 100%;
-        height: 100px;
-        margin-top: 10px;
-        resize: vertical;
-      }
-    }
-  }
-}
-</style>

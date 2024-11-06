@@ -23,7 +23,7 @@ import { useRouter } from 'vue-router';
 import { ApiService } from '@/utils/apiService.js';
 import FormButton from '@/components/FormButton.vue';
 import UserManagement from '@/views/admin/UserManagement.vue';
-import ErrorComponent from '@/views/user/ErrorComponent.vue';
+import ErrorComponent from '@/components/ErrorComponent.vue';
 import ExamManagement from "@/views/admin/ExamManagement.vue";
 import FormationManagement from "@/views/admin/FormationManagement.vue";
 import SessionManagement from "@/views/admin/SessionManagement.vue";

@@ -1,8 +1,13 @@
 ﻿<template>
-  <div class="formation-management-container">
+  <div class="container">
     <!-- Formations column -->
-    <div class="section formations">
-      <h2>Formations</h2>
+    <div class="panel formations">
+      <div class="header">
+        <h2 class="title">Formations</h2>
+        <div class="actions">
+          <a @click="addFormation"><i class="fa-regular fa-square-plus"></i></a>
+        </div>
+      </div>
       <div class="items-list">
         <div
             v-for="formation in formations"
@@ -11,19 +16,23 @@
             :class="{ active: formation._id === selectedFormation?._id }"
             @click="selectFormation(formation)"
         >
-          {{ formation.title }}
-          <button @click.stop="deleteFormation(formation._id)">Delete</button>
-          <button @click.stop="updateFormation(formation._id)">Edit</button>
+          <label>{{ formation.title }}</label>
+          <div class="actions">
+            <a @click.stop="updateFormation(formation._id)"><i class="fa-solid fa-pen-to-square"></i></a>
+            <a @click.stop="deleteFormation(formation._id)"><i class="fa-solid fa-trash"></i></a>
+          </div>
         </div>
-      </div>
-      <div class="actions">
-        <button @click="addFormation">+</button>
       </div>
     </div>
 
     <!-- Grades column -->
-    <div class="section grades" :class="{ disabled: !selectedFormation }">
-      <h2>Grades</h2>
+    <div class="panel grades" :class="{ disabled: !selectedFormation }">
+      <div class="header">
+        <h2 class="title">Grades</h2>
+        <div class="actions">
+          <a @click="addGrade(selectedFormation)"><i class="fa-regular fa-square-plus"></i></a>
+        </div>
+      </div>
       <div class="items-list">
         <div
             v-for="grade in grades"
@@ -32,20 +41,21 @@
             :class="{ active: grade._id === selectedGrade?._id }"
             @click="selectGrade(grade)"
         >
-          {{ grade.grade }}
-          <button @click.stop="deleteGrade(grade._id)">Delete</button>
-          <button @click.stop="updateGrade(grade._id)">Edit</button>
-          <button @click.stop="generateExam(grade._id)">Generate</button> <!-- Nouveau bouton -->
+          <label>{{ grade.grade }}</label>
+          <div class="actions">
+            <a @click.stop="updateGrade(grade._id)"><i class="fa-solid fa-pen-to-square"></i></a>
+            <a @click.stop="deleteGrade(grade._id)"><i class="fa-solid fa-trash"></i></a>
+            <a @click.stop="generateExam(grade._id)"><i class="fa-solid fa-file-pdf"></i></a>
+          </div>
         </div>
-      </div>
-      <div class="actions">
-        <button @click="addGrade(selectedFormation)">+</button>
       </div>
     </div>
 
     <!-- Topics column -->
-    <div class="section topics" :class="{ disabled: !selectedGrade }">
-      <h2>Topics</h2>
+    <div class="panel topics" :class="{ disabled: !selectedGrade }">
+      <div class="header">
+        <h2 class="title">Topics</h2>
+      </div>
       <div class="items-list">
         <div
             v-for="topic in topics"
@@ -54,7 +64,7 @@
             :class="{ active: selectedTopics.includes(topic._id) }"
             @click="toggleTopicSelection(topic)"
         >
-          {{ topic.title }}
+          <label>{{ topic.title }}</label>
         </div>
       </div>
     </div>
@@ -280,62 +290,3 @@ const toggleTopicSelection = async (topic) => {
 // Fetch initial data
 onMounted(fetchFormations);
 </script>
-
-<style scoped lang="scss">
-.formation-management-container {
-  display: flex;
-  flex-direction: row;
-  gap: 20px;
-
-  .section {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    border: 1px solid #ccc;
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-
-    &.disabled {
-      opacity: 0.5;
-      pointer-events: none;
-    }
-
-    h2 {
-      color: $primary-color;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-
-    .items-list {
-      overflow-y: auto;
-      margin-bottom: 10px;
-
-      .item {
-        padding: 8px;
-        border: 1px solid $primary-color;
-        margin-bottom: 5px;
-        cursor: pointer;
-
-        &:hover {
-          background-color: lighten($primary-color, 20%);
-        }
-
-        &.active {
-          background-color: $primary-color;
-          color: white;
-        }
-
-        button {
-          margin-left: 10px;
-        }
-      }
-    }
-
-    .actions {
-      display: flex;
-      justify-content: flex-end;
-    }
-  }
-}
-</style>

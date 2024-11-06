@@ -40,8 +40,7 @@ export default {
 };
 </script>
 
-<style scoped>
-@import "@/styles/main.scss";
+<style scoped lang="scss">
 
 #app {
   display: flex;
@@ -51,7 +50,7 @@ export default {
 }
 
 header {
-  background-color: #e30947;
+  background-color: $primary-color;
   padding: 10px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
@@ -79,7 +78,7 @@ main {
 }
 
 footer {
-  background-color: #333;
+  background-color: $primary-color;
   color: white;
   text-align: center;
   padding: 10px 0;
