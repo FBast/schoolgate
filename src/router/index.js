@@ -1,15 +1,10 @@
 ﻿import { createRouter, createWebHistory } from 'vue-router';
-import {ApiService} from "@/utils/apiService.js";
 import Home from '@/views/Home.vue';
-import Register from '@/views/Register.vue';
-import VerifyEmail from '@/views/VerifyEmail.vue';
 import Dashboard from "@/views/Dashboard.vue";
-import ForgotPassword from "@/views/ForgotPassword.vue";
 import AdminDashboard from "@/views/AdminDashboard.vue";
 import NotFound from "@/views/NotFound.vue";
-import ResetPassword from "@/views/ResetPassword.vue";
-import Login from "@/views/Login.vue";
 import {jwtDecode} from "jwt-decode";
+import Auth from "@/views/Auth.vue";
 
 const routes = [
     {
@@ -18,19 +13,9 @@ const routes = [
         component: Home,
     },
     {
-        path: '/login',
-        name: 'Login',
-        component: Login,
-    },
-    {
-        path: '/register',
-        name: 'Register',
-        component: Register,
-    },
-    {
-        path: '/verifyEmail',
-        name: 'VerifyEmail',
-        component: VerifyEmail,
+        path: '/auth',
+        name: 'Auth',
+        component: Auth,
     },
     {
         path: '/dashboard',
@@ -47,19 +32,6 @@ const routes = [
         meta: {
             requiresAuth: true,
             requiresAdmin: true
-        }
-    },
-    {
-        path: '/forgot-password',
-        name: 'ForgotPassword',
-        component: ForgotPassword
-    },
-    {
-        path: '/reset-password',
-        name: 'ResetPassword',
-        component: ResetPassword,
-        meta: {
-            requiresAuth: true
         }
     },
     {

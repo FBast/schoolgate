@@ -29,7 +29,7 @@ export default {
     const logout = () => {
       localStorage.removeItem('authToken');
       isAuthenticated.value = false;
-      router.push('/login');
+      router.push('/auth');
     };
 
     return {
