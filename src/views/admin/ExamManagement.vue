@@ -16,10 +16,12 @@
             :class="{ active: topic._id === selectedTopic?._id }"
             @click="selectTopic(topic)"
         >
-          <label>{{ topic.title }}</label>
-          <div class="actions">
-            <a @click.stop="updateTopic(topic._id)"><i class="fa-solid fa-pen-to-square"></i></a>
-            <a @click.stop="deleteTopic(topic._id)"><i class="fa-solid fa-trash"></i></a>
+          <div class="item-content">
+            <label>{{ topic.title }}</label>
+            <div class="actions">
+              <a @click.stop="updateTopic(topic._id)"><i class="fa-solid fa-pen-to-square"></i></a>
+              <a @click.stop="deleteTopic(topic._id)"><i class="fa-solid fa-trash"></i></a>
+            </div>
           </div>
         </div>
       </div>
@@ -41,10 +43,12 @@
             :class="{ active: exercise._id === selectedExercise?._id }"
             @click="selectExercise(exercise._id)"
         >
-          <label>{{ exercise.title }}</label>
-          <div class="actions">
-            <a @click.stop="deleteExercise(exercise._id)"><i class="fa-solid fa-pen-to-square"></i></a>
-            <a @click.stop="updateExercise(exercise._id)"><i class="fa-solid fa-trash"></i></a>
+          <div class="item-content">
+            <label>{{ exercise.title }}</label>
+            <div class="actions">
+              <a @click.stop="deleteExercise(exercise._id)"><i class="fa-solid fa-pen-to-square"></i></a>
+              <a @click.stop="updateExercise(exercise._id)"><i class="fa-solid fa-trash"></i></a>
+            </div>
           </div>
         </div>
       </div>

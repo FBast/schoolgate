@@ -16,10 +16,12 @@
             :class="{ active: formation._id === selectedFormation?._id }"
             @click="selectFormation(formation)"
         >
-          <label>{{ formation.title }}</label>
-          <div class="actions">
-            <a @click.stop="updateFormation(formation._id)"><i class="fa-solid fa-pen-to-square"></i></a>
-            <a @click.stop="deleteFormation(formation._id)"><i class="fa-solid fa-trash"></i></a>
+          <div class="item-content">
+            <label>{{ formation.title }}</label>
+            <div class="actions">
+              <a @click.stop="updateFormation(formation._id)"><i class="fa-solid fa-pen-to-square"></i></a>
+              <a @click.stop="deleteFormation(formation._id)"><i class="fa-solid fa-trash"></i></a>
+            </div>
           </div>
         </div>
       </div>
@@ -41,11 +43,13 @@
             :class="{ active: grade._id === selectedGrade?._id }"
             @click="selectGrade(grade)"
         >
-          <label>{{ grade.grade }}</label>
-          <div class="actions">
-            <a @click.stop="updateGrade(grade._id)"><i class="fa-solid fa-pen-to-square"></i></a>
-            <a @click.stop="deleteGrade(grade._id)"><i class="fa-solid fa-trash"></i></a>
-            <a @click.stop="generateExam(grade._id)"><i class="fa-solid fa-file-pdf"></i></a>
+          <div class="item-content">
+            <label>{{ grade.grade }}</label>
+            <div class="actions">
+              <a @click.stop="updateGrade(grade._id)"><i class="fa-solid fa-pen-to-square"></i></a>
+              <a @click.stop="deleteGrade(grade._id)"><i class="fa-solid fa-trash"></i></a>
+              <a @click.stop="generateExam(grade._id)"><i class="fa-solid fa-file-pdf"></i></a>
+            </div>
           </div>
         </div>
       </div>
@@ -64,7 +68,9 @@
             :class="{ active: selectedTopics.includes(topic._id) }"
             @click="toggleTopicSelection(topic)"
         >
-          <label>{{ topic.title }}</label>
+          <div class="item-content">
+            <label>{{ topic.title }}</label>
+          </div>
         </div>
       </div>
     </div>

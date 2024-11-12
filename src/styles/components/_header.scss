@@ -1,0 +1,24 @@
+﻿.items-list-header {
+  display: flex;
+  padding: $spacing-sm;
+  background-color: $secondary-color;
+  font-weight: $font-weight-bold;
+  margin-bottom: $spacing-sm;
+  border: 1px solid $border-color;
+  border-radius: $border-radius;
+
+  .header-details {
+    flex: 1;
+    display: flex;
+    gap: $spacing-sm;
+
+    span {
+      flex: 1;
+      text-align: left;
+    }
+
+    .actions {
+      flex: 0;
+    }
+  }
+}
