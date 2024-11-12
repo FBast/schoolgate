@@ -1,6 +1,10 @@
 <template>
-  <div class="pending-infos">
-    <h2>Informations</h2>
+  <div class="container">
+    <div class="panel pending-infos">
+      <div class="header">
+        <h2 class="title">Informations</h2>
+      </div>
+    </div>
     <form @submit.prevent="submitForm">
       <FormInput v-model="firstName" label="Prénom" type="text" :error="firstNameError" />
       <FormInput v-model="lastName" label="Nom" type="text" :error="lastNameError" />

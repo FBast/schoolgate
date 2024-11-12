@@ -21,10 +21,9 @@
             v-for="user in users"
             :key="user._id"
             class="item"
-            @click="toggleDetails(user._id)"
         >
           <!-- Item Content -->
-          <div class="item-content">
+          <div class="item-content" @click="toggleDetails(user._id)">
             <label>{{ user.lastName }}</label>
             <label>{{ user.firstName }}</label>
             <label>{{ user.email }}</label>
@@ -36,11 +35,13 @@
             </div>
           </div>
           <!-- Item Foldout -->
-          <div v-if="expandedUserId === user._id" class="item-foldout">
-            <p><strong>Additional Information:</strong></p>
-            <p>ID: {{ user._id }}</p>
-            <p>Email: {{ user.email }}</p>
-            <p>Role: {{ user.role }}</p>
+          <div class="item-foldout" :class="{ expanded: expandedUserId === user._id }">
+            <UserInformations
+                v-if="expandedUserId === user._id"
+                :user="user"
+                @update="handleUserUpdate"
+            />
+
           </div>
         </div>
       </div>
@@ -54,12 +55,14 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { ApiService } from '@/utils/apiService.js';
+import UserInformations from "@/views/admin/UserInformations.vue";
 
 const users = ref([]);
 const expandedUserId = ref(null);
 const message = ref('');
 const success = ref(false);
 
+// Récupérer les utilisateurs
 const fetchUsers = async () => {
   try {
     const response = await ApiService.getUsers();
@@ -70,10 +73,12 @@ const fetchUsers = async () => {
   }
 };
 
+// Basculer l'affichage des détails utilisateur
 const toggleDetails = (userId) => {
   expandedUserId.value = expandedUserId.value === userId ? null : userId;
 };
 
+// Supprimer un utilisateur
 const deleteUser = async (userId) => {
   try {
     await ApiService.deleteUser(userId);
@@ -86,10 +91,19 @@ const deleteUser = async (userId) => {
   }
 };
 
+// Mettre à jour les informations utilisateur
+const handleUserUpdate = (updatedUser) => {
+  const index = users.value.findIndex(user => user._id === updatedUser._id);
+  if (index !== -1) {
+    users.value[index] = updatedUser;
+  }
+};
+
 const editUser = (userId) => {
   console.log(`Modifier utilisateur avec ID : ${userId}`);
 };
 
+// Charger les utilisateurs au montage
 onMounted(() => {
   fetchUsers();
 });

@@ -50,15 +50,21 @@
       }
     }
 
-    /* Item Foldout */
     .item-foldout {
-      padding: $spacing-sm;
-      background-color: lighten($secondary-color, 15%);
-      border-top: 1px solid $border-color;
-      color: $text-color;
+      display: block;
+      overflow: hidden;
+      max-height: 0;
+      padding: 0;
+      transition: max-height 0.3s ease, padding 0.3s ease;
 
-      p {
-        margin: 0 0 $spacing-xs 0;
+      &.expanded {
+        max-height: 1000px;
+        transition: max-height 0.3s ease, padding 0.3s ease;
+      }
+
+      &.collapsed {
+        max-height: 0;
+        padding: 0;
       }
     }
   }

@@ -73,8 +73,8 @@ nav a {
 
 main {
   flex: 1;
-  padding: 20px;
-  margin-top: 20px;
+  padding: $spacing-md;
+  margin-top: $spacing-md;
 }
 
 footer {

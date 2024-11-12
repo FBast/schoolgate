@@ -3,7 +3,7 @@
     <!-- Topic column -->
     <div class="panel topic">
       <div class="header">
-        <h2 class="title">Topics</h2>
+        <h2 class="title">Sujets</h2>
         <div class="actions">
           <a @click="addTopic"><i class="fa-regular fa-square-plus"></i></a>
         </div>
@@ -30,7 +30,7 @@
     <!-- Exercises column -->
     <div v-if="selectedTopic" class="panel exercises">
       <div class="header">
-        <h2 class="title">Exercises</h2>
+        <h2 class="title">Exercices</h2>
         <div class="actions">
           <a @click="addExercise"><i class="fa-regular fa-square-plus"></i></a>
         </div>
@@ -57,7 +57,7 @@
     <!-- Exercise details column -->
     <div v-if="selectedExercise" class="panel enonce">
       <div class="header">
-        <h2 class="title">Details</h2>
+        <h2 class="title">Enoncé</h2>
       </div>
       <div class="form-group">
         <label for="exercise-content">Exercise Content:</label>

@@ -3,7 +3,7 @@
     <header>
       <nav class="admin-nav">
         <FormButton v-for="(step, key, index) in stepMap" :key="index"
-                    :class="{ 'active-step': key === currentView }" @click="currentView = key">
+                    :class="{ 'active': key === currentView }" @click="currentView = key">
           {{ step.label }}
         </FormButton>
       </nav>
@@ -29,10 +29,10 @@ import FormationManagement from "@/views/admin/FormationManagement.vue";
 import SessionManagement from "@/views/admin/SessionManagement.vue";
 
 const stepMap = {
-  user_management: { label: 'Gestion des utilisateurs', component: UserManagement },
-  exam_management: { label: 'Gestion des épreuves', component: ExamManagement },
-  formation_management: { label: 'Gestion des formations', component: FormationManagement },
-  date_management: { label: 'Gestion des sessions', component: SessionManagement },
+  user_management: { label: 'Utilisateurs', component: UserManagement },
+  date_management: { label: 'Sessions', component: SessionManagement },
+  exam_management: { label: 'Epreuves', component: ExamManagement },
+  formation_management: { label: 'Formations', component: FormationManagement }
 };
 
 const currentView = ref('user_management');
@@ -76,24 +76,12 @@ const logout = () => {
     justify-content: space-between;
     align-items: center;
     margin-bottom: $spacing-md;
+    gap: $spacing-md;
 
     .admin-nav {
       display: flex;
       gap: $spacing-md;
-
-      .active-step {
-        background-color: $accent-color;
-      }
     }
-
-    button {
-      width: auto;
-      max-width: 200px;
-    }
-  }
-
-  .content {
-    margin-top: $spacing-md;
   }
 }
 </style>
