@@ -3,7 +3,7 @@
     <!-- Topic column -->
     <div class="panel topic">
       <div class="header">
-        <h2 class="title">Sujets</h2>
+        <h2 class="title">{{ $t('topics') }}</h2>
         <div class="actions">
           <a @click="addTopic"><i class="fa-regular fa-square-plus"></i></a>
         </div>
@@ -30,7 +30,7 @@
     <!-- Exercises column -->
     <div v-if="selectedTopic" class="panel exercises">
       <div class="header">
-        <h2 class="title">Exercices</h2>
+        <h2 class="title">{{ $t('exercises') }}</h2>
         <div class="actions">
           <a @click="addExercise"><i class="fa-regular fa-square-plus"></i></a>
         </div>
@@ -57,19 +57,19 @@
     <!-- Exercise details column -->
     <div v-if="selectedExercise" class="panel enonce">
       <div class="header">
-        <h2 class="title">Enoncé</h2>
+        <h2 class="title">{{ $t('statement') }}</h2>
       </div>
       <div class="form-group">
-        <label for="exercise-content">Exercise Content:</label>
+        <label for="exercise-content">{{ $t('exercise_content') }}</label>
         <textarea
             id="exercise-content"
             v-model="selectedExercise.text"
-            placeholder="Enter the exercise content..."
+            :placeholder="$t('exercise_content')"
         ></textarea>
       </div>
 
       <div class="form-group">
-        <label for="file-upload">Attached image:</label>
+        <label for="file-upload">{{ $t('attached_image') }}</label>
         <input type="file" id="file-upload" @change="handleFileUpload" />
       </div>
 
@@ -77,13 +77,15 @@
         <span class="file-name">{{ selectedExercise.image }}</span>
       </div>
     </div>
-
   </div>
 </template>
 
 <script setup>
-import {ref, onMounted, watch} from 'vue';
+import { ref, onMounted, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { ApiService } from '@/utils/apiService.js';
+
+const { t } = useI18n();
 
 const topics = ref([]);
 const exercises = ref([]);
@@ -143,7 +145,7 @@ const selectExercise = (exerciseId) => {
 
 // Add a new topic
 const addTopic = async () => {
-  const newTopic = { title: `New Topic ${topics.value.length + 1}` };
+  const newTopic = { title: t('new_topic') };
   try {
     const responseData = await ApiService.createTopic(newTopic);
     const createdTopic = responseData.topic;
@@ -181,7 +183,7 @@ const deleteTopic = async (id) => {
 
 // Update a topic title
 const updateTopic = async (id) => {
-  const newTitle = prompt('Edit the topic title:');
+  const newTitle = prompt(t('new_topic'));
   if (!newTitle) return;
 
   try {
@@ -197,8 +199,8 @@ const updateTopic = async (id) => {
 const addExercise = async () => {
   if (!selectedTopic.value) return;
   const newExercise = {
-    title: `New Exercise ${exercises.value.length + 1}`,
-    text: 'Exercise description...'
+    title: t('new_exercise'),
+    text: t('exercise_content'),
   };
 
   try {
@@ -225,7 +227,7 @@ const deleteExercise = async (id) => {
 
 // Update an exercise title
 const updateExercise = async (id) => {
-  const newTitle = prompt('Edit the exercise title:');
+  const newTitle = prompt(t('new_exercise'));
   if (!newTitle) return;
 
   try {

@@ -66,14 +66,13 @@
   </div>
 </template>
 
-
 <script setup>
-import { reactive, computed } from 'vue';
+import { reactive, computed, watch, onMounted } from 'vue';
 import FormInput from '@/components/FormInput.vue';
 import FormSelect from '@/components/FormSelect.vue';
 import FormButton from '@/components/FormButton.vue';
+import FormTextarea from '@/components/FormTextarea.vue';
 import { ApiService } from '@/utils/apiService.js';
-import FormTextarea from "@/components/FormTextarea.vue";
 
 const props = defineProps({
   user: Object,
@@ -81,6 +80,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update']);
 
+// Données utilisateur modifiables
 const editableUser = reactive({
   lastName: props.user?.lastName || '',
   firstName: props.user?.firstName || '',
@@ -99,6 +99,10 @@ const statusOptions = [
   { label: 'Actif', value: 'active' },
   { label: 'Suspendu', value: 'suspended' },
 ];
+
+// Listes des formations et années
+const formations = reactive([]);
+const grades = reactive([]);
 
 // Validation des champs
 const firstNameError = computed(() =>
@@ -132,6 +136,40 @@ const isFormValid = computed(() =>
     !statusError.value
 );
 
+// Récupérer les formations au montage
+const fetchFormations = async () => {
+  try {
+    const response = await ApiService.getFormations();
+    formations.splice(0, formations.length, ...response.map(formation => ({
+      label: formation.title,
+      value: formation._id,
+    })));
+  } catch (error) {
+    console.error('Erreur lors de la récupération des formations :', error);
+  }
+};
+
+// Récupérer les années en fonction de la formation sélectionnée
+const fetchGrades = async (formationId) => {
+  try {
+    const response = await ApiService.getGrades(formationId);
+    grades.splice(0, grades.length, ...response.map(grade => ({
+      label: `Année ${grade.grade}`,
+      value: grade._id,
+    })));
+  } catch (error) {
+    console.error('Erreur lors de la récupération des années :', error);
+  }
+};
+
+// Mettre à jour les années disponibles lorsque la formation change
+watch(() => editableUser.requestedFormation, (newFormation) => {
+  if (newFormation) {
+    fetchGrades(newFormation);
+    editableUser.requestedGrade = ''; // Réinitialiser l'année sélectionnée
+  }
+});
+
 // Mettre à jour les informations utilisateur
 const updateUser = async () => {
   if (!isFormValid.value) {
@@ -148,6 +186,14 @@ const updateUser = async () => {
     alert('Erreur lors de la mise à jour.');
   }
 };
+
+// Récupérer les données de base au montage
+onMounted(() => {
+  fetchFormations();
+  if (editableUser.requestedFormation) {
+    fetchGrades(editableUser.requestedFormation);
+  }
+});
 </script>
 
 <style scoped lang="scss">

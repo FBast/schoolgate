@@ -1,5 +1,5 @@
 <template>
-  <h2>Epreuve terminée</h2>
+  <h2>{{ $t('exam_completed') }}</h2>
 </template>
 
 <script setup>

@@ -4,14 +4,14 @@
       <nav class="admin-nav">
         <FormButton v-for="(step, key, index) in stepMap" :key="index"
                     :class="{ 'active': key === currentView }" @click="currentView = key">
-          {{ step.label }}
+          {{ $t(step.label) }}
         </FormButton>
       </nav>
-      <FormButton @click="logout">Déconnexion</FormButton>
+      <FormButton @click="logout">{{ $t('logout') }}</FormButton>
     </header>
 
     <section class="content">
-      <div v-if="loading">Chargement...</div>
+      <div v-if="loading">{{ $t('loading') }}</div>
       <component v-else :is="currentComponent" :message="message" :users="users"></component>
     </section>
   </div>
@@ -29,10 +29,10 @@ import FormationManagement from "@/views/admin/FormationManagement.vue";
 import SessionManagement from "@/views/admin/SessionManagement.vue";
 
 const stepMap = {
-  user_management: { label: 'Utilisateurs', component: UserManagement },
-  date_management: { label: 'Sessions', component: SessionManagement },
-  exam_management: { label: 'Epreuves', component: ExamManagement },
-  formation_management: { label: 'Formations', component: FormationManagement }
+  user_management: { label: 'users', component: UserManagement },
+  date_management: { label: 'sessions', component: SessionManagement },
+  exam_management: { label: 'exams', component: ExamManagement },
+  formation_management: { label: 'formations', component: FormationManagement }
 };
 
 const currentView = ref('user_management');

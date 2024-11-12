@@ -6,12 +6,12 @@
       </div>
     </div>
     <form @submit.prevent="submitForm">
-      <FormInput v-model="firstName" label="Prénom" type="text" :error="firstNameError" />
-      <FormInput v-model="lastName" label="Nom" type="text" :error="lastNameError" />
-      <FormInput v-model="birthDate" label="Date de naissance" type="date" :error="birthDateError" />
-      <FormSelect v-model="requestedFormation" :options="formations" label="Formation demandée" :error="formationError" />
-      <FormSelect v-model="requestedGrade" :options="grades" label="Année demandée" :error="gradeError" />
-      <FormButton type="submit" :disabled="!isFormValid">Valider</FormButton>
+      <FormInput v-model="firstName" :label="$t('first_name')" type="text" :error="firstNameError" />
+      <FormInput v-model="lastName" :label="$t('last_name')" type="text" :error="lastNameError" />
+      <FormInput v-model="birthDate" :label="$t('birth_date')" type="date" :error="birthDateError" />
+      <FormSelect v-model="requestedFormation" :options="formations" :label="$t('formation')" :error="formationError" />
+      <FormSelect v-model="requestedGrade" :options="grades" :label="$t('grade')" :error="gradeError" />
+      <FormButton type="submit" :disabled="!isFormValid">{{ $t('update') }}</FormButton>
     </form>
     <p v-if="message" :class="{'success-message': success, 'error-message': !success}">{{ message }}</p>
   </div>
@@ -37,11 +37,21 @@ const formations = ref([]);
 const grades = ref([]);
 
 // Controle des erreurs
-const firstNameError = computed(() => !isValidName(firstName.value) ? "Le prénom est requis (minimum 2 caractères)" : '');
-const lastNameError = computed(() => !isValidName(lastName.value) ? "Le nom est requis (minimum 2 caractères)" : '');
-const birthDateError = computed(() => !isValidBirthDate(birthDate.value) ? "La date de naissance est invalide" : '');
-const formationError = computed(() => !requestedFormation.value ? "La formation est requise" : '');
-const gradeError = computed(() => !requestedGrade.value ? "L'année est requise" : '');
+const firstNameError = computed(() =>
+    !isValidName(firstName.value) ? $t('first_name_error') : ''
+);
+const lastNameError = computed(() =>
+    !isValidName(lastName.value) ? $t('last_name_error') : ''
+);
+const birthDateError = computed(() =>
+    !isValidBirthDate(birthDate.value) ? $t('birth_date_error') : ''
+);
+const formationError = computed(() =>
+    !requestedFormation.value ? $t('formation_error') : ''
+);
+const gradeError = computed(() =>
+    !requestedGrade.value ? $t('grade_error') : ''
+);
 
 // Vérifier si le formulaire est valide
 const isFormValid = computed(() => {
@@ -104,12 +114,11 @@ watch(requestedFormation, (newFormationId) => {
 const submitForm = async () => {
   if (!isFormValid.value) {
     success.value = false;
-    message.value = "Veuillez remplir tous les champs correctement.";
+    message.value = $t('error_submit_form');
     return;
   }
 
   try {
-    // Utiliser PUT pour mettre à jour l'utilisateur
     await ApiService.updateUserProfile({
       firstName: firstName.value,
       lastName: lastName.value,
@@ -121,10 +130,10 @@ const submitForm = async () => {
     emit('statusChanged');
 
     success.value = true;
-    message.value = 'Informations enregistrées avec succès';
+    message.value = $t('update_success');
   } catch (error) {
     success.value = false;
-    message.value = 'Erreur lors de l\'enregistrement des informations';
+    message.value = $t('update_error');
   }
 };
 

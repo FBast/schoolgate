@@ -2,88 +2,88 @@
   <div class="auth">
     <!-- Formulaire de connexion -->
     <div v-if="currentView === 'login'">
-      <h2>Connexion</h2>
+      <h2>{{ $t('login') }}</h2>
       <form @submit.prevent="loginUser">
-        <FormInput label="Adresse email" type="email" v-model="email" required />
-        <FormInput label="Mot de passe" type="password" v-model="password" required />
-        <FormButton type="submit">Se connecter</FormButton>
+        <FormInput :label="$t('email')" type="email" v-model="email" required />
+        <FormInput :label="$t('password')" type="password" v-model="password" required />
+        <FormButton type="submit">{{ $t('login_button') }}</FormButton>
       </form>
       <p v-if="message" :class="{ 'error-message': !success, 'success-message': success }">{{ message }}</p>
       <p class="forgot-password">
-        <a href="#" @click.prevent="switchView('resetPassword')">Mot de passe oublié ?</a>
+        <a href="#" @click.prevent="switchView('resetPassword')">{{ $t('forgot_password') }}</a>
       </p>
 
-      <Separator text="ou" />
+      <Separator :text="$t('or')" />
 
       <div class="signup-link">
-        <FormButton @click="switchView('register')">Créer un compte</FormButton>
+        <FormButton @click="switchView('register')">{{ $t('create_account') }}</FormButton>
       </div>
     </div>
 
     <!-- Formulaire d'inscription -->
     <div v-else-if="currentView === 'register'">
-      <h2>Inscription</h2>
+      <h2>{{ $t('register') }}</h2>
       <form @submit.prevent="registerUser">
-        <FormInput v-model="email" label="Adresse email" type="email" required />
-        <FormInput v-model="password" label="Mot de passe" type="password" required />
-        <FormInput v-model="confirmPassword" label="Confirmez votre mot de passe" type="password" required />
-        <FormButton type="submit">S'inscrire</FormButton>
+        <FormInput v-model="email" :label="$t('email')" type="email" required />
+        <FormInput v-model="password" :label="$t('password')" type="password" required />
+        <FormInput v-model="confirmPassword" :label="$t('confirm_password')" type="password" required />
+        <FormButton type="submit">{{ $t('register_button') }}</FormButton>
       </form>
-      <p v-if="message" :class="{'success-message': success, 'error-message': !success}">{{ message }}</p>
+      <p v-if="message" :class="{ 'success-message': success, 'error-message': !success }">{{ message }}</p>
 
-      <Separator text="ou" />
+      <Separator :text="$t('or')" />
       <div class="login-link">
-        <FormButton @click="switchView('login')">Se connecter avec un compte existant</FormButton>
+        <FormButton @click="switchView('login')">{{ $t('existing_account') }}</FormButton>
       </div>
     </div>
 
     <!-- Formulaire de vérification de l'email -->
     <div v-else-if="currentView === 'verify'">
-      <h2>Vérification de votre compte</h2>
+      <h2>{{ $t('verify_account') }}</h2>
       <form @submit.prevent="submitCode">
-        <p>Entrez le code à 6 chiffres envoyé à {{ email }}</p>
-        <FormInput label="Code de validation" type="text" v-model="token" required />
-        <FormButton type="submit">Valider</FormButton>
+        <p>{{ $t('enter_verification_code', { email: email }) }}</p>
+        <FormInput :label="$t('verification_code')" type="text" v-model="token" required />
+        <FormButton type="submit">{{ $t('validate') }}</FormButton>
       </form>
-      <FormButton @click="resendCode" class="resend-button">Renvoyer le code</FormButton>
+      <FormButton @click="resendCode" class="resend-button">{{ $t('resend_code') }}</FormButton>
       <p v-if="message" :class="{ 'error-message': !success, 'success-message': success }">{{ message }}</p>
 
-      <Separator text="ou" />
+      <Separator :text="$t('or')" />
       <div class="login-link">
-        <FormButton @click="switchView('login')">Se connecter avec un compte existant</FormButton>
+        <FormButton @click="switchView('login')">{{ $t('existing_account') }}</FormButton>
       </div>
     </div>
 
     <!-- Formulaire de demande de réinitialisation du mot de passe -->
     <div v-else-if="currentView === 'resetPassword'">
-      <h2>Réinitialiser le mot de passe</h2>
+      <h2>{{ $t('reset_password') }}</h2>
       <form @submit.prevent="resetPassword">
-        <FormInput label="Adresse email" type="email" v-model="email" required />
-        <FormButton type="submit">Envoyer le code de réinitialisation</FormButton>
+        <FormInput :label="$t('email')" type="email" v-model="email" required />
+        <FormButton type="submit">{{ $t('send_reset_code') }}</FormButton>
       </form>
       <p v-if="message" :class="{ 'error-message': !success, 'success-message': success }">{{ message }}</p>
 
-      <Separator text="ou" />
+      <Separator :text="$t('or')" />
       <div class="login-link">
-        <FormButton @click="switchView('login')">Se connecter avec un compte existant</FormButton>
+        <FormButton @click="switchView('login')">{{ $t('existing_account') }}</FormButton>
       </div>
     </div>
 
     <!-- Formulaire de confirmation du code et définition du nouveau mot de passe -->
     <div v-else-if="currentView === 'confirmResetPassword'">
-      <h2>Définir un nouveau mot de passe</h2>
+      <h2>{{ $t('define_new_password') }}</h2>
       <form @submit.prevent="submitNewPassword">
-        <p>Entrez le code à 6 chiffres envoyé à {{ email }}</p>
-        <FormInput label="Code de validation" type="text" v-model="validationToken" required />
-        <FormInput label="Nouveau mot de passe" type="password" v-model="newPassword" required />
-        <FormInput label="Confirmez le mot de passe" type="password" v-model="confirmPassword" required />
-        <FormButton type="submit">Réinitialiser le mot de passe</FormButton>
+        <p>{{ $t('enter_reset_code', { email: email }) }}</p>
+        <FormInput :label="$t('verification_code')" type="text" v-model="validationToken" required />
+        <FormInput :label="$t('new_password')" type="password" v-model="newPassword" required />
+        <FormInput :label="$t('confirm_password')" type="password" v-model="confirmPassword" required />
+        <FormButton type="submit">{{ $t('reset_password_button') }}</FormButton>
       </form>
       <p v-if="message" :class="{ 'error-message': !success, 'success-message': success }">{{ message }}</p>
 
-      <Separator text="ou" />
+      <Separator :text="$t('or')" />
       <div class="login-link">
-        <FormButton @click="switchView('login')">Se connecter avec un compte existant</FormButton>
+        <FormButton @click="switchView('login')">{{ $t('existing_account') }}</FormButton>
       </div>
     </div>
   </div>
@@ -97,6 +97,9 @@ import FormButton from '@/components/FormButton.vue';
 import Separator from "@/components/Separator.vue";
 import { ApiService } from '@/utils/apiService.js';
 import {jwtDecode} from "jwt-decode";
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n(); // Initialiser la fonction t pour l'internationalisation
 
 const currentView = ref('login'); // 'login', 'register', 'verify', 'resetPassword', 'confirmResetPassword'
 const email = ref('');
@@ -112,7 +115,6 @@ const isLoading = ref(false); // Pour gérer l'état de chargement
 
 // Fonction pour basculer entre les vues
 const switchView = (view) => {
-  // Réinitialiser les messages et les champs
   message.value = '';
   success.value = false;
   password.value = '';
@@ -133,24 +135,21 @@ const loginUser = async () => {
     const { token: authToken } = await ApiService.loginUser(email.value, password.value);
     const decodedToken = jwtDecode(authToken);
 
-    // Vérifier si l'utilisateur est vérifié ou si c'est un administrateur
     if (decodedToken.status === 'unverified' && decodedToken.role !== 'admin') {
-      message.value = 'Veuillez vérifier votre adresse email avant de vous connecter.';
+      message.value = t('verify_email_prompt');
       success.value = false;
-      // Passer à la vue de vérification
       currentView.value = 'verify';
     } else {
       localStorage.setItem('authToken', authToken);
       success.value = true;
-      message.value = 'Connexion réussie';
+      message.value = t('login_success');
 
-      // Redirection en fonction du rôle
       const userRole = decodedToken.role || 'user';
       await router.push('/');
     }
   } catch (error) {
     success.value = false;
-    message.value = 'Email ou mot de passe incorrect';
+    message.value = t('login_error');
   } finally {
     isLoading.value = false;
   }
@@ -160,7 +159,7 @@ const loginUser = async () => {
 const registerUser = async () => {
   if (password.value !== confirmPassword.value) {
     success.value = false;
-    message.value = 'Les mots de passe ne correspondent pas';
+    message.value = t('passwords_do_not_match');
     return;
   }
 
@@ -168,12 +167,11 @@ const registerUser = async () => {
     isLoading.value = true;
     await ApiService.createUser(email.value, password.value);
     success.value = true;
-    message.value = 'Inscription réussie ! Un code de vérification a été envoyé à votre email.';
-    // Passer à la vue de vérification
+    message.value = t('register_success');
     currentView.value = 'verify';
   } catch (error) {
     success.value = false;
-    message.value = 'Erreur lors de l\'inscription : ' + (error.message || error);
+    message.value = t('register_error', { error: error.message || error });
   } finally {
     isLoading.value = false;
   }
@@ -186,11 +184,11 @@ const submitCode = async () => {
     const responseData = await ApiService.verifyUser(token.value, email.value);
     localStorage.setItem('authToken', responseData.token);
     success.value = true;
-    message.value = 'Compte vérifié avec succès !';
+    message.value = t('verification_success');
     await router.push('/');
   } catch (error) {
     success.value = false;
-    message.value = 'Erreur lors de la vérification : ' + (error.message || error);
+    message.value = t('verification_error', { error: error.message || error });
   } finally {
     isLoading.value = false;
   }
@@ -202,10 +200,10 @@ const resendCode = async () => {
     isLoading.value = true;
     await ApiService.resendVerificationCode(email.value);
     success.value = true;
-    message.value = 'Le code de vérification a été renvoyé à votre email.';
+    message.value = t('resend_code_success');
   } catch (error) {
     success.value = false;
-    message.value = 'Erreur lors de l\'envoi du code : ' + (error.message || error);
+    message.value = t('resend_code_error', { error: error.message || error });
   } finally {
     isLoading.value = false;
   }
@@ -217,12 +215,11 @@ const resetPassword = async () => {
     isLoading.value = true;
     await ApiService.requestPasswordReset(email.value);
     success.value = true;
-    message.value = 'Un code de réinitialisation a été envoyé à votre adresse email.';
-    // Passer à la vue pour confirmer le code et saisir le nouveau mot de passe
+    message.value = t('reset_password_success');
     currentView.value = 'confirmResetPassword';
   } catch (error) {
     success.value = false;
-    message.value = error.message;
+    message.value = t('reset_password_error', { error: error.message || error });
   } finally {
     isLoading.value = false;
   }
@@ -232,7 +229,7 @@ const resetPassword = async () => {
 const submitNewPassword = async () => {
   if (newPassword.value !== confirmPassword.value) {
     success.value = false;
-    message.value = 'Les mots de passe ne correspondent pas';
+    message.value = t('passwords_do_not_match');
     return;
   }
 
@@ -240,12 +237,11 @@ const submitNewPassword = async () => {
     isLoading.value = true;
     await ApiService.resetPassword(email.value, validationToken.value, newPassword.value);
     success.value = true;
-    message.value = 'Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.';
-    // Rediriger vers la vue de connexion
+    message.value = t('new_password_success');
     switchView('login');
   } catch (error) {
     success.value = false;
-    message.value = error.message;
+    message.value = t('new_password_error', { error: error.message || error });
   } finally {
     isLoading.value = false;
   }

@@ -2,7 +2,7 @@
   <div class="exam-waiting-container">
     <!-- User Info Column -->
     <div class="section user-info">
-      <h2>Informations du Candidat</h2>
+      <h2>{{ $t('candidate_information') }}</h2>
       <UserInfoPanel
           :initialData="userInfo"
           :formations="formations"
@@ -15,17 +15,13 @@
 
     <!-- Exam Waiting Info Column -->
     <div class="section exam-info">
-      <h2>Statut de l'Epreuve</h2>
+      <h2>{{ $t('exam_status') }}</h2>
       <div class="content-box">
         <p>
-          Votre session d'examen est prévue pour commencer le <strong>{{ sessionStartDate }}</strong>
-          et se terminera le <strong>{{ sessionEndDate }}</strong>.
-          Un email vous sera envoyé au début de la session, contenant l'épreuve en pièce jointe.
+          {{ $t('exam_scheduled', { startDate: sessionStartDate, endDate: sessionEndDate }) }}
         </p>
         <p>
-          Pendant cette période, vous pourrez également télécharger l'examen directement depuis cette plateforme.
-          Lorsque le dépôt sera activé, vous pourrez soumettre votre travail en ligne. Veuillez respecter
-          les délais pour garantir la validation de votre épreuve.
+          {{ $t('exam_submission_instructions') }}
         </p>
       </div>
     </div>

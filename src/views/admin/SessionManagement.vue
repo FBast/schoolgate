@@ -2,7 +2,7 @@
   <div class="container">
     <div class="panel sessions">
       <div class="header">
-        <h2 class="title">Sessions</h2>
+        <h2 class="title">{{ $t('sessions') }}</h2>
         <div class="actions">
           <a @click="addSession"><i class="fa-regular fa-square-plus"></i></a>
         </div>
@@ -10,10 +10,10 @@
       <!-- Header List -->
       <div class="items-list-header">
         <div class="header-details">
-          <span>Nom</span>
-          <span>Date de début</span>
-          <span>Date de fin</span>
-          <span>Actions</span>
+          <span>{{ $t('name') }}</span>
+          <span>{{ $t('start_date') }}</span>
+          <span>{{ $t('end_date') }}</span>
+          <span>{{ $t('actions') }}</span>
         </div>
       </div>
       <!-- Items List -->
@@ -54,8 +54,11 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { ApiService } from '@/utils/apiService.js';
 import FormInput from '@/components/FormInput.vue';
+
+const { t } = useI18n();
 
 const sessions = ref([]);
 const message = ref('');
@@ -66,7 +69,7 @@ const fetchSessions = async () => {
     const response = await ApiService.getSessions();
     sessions.value = response;
   } catch (error) {
-    message.value = 'Erreur lors de la récupération des sessions';
+    message.value = t('fetching_sessions_error');
     success.value = false;
   }
 };
@@ -74,11 +77,11 @@ const fetchSessions = async () => {
 const deleteSession = async (sessionId) => {
   try {
     await ApiService.deleteSession(sessionId);
-    message.value = 'Session supprimée avec succès';
+    message.value = t('session_deleted_success');
     success.value = true;
     await fetchSessions();
   } catch (error) {
-    message.value = 'Erreur lors de la suppression de la session';
+    message.value = t('deleting_session_error');
     success.value = false;
   }
 };
@@ -88,18 +91,18 @@ const addSession = async () => {
   const defaultEndDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
   const newSession = {
-    name: `Session ${sessions.value.length + 1}`,
+    name: `${t('add_session')} ${sessions.value.length + 1}`,
     startDate: defaultStartDate,
     endDate: defaultEndDate,
   };
 
   try {
     await ApiService.createSession(newSession);
-    message.value = 'Session créée avec succès';
+    message.value = t('session_created_success');
     success.value = true;
     await fetchSessions();
   } catch (error) {
-    message.value = 'Erreur lors de la création de la session';
+    message.value = t('creating_session_error');
     success.value = false;
   }
 };
@@ -111,10 +114,10 @@ const updateSessionDate = async (sessionId, field, value) => {
   try {
     session[field] = value;
     await ApiService.updateSession(sessionId, { ...session });
-    message.value = 'Session mise à jour avec succès';
+    message.value = t('deleted_success_session');
     success.value = true;
   } catch (error) {
-    message.value = 'Erreur lors de la mise à jour de la session';
+    message.value = t('updating_session_error');
     success.value = false;
   }
 };

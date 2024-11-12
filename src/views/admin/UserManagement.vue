@@ -2,17 +2,17 @@
   <div class="container">
     <div class="panel users">
       <div class="header">
-        <h2 class="title">Utilisateurs</h2>
+        <h2 class="title">{{ $t('user_information') }}</h2>
       </div>
       <!-- Header List -->
       <div class="items-list-header">
         <div class="header-details">
-          <span>Nom</span>
-          <span>Prénom</span>
+          <span>{{ $t('last_name') }}</span>
+          <span>{{ $t('first_name') }}</span>
           <span>Email</span>
-          <span>Rôle</span>
-          <span>Statut</span>
-          <span class="actions">Actions</span>
+          <span>{{ $t('role') }}</span>
+          <span>{{ $t('status') }}</span>
+          <span class="actions">{{ $t('actions') }}</span>
         </div>
       </div>
       <!-- Items List -->
@@ -27,11 +27,15 @@
             <label>{{ user.lastName }}</label>
             <label>{{ user.firstName }}</label>
             <label>{{ user.email }}</label>
-            <label>{{ user.role }}</label>
-            <label>{{ user.status }}</label>
+            <label>{{ $t(user.role) }}</label>
+            <label>{{ $t(user.status) }}</label>
             <div class="actions">
-              <a @click.stop="editUser(user._id)"><i class="fa-solid fa-pen-to-square"></i></a>
-              <a @click.stop="deleteUser(user._id)"><i class="fa-solid fa-trash"></i></a>
+              <a @click.stop="editUser(user._id)">
+                <i class="fa-solid fa-pen-to-square"></i>
+              </a>
+              <a @click.stop="deleteUser(user._id)">
+                <i class="fa-solid fa-trash"></i>
+              </a>
             </div>
           </div>
           <!-- Item Foldout -->
@@ -41,7 +45,6 @@
                 :user="user"
                 @update="handleUserUpdate"
             />
-
           </div>
         </div>
       </div>
@@ -54,8 +57,11 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { ApiService } from '@/utils/apiService.js';
 import UserInformations from "@/views/admin/UserInformations.vue";
+
+const { t } = useI18n();
 
 const users = ref([]);
 const expandedUserId = ref(null);
@@ -68,7 +74,7 @@ const fetchUsers = async () => {
     const response = await ApiService.getUsers();
     users.value = response;
   } catch (error) {
-    message.value = 'Erreur lors de la récupération des utilisateurs';
+    message.value = t('error_fetching_users');
     success.value = false;
   }
 };
@@ -82,11 +88,11 @@ const toggleDetails = (userId) => {
 const deleteUser = async (userId) => {
   try {
     await ApiService.deleteUser(userId);
-    message.value = 'Utilisateur supprimé avec succès';
+    message.value = t('success_user_deleted');
     success.value = true;
     await fetchUsers();
   } catch (error) {
-    message.value = 'Erreur lors de la suppression de l\'utilisateur';
+    message.value = t('error_deleting_user');
     success.value = false;
   }
 };
@@ -100,7 +106,7 @@ const handleUserUpdate = (updatedUser) => {
 };
 
 const editUser = (userId) => {
-  console.log(`Modifier utilisateur avec ID : ${userId}`);
+  console.log(`${t('edit_user')} ${userId}`);
 };
 
 // Charger les utilisateurs au montage

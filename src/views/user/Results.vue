@@ -1,5 +1,5 @@
 <template>
-  <h2>Résultat de l'Entretien et de l'Epreuve</h2>
+  <h2>{{ $t('interview_exam_results') }}</h2>
 </template>
 
 <script setup>

@@ -3,7 +3,7 @@
     <!-- Formations column -->
     <div class="panel formations">
       <div class="header">
-        <h2 class="title">Formations</h2>
+        <h2 class="title">{{ $t('formations') }}</h2>
         <div class="actions">
           <a @click="addFormation"><i class="fa-regular fa-square-plus"></i></a>
         </div>
@@ -30,7 +30,7 @@
     <!-- Grades column -->
     <div class="panel grades" :class="{ disabled: !selectedFormation }">
       <div class="header">
-        <h2 class="title">Grades</h2>
+        <h2 class="title">{{ $t('grades') }}</h2>
         <div class="actions">
           <a @click="addGrade(selectedFormation)"><i class="fa-regular fa-square-plus"></i></a>
         </div>
@@ -58,7 +58,7 @@
     <!-- Topics column -->
     <div class="panel topics" :class="{ disabled: !selectedGrade }">
       <div class="header">
-        <h2 class="title">Topics</h2>
+        <h2 class="title">{{ $t('topics') }}</h2>
       </div>
       <div class="items-list">
         <div
@@ -79,7 +79,10 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { ApiService } from '@/utils/apiService.js';
+
+const { t } = useI18n();
 
 const formations = ref([]);
 const grades = ref([]);
@@ -98,7 +101,7 @@ const fetchFormations = async () => {
       await fetchGrades();
     }
   } catch (error) {
-    console.error('Error fetching formations:', error);
+    console.error(t('fetching_formations_error'), error);
   }
 };
 
@@ -114,7 +117,7 @@ const fetchGrades = async () => {
       await fetchTopics();
     }
   } catch (error) {
-    console.error('Error fetching grades:', error);
+    console.error(t('fetching_grades_error'), error);
   }
 };
 
@@ -129,7 +132,7 @@ const fetchTopics = async () => {
     // Set selected topics based on the topics associated with the grade
     selectedTopics.value = selectedGrade.value.topics || [];
   } catch (error) {
-    console.error('Error fetching topics:', error);
+    console.error(t('error_fetching_topics'), error);
   }
 };
 
@@ -150,19 +153,19 @@ const selectGrade = async (grade) => {
 
 // Add a new formation
 const addFormation = async () => {
-  const newFormation = { title: `New Formation ${formations.value.length + 1}` };
+  const newFormation = { title: t('add_formation') };
   try {
     const responseData = await ApiService.createFormation(newFormation);
     formations.value.push(responseData.formation);
     await selectFormation(responseData.formation);
   } catch (error) {
-    console.error('Error creating formation:', error);
+    console.error(t('error_creating_formation'), error);
   }
 };
 
 // Update a formation title
 const updateFormation = async (id) => {
-  const newTitle = prompt('Edit the formation title:');
+  const newTitle = prompt(t('edit_formation'));
   if (!newTitle) return;
 
   try {
@@ -173,7 +176,7 @@ const updateFormation = async (id) => {
       selectedFormation.value = responseData.formation;
     }
   } catch (error) {
-    console.error('Error updating formation:', error);
+    console.error(t('error_updating_formation'), error);
   }
 };
 
@@ -190,26 +193,26 @@ const deleteFormation = async (id) => {
       if (selectedFormation.value) await fetchGrades();
     }
   } catch (error) {
-    console.error('Error deleting formation:', error);
+    console.error(t('error_deleting_formation'), error);
   }
 };
 
 // Add a new grade to the selected formation
 const addGrade = async () => {
   if (!selectedFormation.value) return;
-  const newGrade = { grade: `Grade ${grades.value.length + 1}`, formationId: selectedFormation.value._id };
+  const newGrade = { grade: t('add_grade'), formationId: selectedFormation.value._id };
   try {
     const responseData = await ApiService.createGrade(newGrade);
     grades.value.push(responseData.grade);
     await selectGrade(responseData.grade);
   } catch (error) {
-    console.error('Error creating grade:', error);
+    console.error(t('error_creating_grade'), error);
   }
 };
 
 // Update a grade title
 const updateGrade = async (id) => {
-  const newGrade = prompt('Edit the grade name:');
+  const newGrade = prompt(t('edit_grade'));
   if (!newGrade) return;
 
   try {
@@ -220,7 +223,7 @@ const updateGrade = async (id) => {
       selectedGrade.value = responseData.grade;
     }
   } catch (error) {
-    console.error('Error updating grade:', error);
+    console.error(t('error_updating_grade'), error);
   }
 };
 
@@ -235,7 +238,7 @@ const deleteGrade = async (id) => {
       if (selectedGrade.value) await fetchTopics();
     }
   } catch (error) {
-    console.error('Error deleting grade:', error);
+    console.error(t('error_deleting_grade'), error);
   }
 };
 
@@ -257,15 +260,14 @@ const generateExam = async (gradeId) => {
     // Créer un lien de téléchargement
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = 'exam.pdf';
+    link.download = t('generate_exam');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
-    alert('Exam generated and downloaded successfully!');
+    alert(t('exam_generated_success'));
   } catch (error) {
-    console.error('Error generating exam:', error);
-    alert('Error generating exam');
+    console.error(t('error_generating_exam'), error);
   }
 };
 
@@ -288,7 +290,7 @@ const toggleTopicSelection = async (topic) => {
       const responseData = await ApiService.updateGrade(selectedGrade.value._id, gradeData);
       selectedGrade.value = responseData.grade;
     } catch (error) {
-      console.error('Error updating grade:', error);
+      console.error(t('error_updating_grade'), error);
     }
   }
 };
