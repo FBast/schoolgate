@@ -30,7 +30,7 @@ const onClick = (event) => {
 @import "@/styles/utils/_mixins.scss";
 
 button {
-  background-color: $primary-color;
+  background-color: $secondary-color;
   border: none;
   cursor: pointer;
   padding: $spacing-sm $spacing-md;
@@ -38,9 +38,10 @@ button {
   transition: background-color 0.3s ease;
   color: white;
   font-weight: bold;
+  width: 100%;
 
   &:hover {
-    background-color: $secondary-color;
+    background-color: $accent-color;
   }
 
   &.active {

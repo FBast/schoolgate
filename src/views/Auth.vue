@@ -1,27 +1,27 @@
 ﻿<template>
-  <div class="auth">
+  <div class="layout-restricted">
     <!-- Formulaire de connexion -->
-    <div v-if="currentView === 'login'">
+    <div class="panel auth" v-if="currentView === 'login'">
       <h2>{{ $t('login') }}</h2>
-      <form @submit.prevent="loginUser">
-        <FormInput :label="$t('email')" type="email" v-model="email" required />
-        <FormInput :label="$t('password')" type="password" v-model="password" required />
-        <FormButton type="submit">{{ $t('login_button') }}</FormButton>
+      <form class="flex-vertical gap-sm" @submit.prevent="loginUser">
+          <FormInput :label="$t('email')" type="email" v-model="email" required />
+          <FormInput :label="$t('password')" type="password" v-model="password" required />
+          <FormButton type="submit">{{ $t('login_button') }}</FormButton>
       </form>
       <p v-if="message" :class="{ 'error-message': !success, 'success-message': success }">{{ message }}</p>
-      <p class="forgot-password">
+      <p class="link">
         <a href="#" @click.prevent="switchView('resetPassword')">{{ $t('forgot_password') }}</a>
       </p>
 
       <Separator :text="$t('or')" />
 
-      <div class="signup-link">
+      <div class="link">
         <FormButton @click="switchView('register')">{{ $t('create_account') }}</FormButton>
       </div>
     </div>
 
     <!-- Formulaire d'inscription -->
-    <div v-else-if="currentView === 'register'">
+    <div class="panel register" v-else-if="currentView === 'register'">
       <h2>{{ $t('register') }}</h2>
       <form @submit.prevent="registerUser">
         <FormInput v-model="email" :label="$t('email')" type="email" required />
@@ -38,14 +38,14 @@
     </div>
 
     <!-- Formulaire de vérification de l'email -->
-    <div v-else-if="currentView === 'verify'">
+    <div class="panel verify" v-else-if="currentView === 'verify'">
       <h2>{{ $t('verify_account') }}</h2>
       <form @submit.prevent="submitCode">
         <p>{{ $t('enter_verification_code', { email: email }) }}</p>
         <FormInput :label="$t('verification_code')" type="text" v-model="token" required />
         <FormButton type="submit">{{ $t('validate') }}</FormButton>
       </form>
-      <FormButton @click="resendCode" class="resend-button">{{ $t('resend_code') }}</FormButton>
+      <FormButton @click="resendCode">{{ $t('resend_code') }}</FormButton>
       <p v-if="message" :class="{ 'error-message': !success, 'success-message': success }">{{ message }}</p>
 
       <Separator :text="$t('or')" />
@@ -55,7 +55,7 @@
     </div>
 
     <!-- Formulaire de demande de réinitialisation du mot de passe -->
-    <div v-else-if="currentView === 'resetPassword'">
+    <div class="panel reset" v-else-if="currentView === 'resetPassword'">
       <h2>{{ $t('reset_password') }}</h2>
       <form @submit.prevent="resetPassword">
         <FormInput :label="$t('email')" type="email" v-model="email" required />
@@ -70,7 +70,7 @@
     </div>
 
     <!-- Formulaire de confirmation du code et définition du nouveau mot de passe -->
-    <div v-else-if="currentView === 'confirmResetPassword'">
+    <div class="panel confirmReset" v-else-if="currentView === 'confirmResetPassword'">
       <h2>{{ $t('define_new_password') }}</h2>
       <form @submit.prevent="submitNewPassword">
         <p>{{ $t('enter_reset_code', { email: email }) }}</p>
@@ -247,51 +247,3 @@ const submitNewPassword = async () => {
   }
 };
 </script>
-
-<style scoped lang="scss">
-@import "@/styles/utils/_variables.scss";
-
-.auth {
-  max-width: 400px;
-  margin: 0 auto;
-  padding: $spacing-md;
-  background-color: $primary-color;
-  border-radius: $border-radius;
-  box-shadow: $box-shadow;
-
-  h2 {
-    color: white;
-    margin-bottom: $spacing-sm;
-  }
-
-  p {
-    margin-top: $spacing-sm;
-  }
-
-  .error-message {
-    color: $error-color;
-  }
-
-  .success-message {
-    color: $success-color;
-  }
-
-  .forgot-password {
-    margin-top: $spacing-sm;
-
-    a {
-      color: white;
-      text-decoration: underline;
-      cursor: pointer;
-    }
-  }
-
-  .signup-link, .login-link {
-    margin-top: $spacing-sm;
-  }
-
-  .resend-button {
-    margin-top: $spacing-sm;
-  }
-}
-</style>

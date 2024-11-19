@@ -46,6 +46,8 @@
   "formation": "Formation demandée",
   "formation_error": "La formation est requise.",
   "formations": "Formations",
+  "from": "du",
+  "to": "au",
   "generate_exam": "Générer un examen",
   "grade": "Année demandée",
   "grade_error": "L'année est requise.",

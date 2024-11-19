@@ -2,32 +2,33 @@
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  margin-bottom: $spacing-md;
   gap: $spacing-sm;
 
   .item {
     display: flex;
     flex-direction: column;
-    background-color: $secondary-color;
     border: 1px solid $border-color;
     border-radius: $border-radius;
     transition: background-color 0.3s, border-color 0.3s;
 
-    &:hover {
-      background-color: lighten($secondary-color, 30%);
+    &:hover .item-content {
+      background-color: $accent-color;
       cursor: pointer;
     }
 
-    &.active {
+    &.active .item-content {
       background-color: $accent-color;
     }
-
+    
     /* Item Content */
     .item-content {
       display: flex;
       padding: $spacing-sm;
       gap: $spacing-sm;
-
+      align-items: center;
+      background-color: $secondary-color;
+      border-radius: $border-radius;
+      
       label {
         flex: 1;
       }
@@ -36,8 +37,8 @@
         flex: 0;
         display: flex;
         font-size: $font-size-md;
-        align-content: center;
         gap: $spacing-md;
+        margin: 0 $spacing-sm;
 
         a {
           color: $text-color;
@@ -58,7 +59,7 @@
       transition: max-height 0.3s ease, padding 0.3s ease;
 
       &.expanded {
-        max-height: 1000px;
+        max-height: max-content;
         transition: max-height 0.3s ease, padding 0.3s ease;
       }
 

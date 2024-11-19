@@ -1,6 +1,6 @@
 ﻿<template>
-  <div class="container">
-    <div class="panel sessions">
+  <div class="layout-wide flex-vertical gap-md">
+    <div class="panel">
       <div class="header">
         <h2 class="title">{{ $t('sessions') }}</h2>
         <div class="actions">
@@ -25,12 +25,14 @@
         >
           <div class="item-content">
             <label>{{ session.name }}</label>
+            {{ $t('from') }}
             <FormInput
                 label=""
                 type="date"
                 :modelValue="session.startDate.slice(0, 10)"
                 @update:modelValue="(value) => updateSessionDate(session._id, 'startDate', value)"
             />
+            {{ $t('to') }}
             <FormInput
                 label=""
                 type="date"

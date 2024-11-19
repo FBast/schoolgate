@@ -1,7 +1,7 @@
 .form-group {
+  flex: 0;
   display: flex;
   flex-direction: column;
-  margin-bottom: $spacing-md;
 
   label {
     color: $text-color;
@@ -11,11 +11,22 @@
   input,
   select,
   textarea {
+    flex: 0;
     padding: $spacing-sm;
     border: 1px solid $text-color;
     border-radius: $border-radius;
     font-family: $font-family;
     width: 100%;
     box-sizing: border-box;
+  }
+  
+  textarea {
+    flex: 1;
+    resize: none;
+    min-height: 200px;
+  }
+
+  &:has(textarea) {
+    flex: 1;
   }
 }

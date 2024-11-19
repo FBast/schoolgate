@@ -1,69 +1,67 @@
 ﻿<template>
-  <div class="user-informations">
-    <form @submit.prevent="updateUser">
-      <div class="form-container">
-        <!-- Colonne gauche : Informations utilisateur -->
-        <div class="form-column">
-          <FormInput
-              v-model="editableUser.firstName"
-              label="Prénom"
-              type="text"
-              :error="firstNameError"
-          />
-          <FormInput
-              v-model="editableUser.lastName"
-              label="Nom"
-              type="text"
-              :error="lastNameError"
-          />
-          <FormInput
-              v-model="editableUser.birthDate"
-              label="Date de naissance"
-              type="date"
-              :error="birthDateError"
-          />
-          <FormSelect
-              v-model="editableUser.requestedFormation"
-              :options="formations"
-              label="Formation demandée"
-              :error="formationError"
-          />
-          <FormSelect
-              v-model="editableUser.requestedGrade"
-              :options="grades"
-              label="Année demandée"
-              :error="gradeError"
-          />
-        </div>
-
-        <!-- Colonne droite : Texte d'évaluation et rendez-vous -->
-        <div class="form-column">
-          <FormSelect
-              v-model="editableUser.status"
-              :options="statusOptions"
-              label="Statut"
-              :error="statusError"
-          />
-          <FormTextarea
-              v-model="editableUser.evaluation"
-              label="Texte d'évaluation"
-              placeholder="Entrez un texte d'évaluation ici..."
-          />
-          <FormInput
-              v-model="editableUser.meetingDate"
-              label="Date de rendez-vous"
-              type="date"
-          />
-          <FormButton :disabled="!isFormValid" type="submit">
-            Mettre à jour
-          </FormButton>
-        </div>
+  <form @submit.prevent="updateUser">
+    <div class="flex-horizontal padding-md gap-md">
+      <!-- Colonne gauche : Informations utilisateur -->
+      <div class="flex-vertical gap-sm">
+        <FormInput
+            v-model="editableUser.firstName"
+            label="Prénom"
+            type="text"
+            :error="firstNameError"
+        />
+        <FormInput
+            v-model="editableUser.lastName"
+            label="Nom"
+            type="text"
+            :error="lastNameError"
+        />
+        <FormInput
+            v-model="editableUser.birthDate"
+            label="Date de naissance"
+            type="date"
+            :error="birthDateError"
+        />
+        <FormSelect
+            v-model="editableUser.requestedFormation"
+            :options="formations"
+            label="Formation demandée"
+            :error="formationError"
+        />
+        <FormSelect
+            v-model="editableUser.requestedGrade"
+            :options="grades"
+            label="Année demandée"
+            :error="gradeError"
+        />
       </div>
-    </form>
-    <p v-if="message" :class="{'success-message': success, 'error-message': !success}">
-      {{ message }}
-    </p>
-  </div>
+
+      <!-- Colonne droite : Texte d'évaluation et rendez-vous -->
+      <div class="flex-vertical gap-sm">
+        <FormSelect
+            v-model="editableUser.status"
+            :options="statusOptions"
+            label="Statut"
+            :error="statusError"
+        />
+        <FormTextarea
+            v-model="editableUser.evaluation"
+            label="Texte d'évaluation"
+            placeholder="Entrez un texte d'évaluation ici..."
+        />
+        <FormInput
+            v-model="editableUser.meetingDate"
+            label="Date de rendez-vous"
+            type="date"
+        />
+        <FormButton :disabled="!isFormValid" type="submit">
+          Mettre à jour
+        </FormButton>
+      </div>
+    </div>
+  </form>
+  <p v-if="message" :class="{'success-message': success, 'error-message': !success}">
+    {{ message }}
+  </p>
 </template>
 
 <script setup>
@@ -195,29 +193,3 @@ onMounted(() => {
   }
 });
 </script>
-
-<style scoped lang="scss">
-@import "@/styles/utils/variables.scss";
-
-.user-informations {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-md;
-  padding: $spacing-md;
-  background-color: lighten($secondary-color, 10%);
-  border-radius: $border-radius;
-
-  .form-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: $spacing-lg;
-
-    .form-column {
-      flex: 1;
-      min-width: 300px;
-      display: flex;
-      flex-direction: column;
-    }
-  }
-}
-</style>

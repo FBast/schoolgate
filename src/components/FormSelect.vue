@@ -28,30 +28,30 @@ export default {
 };
 </script>
 
-<style scoped lang="scss">
-@import "@/styles/utils/_variables.scss";
+<!--<style scoped lang="scss">-->
+<!--@import "@/styles/utils/_variables.scss";-->
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 15px;
-}
+<!--.form-group {-->
+<!--  display: flex;-->
+<!--  flex-direction: column;-->
+<!--  margin-bottom: 15px;-->
+<!--}-->
 
-label {
-  margin-bottom: 5px;
-  color: white;
-}
+<!--label {-->
+<!--  margin-bottom: 5px;-->
+<!--  color: white;-->
+<!--}-->
 
-select {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  width: 100%;
-  box-sizing: border-box;
-}
+<!--select {-->
+<!--  padding: 10px;-->
+<!--  border: 1px solid #ccc;-->
+<!--  border-radius: 4px;-->
+<!--  width: 100%;-->
+<!--  box-sizing: border-box;-->
+<!--}-->
 
-.error-message {
-  padding-top: 5px;
-  color: $error-color;
-}
-</style>
+<!--.error-message {-->
+<!--  padding-top: 5px;-->
+<!--  color: $error-color;-->
+<!--}-->
+<!--</style>-->

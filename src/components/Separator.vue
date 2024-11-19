@@ -19,7 +19,7 @@ const props = defineProps({
 .separator {
   display: flex;
   align-items: center;
-  margin: $spacing-md 0;
+  margin: $spacing-sm 0;
   text-align: center;
 
   &::before,

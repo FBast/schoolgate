@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="layout-wide gap-md">
     <div class="panel pending-infos">
       <div class="header">
         <h2 class="title">Informations</h2>

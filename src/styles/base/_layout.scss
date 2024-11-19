@@ -1,0 +1,32 @@
+.layout-wide {}
+
+.layout-restricted {
+  max-width: 500px;
+  margin: 0 auto;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow;
+}
+
+.gap-sm {
+  gap: $spacing-sm;
+}
+
+.gap-md {
+  gap: $spacing-md;
+}
+
+.gap-lg {
+  gap: $spacing-lg;
+}
+
+.padding-sm {
+  padding: $spacing-sm;
+}
+
+.padding-md {
+  padding: $spacing-md;
+}
+
+.padding-lg {
+  padding: $spacing-lg;
+}

@@ -1,16 +1,13 @@
 ﻿<template>
-  <div class="container">
-    <div class="panel users">
+  <div class="layout-wide gap-md">
+    <div class="panel">
       <div class="header">
         <h2 class="title">{{ $t('user_information') }}</h2>
       </div>
       <!-- Header List -->
       <div class="items-list-header">
         <div class="header-details">
-          <span>{{ $t('last_name') }}</span>
-          <span>{{ $t('first_name') }}</span>
           <span>Email</span>
-          <span>{{ $t('role') }}</span>
           <span>{{ $t('status') }}</span>
           <span class="actions">{{ $t('actions') }}</span>
         </div>
@@ -24,10 +21,7 @@
         >
           <!-- Item Content -->
           <div class="item-content" @click="toggleDetails(user._id)">
-            <label>{{ user.lastName }}</label>
-            <label>{{ user.firstName }}</label>
             <label>{{ user.email }}</label>
-            <label>{{ $t(user.role) }}</label>
             <label>{{ $t(user.status) }}</label>
             <div class="actions">
               <a @click.stop="editUser(user._id)">
@@ -72,7 +66,7 @@ const success = ref(false);
 const fetchUsers = async () => {
   try {
     const response = await ApiService.getUsers();
-    users.value = response;
+    users.value = response.filter(user => user.role === 'user');
   } catch (error) {
     message.value = t('error_fetching_users');
     success.value = false;

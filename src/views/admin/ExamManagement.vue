@@ -1,7 +1,7 @@
 ﻿<template>
-  <div class="container">
+  <div class="layout-wide flex-vertical gap-md">
     <!-- Topic column -->
-    <div class="panel topic">
+    <div class="panel">
       <div class="header">
         <h2 class="title">{{ $t('topics') }}</h2>
         <div class="actions">
