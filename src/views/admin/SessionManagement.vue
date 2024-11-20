@@ -4,7 +4,7 @@
       <div class="header">
         <h2 class="title">{{ $t('sessions') }}</h2>
         <div class="actions">
-          <a @click="addSession"><i class="fa-regular fa-square-plus"></i></a>
+          <a @click="addSession"><i class="fas fa-square-plus"></i></a>
         </div>
       </div>
       <!-- Header List -->

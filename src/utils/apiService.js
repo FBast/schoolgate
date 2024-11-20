@@ -290,16 +290,16 @@ export const ApiService = {
         }
     },
 
-    async getFormations() {
+    async getGrades() {
         try {
-            const response = await axiosInstance.get('/formations', {
+            const response = await axiosInstance.get('/grades', {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('authToken')}`
                 }
             });
             return response.data;
         } catch (error) {
-            throw new Error(`Error retrieving formations: ${error.response?.data?.message || error.message}`);
+            throw new Error(`Error retrieving grades: ${error.response?.data?.message || error.message}`);
         }
     },
 
@@ -343,7 +343,20 @@ export const ApiService = {
         }
     },
 
-    async getGrades(formationId) {
+    async getFormations() {
+        try {
+            const response = await axiosInstance.get('/formations', {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw new Error(`Error retrieving formations: ${error.response?.data?.message || error.message}`);
+        }
+    },
+    
+    async getFormationGrades(formationId) {
         try {
             const response = await axiosInstance.get(`/grades?formationId=${formationId}`, {
                 headers: {

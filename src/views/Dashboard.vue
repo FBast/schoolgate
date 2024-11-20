@@ -32,7 +32,7 @@ import { ApiService } from "@/utils/apiService.js";
 
 const stepMap = {
   verified: { label: 'Informations', component: PendingInfos },
-  waiting_exam: { label: 'Épreuve en attente', component: ExamWaiting },
+  awaiting_exam: { label: 'Épreuve en attente', component: ExamWaiting },
   pending_exam: { label: 'Épreuve en cours', component: ExamPending },
   exam_done: { label: 'Épreuve terminée', component: ExamDone },
   interview: { label: 'Entretien', component: Interview },

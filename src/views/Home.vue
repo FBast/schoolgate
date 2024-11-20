@@ -8,6 +8,7 @@
 import { useRouter } from 'vue-router';
 import { jwtDecode } from 'jwt-decode';
 import { onMounted } from 'vue';
+import {ROLES_OPTIONS} from "@/utils/constants.js";
 
 const router = useRouter();
 
@@ -23,7 +24,7 @@ const checkAuthentication = () => {
         localStorage.removeItem('authToken');
         router.push('/auth');
       } 
-      else if (decodedToken.role === 'admin') {
+      else if (decodedToken.role === ROLES_OPTIONS.admin) {
         router.push('/adminDashboard');
       } 
       else {

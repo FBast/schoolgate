@@ -7,7 +7,9 @@
       <!-- Header List -->
       <div class="items-list-header">
         <div class="header-details">
-          <span>Email</span>
+          <span>{{ $t('email') }}</span>
+          <span>{{ $t('formation') }}</span>
+          <span>{{ $t('grade') }}</span>
           <span>{{ $t('status') }}</span>
           <span class="actions">{{ $t('actions') }}</span>
         </div>
@@ -22,6 +24,8 @@
           <!-- Item Content -->
           <div class="item-content" @click="toggleDetails(user._id)">
             <label>{{ user.email }}</label>
+            <label>{{ formations[user.requestedFormation] || t('formation_error') }}</label>
+            <label>{{ grades[user.requestedGrade] || t('grade_error') }}</label>
             <label>{{ $t(user.status) }}</label>
             <div class="actions">
               <a @click.stop="editUser(user._id)">
@@ -34,7 +38,7 @@
           </div>
           <!-- Item Foldout -->
           <div class="item-foldout" :class="{ expanded: expandedUserId === user._id }">
-            <UserInformations
+            <UserInformation
                 v-if="expandedUserId === user._id"
                 :user="user"
                 @update="handleUserUpdate"
@@ -53,20 +57,43 @@
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ApiService } from '@/utils/apiService.js';
-import UserInformations from "@/views/admin/UserInformations.vue";
+import UserInformation from "@/views/admin/UserInformation.vue";
+import {ROLES_OPTIONS} from "@/utils/constants.js";
 
 const { t } = useI18n();
 
 const users = ref([]);
+const formations = ref([]);
+const grades = ref([]);
 const expandedUserId = ref(null);
 const message = ref('');
 const success = ref(false);
+
+// Transformer les formations et grades en dictionnaires
+const fetchFormationsAndGrades = async () => {
+  try {
+    const formationsResponse = await ApiService.getFormations();
+    const gradesResponse = await ApiService.getGrades();
+
+    // Transformer en objets (dictionnaires)
+    formations.value = formationsResponse.reduce(
+        (dict, formation) => ({ ...dict, [formation._id]: formation.title }),
+        {}
+    );
+    grades.value = gradesResponse.reduce(
+        (dict, grade) => ({ ...dict, [grade._id]: grade.grade }),
+        {}
+    );
+  } catch (error) {
+    console.error(t('fetching_formations_error'), error);
+  }
+};
 
 // Récupérer les utilisateurs
 const fetchUsers = async () => {
   try {
     const response = await ApiService.getUsers();
-    users.value = response.filter(user => user.role === 'user');
+    users.value = response.filter(user => user.role === ROLES_OPTIONS.user);
   } catch (error) {
     message.value = t('error_fetching_users');
     success.value = false;
@@ -93,7 +120,7 @@ const deleteUser = async (userId) => {
 
 // Mettre à jour les informations utilisateur
 const handleUserUpdate = (updatedUser) => {
-  const index = users.value.findIndex(user => user._id === updatedUser._id);
+  const index = users.value.findIndex((user) => user._id === updatedUser._id);
   if (index !== -1) {
     users.value[index] = updatedUser;
   }
@@ -103,8 +130,9 @@ const editUser = (userId) => {
   console.log(`${t('edit_user')} ${userId}`);
 };
 
-// Charger les utilisateurs au montage
-onMounted(() => {
-  fetchUsers();
+// Charger les données au montage
+onMounted(async () => {
+  await fetchFormationsAndGrades();
+  await fetchUsers();
 });
 </script>

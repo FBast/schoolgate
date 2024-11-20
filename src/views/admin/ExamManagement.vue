@@ -5,7 +5,7 @@
       <div class="header">
         <h2 class="title">{{ $t('topics') }}</h2>
         <div class="actions">
-          <a @click="addTopic"><i class="fa-regular fa-square-plus"></i></a>
+          <a @click="addTopic"><i class="fas fa-square-plus"></i></a>
         </div>
       </div>
       <div class="items-list">
@@ -32,7 +32,7 @@
       <div class="header">
         <h2 class="title">{{ $t('exercises') }}</h2>
         <div class="actions">
-          <a @click="addExercise"><i class="fa-regular fa-square-plus"></i></a>
+          <a @click="addExercise"><i class="fas fa-square-plus"></i></a>
         </div>
       </div>
       <div class="items-list">

@@ -5,7 +5,7 @@
       <div class="header">
         <h2 class="title">{{ $t('formations') }}</h2>
         <div class="actions">
-          <a @click="addFormation"><i class="fa-regular fa-square-plus"></i></a>
+          <a @click="addFormation"><i class="fas fa-square-plus"></i></a>
         </div>
       </div>
       <div class="items-list">
@@ -32,7 +32,7 @@
       <div class="header">
         <h2 class="title">{{ $t('grades') }}</h2>
         <div class="actions">
-          <a @click="addGrade(selectedFormation)"><i class="fa-regular fa-square-plus"></i></a>
+          <a @click="addGrade(selectedFormation)"><i class="fas fa-square-plus"></i></a>
         </div>
       </div>
       <div class="items-list">
@@ -110,7 +110,7 @@ const fetchGrades = async () => {
   if (!selectedFormation.value) return;
 
   try {
-    const responseData = await ApiService.getGrades(selectedFormation.value._id);
+    const responseData = await ApiService.getFormationGrades(selectedFormation.value._id);
     grades.value = responseData;
     if (grades.value.length > 0) {
       selectedGrade.value = grades.value[0];

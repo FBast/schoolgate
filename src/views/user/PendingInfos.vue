@@ -1,19 +1,31 @@
 <template>
-  <div class="layout-wide gap-md">
-    <div class="panel pending-infos">
+  <div class="layout-wide flex-horizontal gap-md">
+    <div class="panel flex-vertical gap-md">
       <div class="header">
-        <h2 class="title">Informations</h2>
+        <h2 class="title">{{ $t('step_description') }}</h2>
+      </div>
+      <div>
+        <p>
+          Blabla en rapport à la demande d'informations
+        </p>
       </div>
     </div>
-    <form @submit.prevent="submitForm">
-      <FormInput v-model="firstName" :label="$t('first_name')" type="text" :error="firstNameError" />
-      <FormInput v-model="lastName" :label="$t('last_name')" type="text" :error="lastNameError" />
-      <FormInput v-model="birthDate" :label="$t('birth_date')" type="date" :error="birthDateError" />
-      <FormSelect v-model="requestedFormation" :options="formations" :label="$t('formation')" :error="formationError" />
-      <FormSelect v-model="requestedGrade" :options="grades" :label="$t('grade')" :error="gradeError" />
-      <FormButton type="submit" :disabled="!isFormValid">{{ $t('update') }}</FormButton>
-    </form>
-    <p v-if="message" :class="{'success-message': success, 'error-message': !success}">{{ message }}</p>
+    <div class="panel flex-vertical gap-md">
+      <div class="header">
+        <h2 class="title">{{ $t('user_information') }}</h2>
+      </div>
+      <form @submit.prevent="submitForm">
+        <div class="flex-vertical gap-sm">
+          <FormInput v-model="firstName" :label="$t('first_name')" type="text" :error="firstNameError" />
+          <FormInput v-model="lastName" :label="$t('last_name')" type="text" :error="lastNameError" />
+          <FormInput v-model="birthDate" :label="$t('birth_date')" type="date" :error="birthDateError" />
+          <FormSelect v-model="requestedFormation" :options="formations" :label="$t('formation')" :error="formationError" />
+          <FormSelect v-model="requestedGrade" :options="grades" :label="$t('grade')" :error="gradeError" />
+          <FormButton type="submit" :disabled="!isFormValid">{{ $t('update') }}</FormButton>
+        </div>
+      </form>
+      <p v-if="message" :class="{'success-message': success, 'error-message': !success}">{{ message }}</p>
+    </div>
   </div>
 </template>
 
@@ -23,6 +35,8 @@ import FormInput from '@/components/FormInput.vue';
 import FormSelect from '@/components/FormSelect.vue';
 import { ApiService } from "@/utils/apiService.js";
 import FormButton from "@/components/FormButton.vue";
+import {useI18n} from "vue-i18n";
+import {STATUS_OPTIONS} from "@/utils/constants.js";
 
 const firstName = ref('');
 const lastName = ref('');
@@ -36,21 +50,23 @@ const message = ref('');
 const formations = ref([]);
 const grades = ref([]);
 
+const { t } = useI18n();
+
 // Controle des erreurs
 const firstNameError = computed(() =>
-    !isValidName(firstName.value) ? $t('first_name_error') : ''
+    !isValidName(firstName.value) ? t('first_name_error') : ''
 );
 const lastNameError = computed(() =>
-    !isValidName(lastName.value) ? $t('last_name_error') : ''
+    !isValidName(lastName.value) ? t('last_name_error') : ''
 );
 const birthDateError = computed(() =>
-    !isValidBirthDate(birthDate.value) ? $t('birth_date_error') : ''
+    !isValidBirthDate(birthDate.value) ? t('birth_date_error') : ''
 );
 const formationError = computed(() =>
-    !requestedFormation.value ? $t('formation_error') : ''
+    !requestedFormation.value ? t('formation_error') : ''
 );
 const gradeError = computed(() =>
-    !requestedGrade.value ? $t('grade_error') : ''
+    !requestedGrade.value ? t('grade_error') : ''
 );
 
 // Vérifier si le formulaire est valide
@@ -92,7 +108,7 @@ const fetchFormations = async () => {
 // Fetch grades en fonction de la formation sélectionnée
 const fetchYears = async (formationId) => {
   try {
-    const response = await ApiService.getGrades(formationId);
+    const response = await ApiService.getFormationGrades(formationId);
     grades.value = response.map(grade => ({
       label: `Année ${grade.grade}`,
       value: grade._id
@@ -125,7 +141,7 @@ const submitForm = async () => {
       birthDate: birthDate.value,
       requestedFormation: requestedFormation.value,
       requestedGrade: requestedGrade.value,
-      status: 'waiting_exam'
+      status: STATUS_OPTIONS.awaiting_exam
     });
     emit('statusChanged');
 
@@ -142,39 +158,3 @@ onMounted(() => {
   fetchFormations();
 });
 </script>
-
-<style scoped lang="scss">
-@import "@/styles/utils/variables";
-@import "@/styles/utils/mixins";
-
-.pending-infos {
-  margin: 0 auto;
-  padding: 20px;
-  background-color: $primary-color;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-button {
-  width: 100%;
-  padding: 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 15px;
-}
-
-button:hover {
-  background-color: #0056b3;
-}
-
-.success-message {
-  color: $success-color;
-}
-
-.error-message {
-  color: $error-color;
-}
-</style>

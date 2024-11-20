@@ -5,6 +5,7 @@ import AdminDashboard from "@/views/AdminDashboard.vue";
 import NotFound from "@/views/NotFound.vue";
 import {jwtDecode} from "jwt-decode";
 import Auth from "@/views/Auth.vue";
+import {ROLES_OPTIONS} from "@/utils/constants.js";
 
 const routes = [
     {
@@ -62,7 +63,7 @@ router.beforeEach(async (to, from, next) => {
         return next('/');
     }
     
-    if (to.meta.requiresAdmin && token && decodedToken.role !== 'admin') {
+    if (to.meta.requiresAdmin && token && decodedToken.role !== ROLES_OPTIONS.admin) {
         return next('/');
     }
     

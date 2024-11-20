@@ -1,22 +1,10 @@
 <template>
-  <div class="exam-waiting-container">
-    <!-- User Info Column -->
-    <div class="section user-info">
-      <h2>{{ $t('candidate_information') }}</h2>
-      <UserInfoPanel
-          :initialData="userInfo"
-          :formations="formations"
-          :grades="grades"
-          :message="message"
-          :success="success"
-          @submit="submitForm"
-      />
-    </div>
-
-    <!-- Exam Waiting Info Column -->
-    <div class="section exam-info">
-      <h2>{{ $t('exam_status') }}</h2>
-      <div class="content-box">
+  <div class="layout-wide flex-horizontal gap-md">
+    <div class="panel flex-vertical gap-md">
+      <div class="header">
+        <h2 class="title">{{ $t('step_description') }}</h2>
+      </div>
+      <div>
         <p>
           {{ $t('exam_scheduled', { startDate: sessionStartDate, endDate: sessionEndDate }) }}
         </p>
@@ -25,12 +13,20 @@
         </p>
       </div>
     </div>
+    <UserInfoPanel
+        :initialData="userInfo"
+        :formations="formations"
+        :grades="grades"
+        :message="message"
+        :success="success"
+        @submit="submitForm"
+    />
   </div>
 </template>
 
 <script setup>
 import {ref, onMounted} from 'vue';
-import UserInfoPanel from '@/components/UserInfoPanel.vue';
+import UserInfoPanel from '@/views/user/UserInformation.vue';
 import {ApiService} from '@/utils/apiService.js';
 
 const userInfo = ref({});
@@ -46,11 +42,11 @@ const fetchUserInfo = async () => {
   userInfo.value = response;
 
   // Charger les dates de session en fonction du grade de l'utilisateur
-  if (response.requestedGrade) {
-    const sessionData = await ApiService.getNextSessionForGrade(response.requestedGrade);
-    sessionStartDate.value = sessionData.startDate;
-    sessionEndDate.value = sessionData.endDate;
-  }
+  // if (response.requestedGrade) {
+  //   const sessionData = await ApiService.getSessions(response.requestedGrade);
+  //   sessionStartDate.value = sessionData.startDate;
+  //   sessionEndDate.value = sessionData.endDate;
+  // }
 };
 
 const fetchFormations = async () => {
@@ -59,7 +55,7 @@ const fetchFormations = async () => {
 };
 
 const fetchGrades = async (formationId) => {
-  const response = await ApiService.getGrades(formationId);
+  const response = await ApiService.getFormationGrades(formationId);
   grades.value = response.map(g => ({label: `Année ${g.grade}`, value: g._id}));
 };
 

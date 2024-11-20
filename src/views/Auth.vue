@@ -23,7 +23,7 @@
     <!-- Formulaire d'inscription -->
     <div class="panel register" v-else-if="currentView === 'register'">
       <h2>{{ $t('register') }}</h2>
-      <form @submit.prevent="registerUser">
+      <form class="flex-vertical gap-sm" @submit.prevent="registerUser">
         <FormInput v-model="email" :label="$t('email')" type="email" required />
         <FormInput v-model="password" :label="$t('password')" type="password" required />
         <FormInput v-model="confirmPassword" :label="$t('confirm_password')" type="password" required />
@@ -40,7 +40,7 @@
     <!-- Formulaire de vérification de l'email -->
     <div class="panel verify" v-else-if="currentView === 'verify'">
       <h2>{{ $t('verify_account') }}</h2>
-      <form @submit.prevent="submitCode">
+      <form class="flex-vertical gap-sm" @submit.prevent="submitCode">
         <p>{{ $t('enter_verification_code', { email: email }) }}</p>
         <FormInput :label="$t('verification_code')" type="text" v-model="token" required />
         <FormButton type="submit">{{ $t('validate') }}</FormButton>
@@ -57,7 +57,7 @@
     <!-- Formulaire de demande de réinitialisation du mot de passe -->
     <div class="panel reset" v-else-if="currentView === 'resetPassword'">
       <h2>{{ $t('reset_password') }}</h2>
-      <form @submit.prevent="resetPassword">
+      <form class="flex-vertical gap-sm" @submit.prevent="resetPassword">
         <FormInput :label="$t('email')" type="email" v-model="email" required />
         <FormButton type="submit">{{ $t('send_reset_code') }}</FormButton>
       </form>
@@ -72,7 +72,7 @@
     <!-- Formulaire de confirmation du code et définition du nouveau mot de passe -->
     <div class="panel confirmReset" v-else-if="currentView === 'confirmResetPassword'">
       <h2>{{ $t('define_new_password') }}</h2>
-      <form @submit.prevent="submitNewPassword">
+      <form class="flex-vertical gap-sm" @submit.prevent="submitNewPassword">
         <p>{{ $t('enter_reset_code', { email: email }) }}</p>
         <FormInput :label="$t('verification_code')" type="text" v-model="validationToken" required />
         <FormInput :label="$t('new_password')" type="password" v-model="newPassword" required />
@@ -98,6 +98,7 @@ import Separator from "@/components/Separator.vue";
 import { ApiService } from '@/utils/apiService.js';
 import {jwtDecode} from "jwt-decode";
 import { useI18n } from 'vue-i18n';
+import {ROLES_OPTIONS} from "@/utils/constants.js";
 
 const { t } = useI18n(); // Initialiser la fonction t pour l'internationalisation
 
@@ -135,7 +136,7 @@ const loginUser = async () => {
     const { token: authToken } = await ApiService.loginUser(email.value, password.value);
     const decodedToken = jwtDecode(authToken);
 
-    if (decodedToken.status === 'unverified' && decodedToken.role !== 'admin') {
+    if (decodedToken.status === 'unverified' && decodedToken.role !== ROLES_OPTIONS.admin) {
       message.value = t('verify_email_prompt');
       success.value = false;
       currentView.value = 'verify';
@@ -144,7 +145,7 @@ const loginUser = async () => {
       success.value = true;
       message.value = t('login_success');
 
-      const userRole = decodedToken.role || 'user';
+      const userRole = decodedToken.role || ROLES_OPTIONS.user;
       await router.push('/');
     }
   } catch (error) {

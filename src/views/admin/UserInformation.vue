@@ -71,18 +71,22 @@ import FormSelect from '@/components/FormSelect.vue';
 import FormButton from '@/components/FormButton.vue';
 import FormTextarea from '@/components/FormTextarea.vue';
 import { ApiService } from '@/utils/apiService.js';
+import {useI18n} from "vue-i18n";
+import {ROLES_OPTIONS, STATUS_OPTIONS} from "@/utils/constants.js";
 
 const props = defineProps({
-  user: Object,
+  user: Object
 });
 
 const emit = defineEmits(['update']);
+
+const { t } = useI18n();
 
 // Données utilisateur modifiables
 const editableUser = reactive({
   lastName: props.user?.lastName || '',
   firstName: props.user?.firstName || '',
-  role: props.user?.role || 'user',
+  role: props.user?.role || ROLES_OPTIONS.user,
   status: props.user?.status || 'pending',
   evaluation: props.user?.evaluation || '',
   meetingDate: props.user?.meetingDate || '',
@@ -91,12 +95,17 @@ const editableUser = reactive({
   birthDate: props.user?.birthDate || '',
 });
 
+// Extraire uniquement la date
+editableUser.birthDate = editableUser.birthDate
+    ? editableUser.birthDate.split('T')[0] // Extraire uniquement la date
+    : '';
+
+
 // Options pour le champ statut
-const statusOptions = [
-  { label: 'En attente', value: 'pending' },
-  { label: 'Actif', value: 'active' },
-  { label: 'Suspendu', value: 'suspended' },
-];
+const statusOptions = Object.keys(STATUS_OPTIONS).map((key) => ({
+  label: t(key), // Utiliser la clé pour traduire
+  value: STATUS_OPTIONS[key],
+}));
 
 // Listes des formations et années
 const formations = reactive([]);
@@ -104,25 +113,25 @@ const grades = reactive([]);
 
 // Validation des champs
 const firstNameError = computed(() =>
-    editableUser.firstName.length < 2 ? 'Le prénom est requis (minimum 2 caractères).' : ''
+    editableUser.firstName.length < 2 ? t('first_name_error') : ''
 );
 const lastNameError = computed(() =>
-    editableUser.lastName.length < 2 ? 'Le nom est requis (minimum 2 caractères).' : ''
+    editableUser.lastName.length < 2 ? t('last_name_error') : ''
 );
 const birthDateError = computed(() => {
   const today = new Date().toISOString().split('T')[0];
   return !editableUser.birthDate || editableUser.birthDate > today
-      ? 'La date de naissance doit être valide.'
+      ? t('birth_date_error')
       : '';
 });
 const formationError = computed(() =>
-    !editableUser.requestedFormation ? 'La formation est requise.' : ''
+    !editableUser.requestedFormation ? t('formation_error') : ''
 );
 const gradeError = computed(() =>
-    !editableUser.requestedGrade ? 'L\'année est requise.' : ''
+    !editableUser.requestedGrade ? t('grade_error') : ''
 );
 const statusError = computed(() =>
-    !editableUser.status ? 'Le statut est requis.' : ''
+    !editableUser.status ? t('status_error') : ''
 );
 
 const isFormValid = computed(() =>
@@ -143,20 +152,20 @@ const fetchFormations = async () => {
       value: formation._id,
     })));
   } catch (error) {
-    console.error('Erreur lors de la récupération des formations :', error);
+    console.error(t('fetching_formations_error'), error);
   }
 };
 
 // Récupérer les années en fonction de la formation sélectionnée
 const fetchGrades = async (formationId) => {
   try {
-    const response = await ApiService.getGrades(formationId);
+    const response = await ApiService.getFormationGrades(formationId);
     grades.splice(0, grades.length, ...response.map(grade => ({
       label: `Année ${grade.grade}`,
       value: grade._id,
     })));
   } catch (error) {
-    console.error('Erreur lors de la récupération des années :', error);
+    console.error(t('fetching_grades_error'), error);
   }
 };
 
@@ -178,10 +187,10 @@ const updateUser = async () => {
     const updatedUser = { ...editableUser };
     await ApiService.updateUser(props.user._id, updatedUser);
     emit('update', updatedUser);
-    alert('Utilisateur mis à jour avec succès.');
+    alert(t('update_success'));
   } catch (error) {
-    console.error('Erreur lors de la mise à jour de l\'utilisateur :', error);
-    alert('Erreur lors de la mise à jour.');
+    console.error(t('update_error'), error);
+    alert(t('update_error'));
   }
 };
 

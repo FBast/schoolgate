@@ -1,17 +1,19 @@
 <template>
-  <div class="user-info-panel">
-    <h3>Informations du candidat</h3>
-    <p><strong>Prénom :</strong> {{ userData.firstName }}</p>
-    <p><strong>Nom :</strong> {{ userData.lastName }}</p>
-    <p><strong>Date de naissance :</strong> {{ userData.birthDate }}</p>
-    <p><strong>Formation demandée :</strong> {{ userData.requestedFormation }}</p>
-    <p><strong>Année demandée :</strong> {{ userData.requestedGrade }}</p>
+  <div class="panel flex-vertical gap-md">
+    <div class="header">
+      <h2>{{ $t('candidate_information') }}</h2>
+    </div>
+    <label>Prénom : {{ userData.firstName }}</label>
+    <label>Nom : {{ userData.lastName }}</label>
+    <label>Date de naissance : {{ userData.birthDate }}</label>
+    <label>Formation demandée : {{ userData.requestedFormation }}</label>
+    <label>Année demandée : {{ userData.requestedGrade }}</label>
 
     <div class="actions">
       <button @click="toggleEmailEdit">Modifier l'adresse email</button>
       <button @click="togglePasswordEdit">Modifier le mot de passe</button>
     </div>
-
+    
     <!-- Section pour modifier l'email -->
     <div v-if="editEmail" class="edit-section">
       <FormInput v-model="newEmail" label="Nouvelle adresse email" type="email" />
@@ -99,33 +101,3 @@ const updatePassword = async () => {
   }
 };
 </script>
-
-<style scoped lang="scss">
-@import "@/styles/utils/variables";
-
-.user-info-panel {
-  padding: 20px;
-  background-color: $primary-color;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  color: #fff;
-}
-
-.actions {
-  margin-top: 15px;
-  display: flex;
-  gap: 10px;
-}
-
-.edit-section {
-  margin-top: 10px;
-}
-
-.success-message {
-  color: $success-color;
-}
-
-.error-message {
-  color: $error-color;
-}
-</style>
