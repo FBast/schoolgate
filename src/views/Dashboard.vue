@@ -4,10 +4,10 @@
       <nav class="progress-indicator">
         <div v-for="(step, key, index) in stepMap" :key="index" :class="{ 'active-step': key === status, 'step': true }">
           <span class="step-number">{{ index + 1 }}</span>
-          <span class="step-label">{{ step.label }}</span>
+          <span class="step-label">{{ $t(key) }}</span>
         </div>
       </nav>
-      <FormButton @click="logout">Déconnexion</FormButton>
+      <FormButton @click="logout" :label="$t('logout')"></FormButton>
     </header>
 
     <section class="content">
@@ -22,21 +22,25 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import PendingInfos from "@/views/user/PendingInfos.vue";
 import ExamWaiting from "@/views/user/ExamWaiting.vue";
-import ExamPending from "@/views/user/ExamPending.vue";
+import ExamPending from "@/views/user/ExamInProgress.vue";
 import ExamDone from "@/views/user/ExamDone.vue";
 import Interview from "@/views/user/Interview.vue";
 import Results from "@/views/user/Results.vue";
 import ErrorComponent from "@/components/ErrorComponent.vue";
 import FormButton from '@/components/FormButton.vue';
 import { ApiService } from "@/utils/apiService.js";
+import {STATUS_OPTIONS} from "@/utils/constants.js";
 
 const stepMap = {
-  verified: { label: 'Informations', component: PendingInfos },
-  awaiting_exam: { label: 'Épreuve en attente', component: ExamWaiting },
-  pending_exam: { label: 'Épreuve en cours', component: ExamPending },
-  exam_done: { label: 'Épreuve terminée', component: ExamDone },
-  interview: { label: 'Entretien', component: Interview },
-  results: { label: 'Résultats', component: Results }
+  [STATUS_OPTIONS.verified]: { component: PendingInfos },
+  [STATUS_OPTIONS.awaiting_exam]: { component: ExamWaiting },
+  [STATUS_OPTIONS.exam_in_progress]: { component: ExamPending },
+  [STATUS_OPTIONS.awaiting_appointment]: { component: ExamDone },
+  [STATUS_OPTIONS.awaiting_interview]: { component: Interview },
+  [STATUS_OPTIONS.awaiting_decision]: { component: Results },
+  [STATUS_OPTIONS.application_validated]: { component: Results },
+  [STATUS_OPTIONS.application_refused]: { component: Results },
+  [STATUS_OPTIONS.application_pending]: { component: Results },
 };
 
 const status = ref('verified');

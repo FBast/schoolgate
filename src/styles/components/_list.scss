@@ -23,8 +23,8 @@
     /* Item Content */
     .item-content {
       display: flex;
-      padding: $spacing-sm;
-      gap: $spacing-sm;
+      padding: $spacing-sm $spacing-md;
+      gap: $spacing-md;
       align-items: center;
       background-color: $secondary-color;
       border-radius: $border-radius;
@@ -34,19 +34,14 @@
       }
 
       .actions {
-        flex: 0;
+        flex: 1;
         display: flex;
         font-size: $font-size-md;
         gap: $spacing-md;
-        margin: 0 $spacing-sm;
+        justify-content: flex-end;
 
         a {
           color: $text-color;
-          transition: color 0.2s ease-in;
-
-          &:hover {
-            color: $accent-color;
-          }
         }
       }
     }

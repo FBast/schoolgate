@@ -3,11 +3,13 @@
     <header>
       <nav class="admin-nav">
         <FormButton v-for="(step, key, index) in stepMap" :key="index"
-                    :class="{ 'active': key === currentView }" @click="currentView = key">
-          {{ $t(step.label) }}
+                    :class="{ 'active': key === currentView }"
+                    :label="$t(step.label)"
+                    @click="currentView = key">
         </FormButton>
       </nav>
-      <FormButton @click="logout">{{ $t('logout') }}</FormButton>
+      <FormButton @click="logout" :label="$t('logout')">
+      </FormButton>
     </header>
 
     <section class="content">

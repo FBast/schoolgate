@@ -1,11 +1,12 @@
 <template>
   <button :type="type" @click="onClick" :disabled="disabled">
-    <slot />
+    <label>{{ label }}</label>
   </button>
 </template>
 
 <script setup>
 const props = defineProps({
+  label: String,
   type: {
     type: String,
     default: 'button'

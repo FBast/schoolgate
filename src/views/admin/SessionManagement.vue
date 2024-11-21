@@ -13,7 +13,7 @@
           <span>{{ $t('name') }}</span>
           <span>{{ $t('start_date') }}</span>
           <span>{{ $t('end_date') }}</span>
-          <span>{{ $t('actions') }}</span>
+          <span class="actions">{{ $t('actions') }}</span>
         </div>
       </div>
       <!-- Items List -->
@@ -23,27 +23,39 @@
             :key="session._id"
             class="item"
         >
-          <div class="item-content">
+          <div class="item-content" @click="toggleDetails(session._id)">
             <label>{{ session.name }}</label>
-            {{ $t('from') }}
-            <FormInput
-                label=""
-                type="date"
-                :modelValue="session.startDate.slice(0, 10)"
-                @update:modelValue="(value) => updateSessionDate(session._id, 'startDate', value)"
-            />
-            {{ $t('to') }}
-            <FormInput
-                label=""
-                type="date"
-                :modelValue="session.endDate.slice(0, 10)"
-                @update:modelValue="(value) => updateSessionDate(session._id, 'endDate', value)"
-            />
+            <label>{{ formatDate(session.startDate) }}</label>
+            <label>{{ formatDate(session.endDate) }}</label>
             <div class="actions">
               <a @click.stop="deleteSession(session._id)">
                 <i class="fa-solid fa-trash"></i>
               </a>
             </div>
+          </div>
+          <!-- Item Foldout -->
+          <div class="item-foldout" :class="{ expanded: expandedSessionId === session._id }">
+            <form @submit.prevent="updateSession(session._id)" class="flex-vertical padding-md gap-md">
+              <FormInput
+                  :label="$t('name')"
+                  type="text"
+                  v-model="session.name"
+                  :error="sessionErrors[session._id]?.name"
+              />
+              <FormInput
+                  :label="$t('start_date')"
+                  type="date"
+                  v-model="session.startDate"
+                  :error="sessionErrors[session._id]?.startDate"
+              />
+              <FormInput
+                  :label="$t('end_date')"
+                  type="date"
+                  v-model="session.endDate"
+                  :error="sessionErrors[session._id]?.endDate"
+              />
+              <FormButton :label="$t('update')" type="submit" />
+            </form>
           </div>
         </div>
       </div>
@@ -59,10 +71,14 @@ import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { ApiService } from '@/utils/apiService.js';
 import FormInput from '@/components/FormInput.vue';
+import FormButton from "@/components/FormButton.vue";
+import {formatDate} from "@/utils/helpers.js";
 
 const { t } = useI18n();
 
 const sessions = ref([]);
+const sessionErrors = ref({});
+const expandedSessionId = ref(null);
 const message = ref('');
 const success = ref(false);
 
@@ -72,6 +88,58 @@ const fetchSessions = async () => {
     sessions.value = response;
   } catch (error) {
     message.value = t('fetching_sessions_error');
+    success.value = false;
+  }
+};
+
+// Basculer l'affichage des détails utilisateur
+const toggleDetails = (sessionId) => {
+  expandedSessionId.value = expandedSessionId.value === sessionId ? null : sessionId;
+};
+
+const validateSession = (session) => {
+  const errors = {};
+
+  // Validation du nom
+  if (!session.name || session.name.trim().length === 0) {
+    errors.name = t('name_required_error');
+  }
+
+  // Validation des dates
+  if (!session.startDate) {
+    errors.startDate = t('start_date_required_error');
+  }
+
+  if (!session.endDate) {
+    errors.endDate = t('end_date_required_error');
+  }
+
+  if (session.startDate && session.endDate && session.startDate > session.endDate) {
+    errors.startDate = t('start_date_after_end_error');
+    errors.endDate = t('end_date_before_start_error');
+  }
+
+  return errors;
+};
+
+const updateSession = async (sessionId) => {
+  const session = sessions.value.find((s) => s._id === sessionId);
+  if (!session) return;
+
+  const errors = validateSession(session);
+  if (Object.keys(errors).length > 0) {
+    sessionErrors.value[sessionId] = errors;
+    return;
+  }
+
+  sessionErrors.value[sessionId] = {};
+
+  try {
+    await ApiService.updateSession(sessionId, session);
+    message.value = t('session_updated_success');
+    success.value = true;
+  } catch (error) {
+    message.value = t('session_updated_error');
     success.value = false;
   }
 };
@@ -105,21 +173,6 @@ const addSession = async () => {
     await fetchSessions();
   } catch (error) {
     message.value = t('creating_session_error');
-    success.value = false;
-  }
-};
-
-const updateSessionDate = async (sessionId, field, value) => {
-  const session = sessions.value.find((s) => s._id === sessionId);
-  if (!session) return;
-
-  try {
-    session[field] = value;
-    await ApiService.updateSession(sessionId, { ...session });
-    message.value = t('deleted_success_session');
-    success.value = true;
-  } catch (error) {
-    message.value = t('updating_session_error');
     success.value = false;
   }
 };

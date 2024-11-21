@@ -21,7 +21,7 @@
           <FormInput v-model="birthDate" :label="$t('birth_date')" type="date" :error="birthDateError" />
           <FormSelect v-model="requestedFormation" :options="formations" :label="$t('formation')" :error="formationError" />
           <FormSelect v-model="requestedGrade" :options="grades" :label="$t('grade')" :error="gradeError" />
-          <FormButton type="submit" :disabled="!isFormValid">{{ $t('update') }}</FormButton>
+          <FormButton type="submit" :label="$t('update')" :disabled="!isFormValid"></FormButton>
         </div>
       </form>
       <p v-if="message" :class="{'success-message': success, 'error-message': !success}">{{ message }}</p>

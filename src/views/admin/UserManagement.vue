@@ -8,8 +8,8 @@
       <div class="items-list-header">
         <div class="header-details">
           <span>{{ $t('email') }}</span>
-          <span>{{ $t('formation') }}</span>
-          <span>{{ $t('grade') }}</span>
+          <span>{{ $t('requested_formation') }}</span>
+          <span>{{ $t('requested_grade') }}</span>
           <span>{{ $t('status') }}</span>
           <span class="actions">{{ $t('actions') }}</span>
         </div>
@@ -33,6 +33,9 @@
               </a>
               <a @click.stop="deleteUser(user._id)">
                 <i class="fa-solid fa-trash"></i>
+              </a>
+              <a v-if="user.examPdf" @click.stop="downloadPdf(user._id)">
+                <i class="fa-solid fa-file-pdf"></i>
               </a>
             </div>
           </div>
@@ -115,6 +118,42 @@ const deleteUser = async (userId) => {
   } catch (error) {
     message.value = t('error_deleting_user');
     success.value = false;
+  }
+};
+
+const downloadPdf = async (userId) => {
+  try {
+    // Récupérer l'utilisateur pour obtenir son PDF
+    const user = await ApiService.getUser(userId);
+
+    if (!user.examPdf) {
+      message.value = t('no_pdf_available');
+      success.value = false;
+      return;
+    }
+
+    // Convertir le PDF en Blob
+    const pdfBuffer = Buffer.from(user.examPdf.data); // `data` si c'est un buffer natif
+    const blob = new Blob([pdfBuffer], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+
+    // Créer un lien pour télécharger le PDF
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'exam.pdf');
+    document.body.appendChild(link);
+    link.click();
+
+    // Nettoyer le lien temporaire
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    message.value = t('pdf_downloaded_successfully');
+    success.value = true;
+  } catch (error) {
+    message.value = t('error_downloading_pdf');
+    success.value = false;
+    console.error('Erreur lors du téléchargement du PDF :', error);
   }
 };
 

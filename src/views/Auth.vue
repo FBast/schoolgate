@@ -6,7 +6,9 @@
       <form class="flex-vertical gap-sm" @submit.prevent="loginUser">
           <FormInput :label="$t('email')" type="email" v-model="email" required />
           <FormInput :label="$t('password')" type="password" v-model="password" required />
-          <FormButton type="submit">{{ $t('login_button') }}</FormButton>
+          <FormButton :label="$t('login')"
+                      type="submit">
+          </FormButton>
       </form>
       <p v-if="message" :class="{ 'error-message': !success, 'success-message': success }">{{ message }}</p>
       <p class="link">
@@ -16,7 +18,7 @@
       <Separator :text="$t('or')" />
 
       <div class="link">
-        <FormButton @click="switchView('register')">{{ $t('create_account') }}</FormButton>
+        <FormButton @click="switchView('register')" :label="$t('create_account')"></FormButton>
       </div>
     </div>
 
@@ -27,13 +29,13 @@
         <FormInput v-model="email" :label="$t('email')" type="email" required />
         <FormInput v-model="password" :label="$t('password')" type="password" required />
         <FormInput v-model="confirmPassword" :label="$t('confirm_password')" type="password" required />
-        <FormButton type="submit">{{ $t('register_button') }}</FormButton>
+        <FormButton type="submit" :label="$t('register_button')"></FormButton>
       </form>
       <p v-if="message" :class="{ 'success-message': success, 'error-message': !success }">{{ message }}</p>
 
       <Separator :text="$t('or')" />
       <div class="login-link">
-        <FormButton @click="switchView('login')">{{ $t('existing_account') }}</FormButton>
+        <FormButton @click="switchView('login')" :label="$t('existing_account')"></FormButton>
       </div>
     </div>
 
@@ -43,14 +45,14 @@
       <form class="flex-vertical gap-sm" @submit.prevent="submitCode">
         <p>{{ $t('enter_verification_code', { email: email }) }}</p>
         <FormInput :label="$t('verification_code')" type="text" v-model="token" required />
-        <FormButton type="submit">{{ $t('validate') }}</FormButton>
+        <FormButton type="submit" :label="$t('validate')"></FormButton>
       </form>
-      <FormButton @click="resendCode">{{ $t('resend_code') }}</FormButton>
+      <FormButton @click="resendCode" :label="$t('resend_code')"> </FormButton>
       <p v-if="message" :class="{ 'error-message': !success, 'success-message': success }">{{ message }}</p>
 
       <Separator :text="$t('or')" />
       <div class="login-link">
-        <FormButton @click="switchView('login')">{{ $t('existing_account') }}</FormButton>
+        <FormButton @click="switchView('login')" :label="$t('existing_account')"></FormButton>
       </div>
     </div>
 
@@ -59,13 +61,13 @@
       <h2>{{ $t('reset_password') }}</h2>
       <form class="flex-vertical gap-sm" @submit.prevent="resetPassword">
         <FormInput :label="$t('email')" type="email" v-model="email" required />
-        <FormButton type="submit">{{ $t('send_reset_code') }}</FormButton>
+        <FormButton type="submit" :label="$t('send_reset_code')"></FormButton>
       </form>
       <p v-if="message" :class="{ 'error-message': !success, 'success-message': success }">{{ message }}</p>
 
       <Separator :text="$t('or')" />
       <div class="login-link">
-        <FormButton @click="switchView('login')">{{ $t('existing_account') }}</FormButton>
+        <FormButton @click="switchView('login')" :label="$t('existing_account')"></FormButton>
       </div>
     </div>
 
@@ -77,13 +79,13 @@
         <FormInput :label="$t('verification_code')" type="text" v-model="validationToken" required />
         <FormInput :label="$t('new_password')" type="password" v-model="newPassword" required />
         <FormInput :label="$t('confirm_password')" type="password" v-model="confirmPassword" required />
-        <FormButton type="submit">{{ $t('reset_password_button') }}</FormButton>
+        <FormButton type="submit" :label="$t('reset_password_button') "></FormButton>
       </form>
       <p v-if="message" :class="{ 'error-message': !success, 'success-message': success }">{{ message }}</p>
 
       <Separator :text="$t('or')" />
       <div class="login-link">
-        <FormButton @click="switchView('login')">{{ $t('existing_account') }}</FormButton>
+        <FormButton @click="switchView('login')" :label="$t('existing_account')"></FormButton>
       </div>
     </div>
   </div>

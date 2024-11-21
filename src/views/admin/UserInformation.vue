@@ -2,7 +2,7 @@
   <form @submit.prevent="updateUser">
     <div class="flex-horizontal padding-md gap-md">
       <!-- Colonne gauche : Informations utilisateur -->
-      <div class="flex-vertical gap-sm">
+      <div class="flex-vertical gap-md">
         <FormInput
             v-model="editableUser.firstName"
             label="Prénom"
@@ -36,7 +36,7 @@
       </div>
 
       <!-- Colonne droite : Texte d'évaluation et rendez-vous -->
-      <div class="flex-vertical gap-sm">
+      <div class="flex-vertical gap-md">
         <FormSelect
             v-model="editableUser.status"
             :options="statusOptions"
@@ -53,8 +53,7 @@
             label="Date de rendez-vous"
             type="date"
         />
-        <FormButton :disabled="!isFormValid" type="submit">
-          Mettre à jour
+        <FormButton :disabled="!isFormValid" type="submit" :label="$t('update')">
         </FormButton>
       </div>
     </div>

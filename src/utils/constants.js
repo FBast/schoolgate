@@ -3,8 +3,6 @@
     verified: "verified",
     awaiting_exam: "awaiting_exam",
     exam_in_progress: "exam_in_progress",
-    exam_completed: "exam_completed",
-    exam_not_filed: "exam_not_filed",
     awaiting_appointment: "awaiting_appointment",
     awaiting_interview: "awaiting_interview",
     awaiting_decision: "awaiting_decision",
