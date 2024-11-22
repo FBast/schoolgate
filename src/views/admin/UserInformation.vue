@@ -1,203 +1,78 @@
 ﻿<template>
   <form @submit.prevent="updateUser">
     <div class="flex-horizontal padding-md gap-md">
-      <!-- Colonne gauche : Informations utilisateur -->
       <div class="flex-vertical gap-md">
-        <FormInput
-            v-model="editableUser.firstName"
-            label="Prénom"
-            type="text"
-            :error="firstNameError"
-        />
-        <FormInput
-            v-model="editableUser.lastName"
-            label="Nom"
-            type="text"
-            :error="lastNameError"
-        />
-        <FormInput
-            v-model="editableUser.birthDate"
-            label="Date de naissance"
-            type="date"
-            :error="birthDateError"
-        />
-        <FormSelect
-            v-model="editableUser.requestedFormation"
-            :options="formations"
-            label="Formation demandée"
-            :error="formationError"
-        />
-        <FormSelect
-            v-model="editableUser.requestedGrade"
-            :options="grades"
-            label="Année demandée"
-            :error="gradeError"
-        />
+        <FormInput v-model="editableUser.firstName" label="Prénom" type="text" />
+        <FormInput v-model="editableUser.lastName" label="Nom" type="text" />
+        <FormInput v-model="editableUser.birthDate" label="Date de naissance" type="date" />
+        <FormSelect v-model="editableUser.requestedFormation" :options="formationOptions" label="Formation demandée" />
+        <FormSelect v-model="editableUser.requestedGrade" :options="gradeOptions" label="Année demandée" />
       </div>
-
-      <!-- Colonne droite : Texte d'évaluation et rendez-vous -->
       <div class="flex-vertical gap-md">
-        <FormSelect
-            v-model="editableUser.status"
-            :options="statusOptions"
-            label="Statut"
-            :error="statusError"
-        />
-        <FormTextarea
-            v-model="editableUser.evaluation"
-            label="Texte d'évaluation"
-            placeholder="Entrez un texte d'évaluation ici..."
-        />
-        <FormInput
-            v-model="editableUser.meetingDate"
-            label="Date de rendez-vous"
-            type="date"
-        />
-        <FormButton :disabled="!isFormValid" type="submit" :label="$t('update')">
-        </FormButton>
+        <FormSelect v-model="editableUser.status" :options="statusOptions" label="Statut" />
+        <FormTextarea v-model="editableUser.evaluation" label="Texte d'évaluation" />
+        <FormInput v-model="editableUser.meetingDate" label="Date de rendez-vous" type="date" />
+        <FormButton :label="$t('update')" />
       </div>
     </div>
   </form>
-  <p v-if="message" :class="{'success-message': success, 'error-message': !success}">
-    {{ message }}
-  </p>
 </template>
 
 <script setup>
 import { reactive, computed, watch, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useUserStore } from '@/stores/userStore';
+import { useFormationStore } from '@/stores/formationStore';
 import FormInput from '@/components/FormInput.vue';
 import FormSelect from '@/components/FormSelect.vue';
 import FormButton from '@/components/FormButton.vue';
 import FormTextarea from '@/components/FormTextarea.vue';
-import { ApiService } from '@/utils/apiService.js';
-import {useI18n} from "vue-i18n";
-import {ROLES_OPTIONS, STATUS_OPTIONS} from "@/utils/constants.js";
-
-const props = defineProps({
-  user: Object
-});
-
-const emit = defineEmits(['update']);
+import { STATUS_OPTIONS } from '@/utils/constants';
 
 const { t } = useI18n();
+const userStore = useUserStore();
+const formationStore = useFormationStore();
 
-// Données utilisateur modifiables
 const editableUser = reactive({
-  lastName: props.user?.lastName || '',
-  firstName: props.user?.firstName || '',
-  role: props.user?.role || ROLES_OPTIONS.user,
-  status: props.user?.status || 'pending',
-  evaluation: props.user?.evaluation || '',
-  meetingDate: props.user?.meetingDate || '',
-  requestedFormation: props.user?.requestedFormation || '',
-  requestedGrade: props.user?.requestedGrade || '',
-  birthDate: props.user?.birthDate || '',
+  ...userStore.selectedUser,
+  birthDate: userStore.selectedUser?.birthDate?.split('T')[0] || '',
 });
 
-// Extraire uniquement la date
-editableUser.birthDate = editableUser.birthDate
-    ? editableUser.birthDate.split('T')[0] // Extraire uniquement la date
-    : '';
-
-
-// Options pour le champ statut
 const statusOptions = Object.keys(STATUS_OPTIONS).map((key) => ({
-  label: t(key), // Utiliser la clé pour traduire
+  label: t(key),
   value: STATUS_OPTIONS[key],
 }));
 
-// Listes des formations et années
-const formations = reactive([]);
-const grades = reactive([]);
-
-// Validation des champs
-const firstNameError = computed(() =>
-    editableUser.firstName.length < 2 ? t('first_name_error') : ''
-);
-const lastNameError = computed(() =>
-    editableUser.lastName.length < 2 ? t('last_name_error') : ''
-);
-const birthDateError = computed(() => {
-  const today = new Date().toISOString().split('T')[0];
-  return !editableUser.birthDate || editableUser.birthDate > today
-      ? t('birth_date_error')
-      : '';
-});
-const formationError = computed(() =>
-    !editableUser.requestedFormation ? t('formation_error') : ''
-);
-const gradeError = computed(() =>
-    !editableUser.requestedGrade ? t('grade_error') : ''
-);
-const statusError = computed(() =>
-    !editableUser.status ? t('status_error') : ''
-);
-
-const isFormValid = computed(() =>
-    !firstNameError.value &&
-    !lastNameError.value &&
-    !birthDateError.value &&
-    !formationError.value &&
-    !gradeError.value &&
-    !statusError.value
-);
-
-// Récupérer les formations au montage
-const fetchFormations = async () => {
-  try {
-    const response = await ApiService.getFormations();
-    formations.splice(0, formations.length, ...response.map(formation => ({
+const formationOptions = computed(() =>
+    formationStore.formations.map((formation) => ({
       label: formation.title,
       value: formation._id,
-    })));
-  } catch (error) {
-    console.error(t('fetching_formations_error'), error);
-  }
-};
+    }))
+);
 
-// Récupérer les années en fonction de la formation sélectionnée
-const fetchGrades = async (formationId) => {
-  try {
-    const response = await ApiService.getFormationGrades(formationId);
-    grades.splice(0, grades.length, ...response.map(grade => ({
-      label: `Année ${grade.grade}`,
-      value: grade._id,
-    })));
-  } catch (error) {
-    console.error(t('fetching_grades_error'), error);
-  }
-};
-
-// Mettre à jour les années disponibles lorsque la formation change
-watch(() => editableUser.requestedFormation, (newFormation) => {
-  if (newFormation) {
-    fetchGrades(newFormation);
-    editableUser.requestedGrade = ''; // Réinitialiser l'année sélectionnée
-  }
+const gradeOptions = computed(() => {
+  const grades = formationStore.getGradesByFormationId(editableUser.requestedFormation);
+  return grades.map((grade) => ({
+    label: grade.grade,
+    value: grade._id,
+  }));
 });
 
-// Mettre à jour les informations utilisateur
 const updateUser = async () => {
-  if (!isFormValid.value) {
-    return;
-  }
-
   try {
-    const updatedUser = { ...editableUser };
-    await ApiService.updateUser(props.user._id, updatedUser);
-    emit('update', updatedUser);
-    alert(t('update_success'));
+    await userStore.updateUser(userStore.selectedUser._id, editableUser);
   } catch (error) {
-    console.error(t('update_error'), error);
-    alert(t('update_error'));
+    console.error(error);
   }
 };
 
-// Récupérer les données de base au montage
-onMounted(() => {
-  fetchFormations();
-  if (editableUser.requestedFormation) {
-    fetchGrades(editableUser.requestedFormation);
-  }
-});
+watch(
+    () => editableUser.requestedFormation,
+    (newFormation) => {
+      if (newFormation) {
+        formationStore.fetchGradesByFormationId(newFormation);
+        editableUser.requestedGrade = '';
+      }
+    }
+);
 </script>

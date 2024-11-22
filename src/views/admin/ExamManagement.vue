@@ -10,10 +10,10 @@
       </div>
       <div class="items-list">
         <div
-            v-for="topic in topics"
+            v-for="topic in topicStore.topics"
             :key="topic._id"
             class="item"
-            :class="{ active: topic._id === selectedTopic?._id }"
+            :class="{ active: topic._id === topicStore.selectedTopic?._id }"
             @click="selectTopic(topic)"
         >
           <div class="item-content">
@@ -28,7 +28,7 @@
     </div>
 
     <!-- Exercises column -->
-    <div v-if="selectedTopic" class="panel exercises">
+    <div v-if="topicStore.selectedTopic" class="panel exercises">
       <div class="header">
         <h2 class="title">{{ $t('exercises') }}</h2>
         <div class="actions">
@@ -37,17 +37,17 @@
       </div>
       <div class="items-list">
         <div
-            v-for="exercise in exercises"
+            v-for="exercise in exerciseStore.exercises"
             :key="exercise._id"
             class="item"
-            :class="{ active: exercise._id === selectedExercise?._id }"
-            @click="selectExercise(exercise._id)"
+            :class="{ active: exercise._id === exerciseStore.selectedExercise?._id }"
+            @click="selectExercise(exercise)"
         >
           <div class="item-content">
             <label>{{ exercise.title }}</label>
             <div class="actions">
-              <a @click.stop="deleteExercise(exercise._id)"><i class="fa-solid fa-pen-to-square"></i></a>
-              <a @click.stop="updateExercise(exercise._id)"><i class="fa-solid fa-trash"></i></a>
+              <a @click.stop="updateExercise(exercise._id)"><i class="fa-solid fa-pen-to-square"></i></a>
+              <a @click.stop="deleteExercise(exercise._id)"><i class="fa-solid fa-trash"></i></a>
             </div>
           </div>
         </div>
@@ -55,7 +55,7 @@
     </div>
 
     <!-- Exercise details column -->
-    <div v-if="selectedExercise" class="panel enonce">
+    <div v-if="exerciseStore.selectedExercise" class="panel enonce">
       <div class="header">
         <h2 class="title">{{ $t('statement') }}</h2>
       </div>
@@ -63,7 +63,7 @@
         <label for="exercise-content">{{ $t('exercise_content') }}</label>
         <textarea
             id="exercise-content"
-            v-model="selectedExercise.text"
+            v-model="exerciseStore.selectedExercise.text"
             :placeholder="$t('exercise_content')"
         ></textarea>
       </div>
@@ -73,178 +73,87 @@
         <input type="file" id="file-upload" @change="handleFileUpload" />
       </div>
 
-      <div v-if="selectedExercise.image" class="form-group">
-        <span class="file-name">{{ selectedExercise.image }}</span>
+      <div v-if="exerciseStore.selectedExercise.image" class="form-group">
+        <span class="file-name">{{ exerciseStore.selectedExercise.image }}</span>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { ApiService } from '@/utils/apiService.js';
+import {onMounted} from "vue";
+import {useI18n} from "vue-i18n";
+import {useTopicStore} from "@/stores/topicStore";
+import {useExerciseStore} from "@/stores/exerciseStore";
 
-const { t } = useI18n();
+const {t} = useI18n();
+const topicStore = useTopicStore();
+const exerciseStore = useExerciseStore();
 
-const topics = ref([]);
-const exercises = ref([]);
-const selectedTopic = ref(null);
-const selectedExercise = ref(null);
+// Charger les topics au montage
+onMounted(() => {
+  topicStore.fetchTopics();
+});
 
-const fetchTopics = async () => {
-  try {
-    const responseData = await ApiService.getTopics();
-    topics.value = responseData;
-    if (topics.value.length > 0) {
-      selectedTopic.value = topics.value[0];
-      await selectTopic(selectedTopic.value);
-    }
-  } catch (error) {
-    console.error('Error fetching topics:', error);
-  }
-};
-
-// Select a topic and load its exercises
+// Sélectionner un topic
 const selectTopic = async (topic) => {
-  selectedTopic.value = topic;
-  selectedExercise.value = null;
-  try {
-    const responseData = await ApiService.getExercises(topic._id);
-    exercises.value = responseData;
-  } catch (error) {
-    console.error('Error fetching exercises:', error);
-  }
+  topicStore.selectTopic(topic);
+  await exerciseStore.fetchExercises(topic._id);
 };
 
-// Watch for changes in the selected exercise text and update the backend
-watch(
-    () => selectedExercise.value?.text,
-    async (newText) => {
-      if (selectedExercise.value && newText !== undefined) {
-        try {
-          await ApiService.updateExercise(selectedExercise.value._id, {
-            text: newText,
-          });
-        } catch (error) {
-          console.error('Error updating exercise content:', error);
-        }
-      }
-    }
-);
-
-// Select an exercise and load its details
-const selectExercise = (exerciseId) => {
-  const exercise = exercises.value.find((ex) => ex._id === exerciseId);
-  if (exercise) {
-    selectedExercise.value = exercise;
-  } else {
-    console.error('Exercise not found:', exerciseId);
-  }
-};
-
-// Add a new topic
+// Ajouter un topic
 const addTopic = async () => {
-  const newTopic = { title: t('new_topic') };
-  try {
-    const responseData = await ApiService.createTopic(newTopic);
-    const createdTopic = responseData.topic;
-    topics.value.push(createdTopic);
-
-    // Select the newly created topic
-    selectedTopic.value = createdTopic;
-    exercises.value = []; // Reset exercises
-    selectedExercise.value = null; // Reset selected exercise
-
-    // Fetch exercises for the newly created topic
-    await selectTopic(createdTopic);
-  } catch (error) {
-    console.error('Error creating topic:', error);
+  const title = prompt(t("new_topic"));
+  if (title) {
+    await topicStore.createTopic(title);
   }
 };
 
-// Delete a topic
+// Supprimer un topic
 const deleteTopic = async (id) => {
-  try {
-    await ApiService.deleteTopic(id);
-    topics.value = topics.value.filter((topic) => topic._id !== id);
-
-    // If the deleted topic was the currently selected one, reset selection
-    if (selectedTopic.value && selectedTopic.value._id === id) {
-      selectedTopic.value = topics.value.length > 0 ? topics.value[0] : null;
-      exercises.value = [];
-      selectedExercise.value = null;
-      if (selectedTopic.value) await selectTopic(selectedTopic.value);
-    }
-  } catch (error) {
-    console.error('Error deleting topic:', error);
-  }
+  await topicStore.deleteTopic(id);
 };
 
-// Update a topic title
+// Modifier un topic
 const updateTopic = async (id) => {
-  const newTitle = prompt(t('new_topic'));
-  if (!newTitle) return;
-
-  try {
-    const responseData = await ApiService.updateTopic(id, { title: newTitle });
-    const index = topics.value.findIndex((topic) => topic._id === id);
-    topics.value[index] = responseData.topic;
-  } catch (error) {
-    console.error('Error updating topic:', error);
+  const newTitle = prompt(t("edit_topic"));
+  if (newTitle) {
+    await topicStore.updateTopic(id, newTitle);
   }
 };
 
-// Add a new exercise to the selected topic
+// Ajouter un exercice
 const addExercise = async () => {
-  if (!selectedTopic.value) return;
-  const newExercise = {
-    title: t('new_exercise'),
-    text: t('exercise_content'),
-  };
-
-  try {
-    const responseData = await ApiService.createExercise(selectedTopic.value._id, newExercise);
-    exercises.value.push(responseData.exercise);
-    selectExercise(responseData.exercise._id); // Auto-select the new exercise
-  } catch (error) {
-    console.error('Error creating exercise:', error);
+  const title = prompt(t("new_exercise"));
+  const text = t("exercise_content");
+  if (title) {
+    await exerciseStore.createExercise(topicStore.selectedTopic._id, title, text);
   }
 };
 
-// Delete an exercise
+// Supprimer un exercice
 const deleteExercise = async (id) => {
-  try {
-    await ApiService.deleteExercise(id);
-    exercises.value = exercises.value.filter((exercise) => exercise._id !== id);
-    if (selectedExercise.value && selectedExercise.value._id === id) {
-      selectedExercise.value = null;
-    }
-  } catch (error) {
-    console.error('Error deleting exercise:', error);
-  }
+  await exerciseStore.deleteExercise(id);
 };
 
-// Update an exercise title
+// Modifier un exercice
 const updateExercise = async (id) => {
-  const newTitle = prompt(t('new_exercise'));
-  if (!newTitle) return;
-
-  try {
-    const responseData = await ApiService.updateExercise(id, { title: newTitle });
-    const index = exercises.value.findIndex((exercise) => exercise._id === id);
-    exercises.value[index] = responseData.exercise;
-  } catch (error) {
-    console.error('Error updating exercise:', error);
+  const newTitle = prompt(t("edit_exercise"));
+  if (newTitle) {
+    await exerciseStore.updateExercise(id, {title: newTitle});
   }
 };
 
-// Handle file upload for the selected exercise
+// Sélectionner un exercice
+const selectExercise = (exercise) => {
+  exerciseStore.selectExercise(exercise);
+};
+
+// Gérer le téléchargement d'un fichier pour l'exercice
 const handleFileUpload = (event) => {
-  if (selectedExercise.value) {
-    selectedExercise.value.image = event.target.files[0].name;
+  const file = event.target.files[0];
+  if (file && exerciseStore.selectedExercise) {
+    exerciseStore.updateSelectedExercise({image: file.name});
   }
 };
-
-onMounted(fetchTopics);
 </script>

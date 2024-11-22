@@ -10,17 +10,21 @@
       </div>
       <div class="items-list">
         <div
-            v-for="formation in formations"
+            v-for="formation in formationStore.formations"
             :key="formation._id"
             class="item"
-            :class="{ active: formation._id === selectedFormation?._id }"
+            :class="{ active: formation._id === formationStore.selectedFormation?._id }"
             @click="selectFormation(formation)"
         >
           <div class="item-content">
             <label>{{ formation.title }}</label>
             <div class="actions">
-              <a @click.stop="updateFormation(formation._id)"><i class="fa-solid fa-pen-to-square"></i></a>
-              <a @click.stop="deleteFormation(formation._id)"><i class="fa-solid fa-trash"></i></a>
+              <a @click.stop="updateFormation(formation._id)">
+                <i class="fa-solid fa-pen-to-square"></i>
+              </a>
+              <a @click.stop="deleteFormation(formation._id)">
+                <i class="fa-solid fa-trash"></i>
+              </a>
             </div>
           </div>
         </div>
@@ -28,11 +32,11 @@
     </div>
 
     <!-- Grades column -->
-    <div class="panel grades" :class="{ disabled: !selectedFormation }">
+    <div class="panel" :class="{ disabled: !formationStore.selectedFormation }">
       <div class="header">
         <h2 class="title">{{ $t('grades') }}</h2>
         <div class="actions">
-          <a @click="addGrade(selectedFormation)"><i class="fas fa-square-plus"></i></a>
+          <a @click="addGrade"><i class="fas fa-square-plus"></i></a>
         </div>
       </div>
       <div class="items-list">
@@ -46,9 +50,15 @@
           <div class="item-content">
             <label>{{ grade.grade }}</label>
             <div class="actions">
-              <a @click.stop="updateGrade(grade._id)"><i class="fa-solid fa-pen-to-square"></i></a>
-              <a @click.stop="deleteGrade(grade._id)"><i class="fa-solid fa-trash"></i></a>
-              <a @click.stop="generateExam(grade._id)"><i class="fa-solid fa-file-pdf"></i></a>
+              <a @click.stop="updateGrade(grade._id)">
+                <i class="fa-solid fa-pen-to-square"></i>
+              </a>
+              <a @click.stop="deleteGrade(grade._id)">
+                <i class="fa-solid fa-trash"></i>
+              </a>
+              <a @click.stop="generateExam(grade._id)">
+                <i class="fa-solid fa-file-pdf"></i>
+              </a>
             </div>
           </div>
         </div>
@@ -62,7 +72,7 @@
       </div>
       <div class="items-list">
         <div
-            v-for="topic in topics"
+            v-for="topic in topicStore.topics"
             :key="topic._id"
             class="item"
             :class="{ active: selectedTopics.includes(topic._id) }"
@@ -78,196 +88,116 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { ApiService } from '@/utils/apiService.js';
+import {ref, onMounted} from "vue";
+import {useI18n} from "vue-i18n";
+import {useFormationStore} from "@/stores/formationStore";
+import {useTopicStore} from "@/stores/topicStore";
 
-const { t } = useI18n();
+const {t} = useI18n();
+const formationStore = useFormationStore();
+const topicStore = useTopicStore();
 
-const formations = ref([]);
-const grades = ref([]);
-const topics = ref([]);
-const selectedFormation = ref(null);
-const selectedGrade = ref(null);
 const selectedTopics = ref([]);
+const selectedGrade = ref(null);
+const grades = ref([]);
 
-// Fetch formations
-const fetchFormations = async () => {
-  try {
-    const responseData = await ApiService.getFormations();
-    formations.value = responseData;
-    if (formations.value.length > 0) {
-      selectedFormation.value = formations.value[0];
-      await fetchGrades();
-    }
-  } catch (error) {
-    console.error(t('fetching_formations_error'), error);
+// Fetch initial data
+onMounted(async () => {
+  await formationStore.fetchFormations();
+  if (formationStore.selectedFormation) {
+    await fetchGrades(formationStore.selectedFormation._id);
   }
+  await topicStore.fetchTopics();
+});
+
+// Fetch grades for the selected formation
+const fetchGrades = async (formationId) => {
+  grades.value = await formationStore.fetchGradesByFormationId(formationId);
 };
 
-// Fetch grades based on selectedFormation
-const fetchGrades = async () => {
-  if (!selectedFormation.value) return;
-
-  try {
-    const responseData = await ApiService.getFormationGrades(selectedFormation.value._id);
-    grades.value = responseData;
-    if (grades.value.length > 0) {
-      selectedGrade.value = grades.value[0];
-      await fetchTopics();
-    }
-  } catch (error) {
-    console.error(t('fetching_grades_error'), error);
-  }
-};
-
-// Fetch topics based on selectedGrade
-const fetchTopics = async () => {
-  if (!selectedGrade.value) return;
-
-  try {
-    const responseData = await ApiService.getTopics();
-    topics.value = responseData;
-
-    // Set selected topics based on the topics associated with the grade
-    selectedTopics.value = selectedGrade.value.topics || [];
-  } catch (error) {
-    console.error(t('error_fetching_topics'), error);
-  }
-};
-
-// Select a formation and fetch its grades
+// Select formation and fetch grades
 const selectFormation = async (formation) => {
-  selectedFormation.value = formation;
+  formationStore.selectFormation(formation);
   selectedGrade.value = null;
   selectedTopics.value = [];
-  await fetchGrades();
+  await fetchGrades(formation._id);
 };
 
-// Select a grade and fetch its topics
-const selectGrade = async (grade) => {
+// Select grade and update selected topics
+const selectGrade = (grade) => {
   selectedGrade.value = grade;
   selectedTopics.value = grade.topics || [];
-  await fetchTopics();
 };
 
-// Add a new formation
+// Add formation
 const addFormation = async () => {
-  const newFormation = { title: t('add_formation') };
-  try {
-    const responseData = await ApiService.createFormation(newFormation);
-    formations.value.push(responseData.formation);
-    await selectFormation(responseData.formation);
-  } catch (error) {
-    console.error(t('error_creating_formation'), error);
-  }
-};
-
-// Update a formation title
-const updateFormation = async (id) => {
-  const newTitle = prompt(t('edit_formation'));
-  if (!newTitle) return;
-
-  try {
-    const responseData = await ApiService.updateFormation(id, { title: newTitle });
-    const index = formations.value.findIndex((formation) => formation._id === id);
-    formations.value[index] = responseData.formation;
-    if (selectedFormation.value && selectedFormation.value._id === id) {
-      selectedFormation.value = responseData.formation;
+  const title = prompt(t("add_formation"));
+  if (title) {
+    await formationStore.addFormation(title);
+    if (formationStore.selectedFormation) {
+      await fetchGrades(formationStore.selectedFormation._id);
     }
-  } catch (error) {
-    console.error(t('error_updating_formation'), error);
   }
 };
 
-// Delete a formation
-const deleteFormation = async (id) => {
-  try {
-    await ApiService.deleteFormation(id);
-    formations.value = formations.value.filter((formation) => formation._id !== id);
-    if (selectedFormation.value && selectedFormation.value._id === id) {
-      selectedFormation.value = formations.value.length > 0 ? formations.value[0] : null;
-      grades.value = [];
-      selectedGrade.value = null;
-      selectedTopics.value = [];
-      if (selectedFormation.value) await fetchGrades();
-    }
-  } catch (error) {
-    console.error(t('error_deleting_formation'), error);
+// Update formation
+const updateFormation = async (formationId) => {
+  const title = prompt(t("edit_formation"));
+  if (title) {
+    await formationStore.updateFormation(formationId, title);
   }
 };
 
-// Add a new grade to the selected formation
+// Delete formation
+const deleteFormation = async (formationId) => {
+  await formationStore.deleteFormation(formationId);
+  if (formationStore.selectedFormation) {
+    await fetchGrades(formationStore.selectedFormation._id);
+  }
+};
+
+// Add grade
 const addGrade = async () => {
-  if (!selectedFormation.value) return;
-  const newGrade = { grade: t('add_grade'), formationId: selectedFormation.value._id };
-  try {
-    const responseData = await ApiService.createGrade(newGrade);
-    grades.value.push(responseData.grade);
-    await selectGrade(responseData.grade);
-  } catch (error) {
-    console.error(t('error_creating_grade'), error);
+  const gradeValue = prompt(t("add_grade"));
+  if (gradeValue && formationStore.selectedFormation) {
+    await formationStore.addGradeToFormation(formationStore.selectedFormation._id, {grade: gradeValue});
+    await fetchGrades(formationStore.selectedFormation._id);
   }
 };
 
-// Update a grade title
-const updateGrade = async (id) => {
-  const newGrade = prompt(t('edit_grade'));
-  if (!newGrade) return;
-
-  try {
-    const responseData = await ApiService.updateGrade(id, { grade: newGrade });
-    const index = grades.value.findIndex((grade) => grade._id === id);
-    grades.value[index] = responseData.grade;
-    if (selectedGrade.value && selectedGrade.value._id === id) {
-      selectedGrade.value = responseData.grade;
-    }
-  } catch (error) {
-    console.error(t('error_updating_grade'), error);
+// Update grade
+const updateGrade = async (gradeId) => {
+  const gradeValue = prompt(t("edit_grade"));
+  if (gradeValue) {
+    await formationStore.updateGrade(gradeId, {grade: gradeValue});
+    await fetchGrades(formationStore.selectedFormation._id);
   }
 };
 
-// Delete a grade
-const deleteGrade = async (id) => {
-  try {
-    await ApiService.deleteGrade(id);
-    grades.value = grades.value.filter((grade) => grade._id !== id);
-    if (selectedGrade.value && selectedGrade.value._id === id) {
-      selectedGrade.value = grades.value.length > 0 ? grades.value[0] : null;
-      selectedTopics.value = [];
-      if (selectedGrade.value) await fetchTopics();
-    }
-  } catch (error) {
-    console.error(t('error_deleting_grade'), error);
-  }
+// Delete grade
+const deleteGrade = async (gradeId) => {
+  await formationStore.deleteGrade(gradeId);
+  await fetchGrades(formationStore.selectedFormation._id);
 };
 
-// Generate exam for a grade
+// Generate exam for grade
 const generateExam = async (gradeId) => {
+  const grade = grades.value.find((g) => g._id === gradeId);
+  if (!grade) return;
+
   try {
     const response = await ApiService.generateExam(gradeId);
-    const pdfBase64 = response.pdf;
+    const blob = new Blob([response.pdf], {type: "application/pdf"});
+    const url = URL.createObjectURL(blob);
 
-    // Convertir la chaîne base64 en un Blob
-    const byteCharacters = atob(pdfBase64);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: 'application/pdf' });
-
-    // Créer un lien de téléchargement
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = t('generate_exam');
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${grade.grade}_exam.pdf`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-
-    alert(t('exam_generated_success'));
   } catch (error) {
-    console.error(t('error_generating_exam'), error);
+    console.error(t("error_generating_exam"), error);
   }
 };
 
@@ -286,15 +216,10 @@ const toggleTopicSelection = async (topic) => {
         grade: selectedGrade.value.grade,
         topics: selectedTopics.value,
       };
-
-      const responseData = await ApiService.updateGrade(selectedGrade.value._id, gradeData);
-      selectedGrade.value = responseData.grade;
+      await formationStore.updateGrade(selectedGrade.value._id, gradeData);
     } catch (error) {
-      console.error(t('error_updating_grade'), error);
+      console.error(t("error_updating_grade"), error);
     }
   }
 };
-
-// Fetch initial data
-onMounted(fetchFormations);
 </script>

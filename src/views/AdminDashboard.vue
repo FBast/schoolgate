@@ -2,70 +2,69 @@
   <div class="admin-dashboard">
     <header>
       <nav class="admin-nav">
-        <FormButton v-for="(step, key, index) in stepMap" :key="index"
-                    :class="{ 'active': key === currentView }"
-                    :label="$t(step.label)"
-                    @click="currentView = key">
-        </FormButton>
+        <FormButton
+            v-for="(step, key, index) in stepMap"
+            :key="index"
+            :class="{ active: key === currentView }"
+            :label="$t(step.label)"
+            @click="changeView(key)"
+        />
       </nav>
-      <FormButton @click="logout" :label="$t('logout')">
-      </FormButton>
+      <FormButton @click="logout" :label="$t('logout')" />
     </header>
 
     <section class="content">
       <div v-if="loading">{{ $t('loading') }}</div>
-      <component v-else :is="currentComponent" :message="message" :users="users"></component>
+      <component v-else :is="currentComponent" />
     </section>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { ApiService } from '@/utils/apiService.js';
-import FormButton from '@/components/FormButton.vue';
-import UserManagement from '@/views/admin/UserManagement.vue';
-import ErrorComponent from '@/components/ErrorComponent.vue';
+import { ref, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import FormButton from "@/components/FormButton.vue";
+import UserManagement from "@/views/admin/UserManagement.vue";
+import ErrorComponent from "@/components/ErrorComponent.vue";
 import ExamManagement from "@/views/admin/ExamManagement.vue";
 import FormationManagement from "@/views/admin/FormationManagement.vue";
 import SessionManagement from "@/views/admin/SessionManagement.vue";
+import { useUserStore } from "@/stores/userStore.js";
+
+const userStore = useUserStore();
 
 const stepMap = {
-  user_management: { label: 'users', component: UserManagement },
-  date_management: { label: 'sessions', component: SessionManagement },
-  exam_management: { label: 'exams', component: ExamManagement },
-  formation_management: { label: 'formations', component: FormationManagement }
+  user_management: { label: "users", component: UserManagement },
+  date_management: { label: "sessions", component: SessionManagement },
+  exam_management: { label: "exams", component: ExamManagement },
+  formation_management: { label: "formations", component: FormationManagement },
 };
 
-const currentView = ref('user_management');
-const message = ref('');
-const loading = ref(true);
-const users = ref([]);
-
+const currentView = ref("user_management");
 const currentComponent = computed(() => {
   const step = stepMap[currentView.value];
   return step ? step.component : ErrorComponent;
 });
 
-const fetchUsers = async () => {
+const changeView = (key) => {
+  currentView.value = key;
+};
+
+const loading = ref(true);
+
+onMounted(async () => {
   try {
-    const response = await ApiService.getUsers();
-    users.value = response;
-  } catch (error) {
-    message.value = 'Erreur lors de la récupération des utilisateurs';
+    loading.value = true;
+    await userStore.fetchUsers();
   } finally {
     loading.value = false;
   }
-};
-
-onMounted(() => {
-  fetchUsers();
 });
 
 const router = useRouter();
 const logout = () => {
-  localStorage.removeItem('authToken');
-  router.push('/');
+  localStorage.removeItem("authToken");
+  router.push("/");
 };
 </script>
 
