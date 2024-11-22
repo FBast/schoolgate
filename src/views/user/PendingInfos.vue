@@ -16,145 +16,96 @@
       </div>
       <form @submit.prevent="submitForm">
         <div class="flex-vertical gap-sm">
-          <FormInput v-model="firstName" :label="$t('first_name')" type="text" :error="firstNameError" />
-          <FormInput v-model="lastName" :label="$t('last_name')" type="text" :error="lastNameError" />
-          <FormInput v-model="birthDate" :label="$t('birth_date')" type="date" :error="birthDateError" />
-          <FormSelect v-model="requestedFormation" :options="formations" :label="$t('formation')" :error="formationError" />
-          <FormSelect v-model="requestedGrade" :options="grades" :label="$t('grade')" :error="gradeError" />
+          <FormInput v-model="userStore.firstName" :label="$t('first_name')" type="text" :error="firstNameError" />
+          <FormInput v-model="userStore.lastName" :label="$t('last_name')" type="text" :error="lastNameError" />
+          <FormInput v-model="userStore.birthDate" :label="$t('birth_date')" type="date" :error="birthDateError" />
+          <FormSelect v-model="userStore.requestedFormation" :options="formationStore.formationOptions" :label="$t('formation')" :error="formationError" />
+          <FormSelect v-model="userStore.requestedGrade" :options="formationStore.gradeOptions" :label="$t('grade')" :error="gradeError" />
           <FormButton type="submit" :label="$t('update')" :disabled="!isFormValid"></FormButton>
         </div>
       </form>
-      <p v-if="message" :class="{'success-message': success, 'error-message': !success}">{{ message }}</p>
+      <p v-if="userStore.message" :class="{'success-message': userStore.success, 'error-message': !userStore.success}">
+        {{ userStore.message }}
+      </p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue';
+import { computed, watch, onMounted } from 'vue';
+import { useUserStore } from '@/stores/userStore';
+import { useFormationStore } from '@/stores/formationStore';
 import FormInput from '@/components/FormInput.vue';
 import FormSelect from '@/components/FormSelect.vue';
-import { ApiService } from "@/utils/apiService.js";
-import FormButton from "@/components/FormButton.vue";
-import {useI18n} from "vue-i18n";
-import {STATUS_OPTIONS} from "@/utils/constants.js";
+import FormButton from '@/components/FormButton.vue';
+import { useI18n } from 'vue-i18n';
 
-const firstName = ref('');
-const lastName = ref('');
-const birthDate = ref('');
-const requestedFormation = ref('');
-const requestedGrade = ref('');
-const success = ref(false);
-const message = ref('');
-
-// Listes pour les sélecteurs
-const formations = ref([]);
-const grades = ref([]);
-
+const userStore = useUserStore();
+const formationStore = useFormationStore();
 const { t } = useI18n();
-
-// Controle des erreurs
-const firstNameError = computed(() =>
-    !isValidName(firstName.value) ? t('first_name_error') : ''
-);
-const lastNameError = computed(() =>
-    !isValidName(lastName.value) ? t('last_name_error') : ''
-);
-const birthDateError = computed(() =>
-    !isValidBirthDate(birthDate.value) ? t('birth_date_error') : ''
-);
-const formationError = computed(() =>
-    !requestedFormation.value ? t('formation_error') : ''
-);
-const gradeError = computed(() =>
-    !requestedGrade.value ? t('grade_error') : ''
-);
-
-// Vérifier si le formulaire est valide
-const isFormValid = computed(() => {
-  return (
-      isValidName(firstName.value) &&
-      isValidName(lastName.value) &&
-      isValidBirthDate(birthDate.value) &&
-      requestedFormation.value &&
-      requestedGrade.value
-  );
-});
 
 const emit = defineEmits(['statusChanged']);
 
-// Fonctions de validation
-function isValidName(name) {
-  return name.length >= 2;
-}
-
-function isValidBirthDate(date) {
+// Validation des champs
+const firstNameError = computed(() =>
+    userStore.firstName.length >= 2 ? '' : t('first_name_error')
+);
+const lastNameError = computed(() =>
+    userStore.lastName.length >= 2 ? '' : t('last_name_error')
+);
+const birthDateError = computed(() => {
   const today = new Date().toISOString().split('T')[0];
-  return date && date <= today;
-}
-
-// Fetch formations au montage du composant
-const fetchFormations = async () => {
-  try {
-    const response = await ApiService.getFormations();
-    formations.value = response.map(formation => ({
-      label: formation.title,
-      value: formation._id
-    }));
-  } catch (error) {
-    console.error('Erreur lors de la récupération des formations:', error);
-  }
-};
-
-// Fetch grades en fonction de la formation sélectionnée
-const fetchYears = async (formationId) => {
-  try {
-    const response = await ApiService.getFormationGrades(formationId);
-    grades.value = response.map(grade => ({
-      label: `Année ${grade.grade}`,
-      value: grade._id
-    }));
-  } catch (error) {
-    console.error('Erreur lors de la récupération des grades:', error);
-  }
-};
-
-// Watch pour détecter le changement de formation et mettre à jour les années disponibles
-watch(requestedFormation, (newFormationId) => {
-  if (newFormationId) {
-    fetchYears(newFormationId);
-    requestedGrade.value = ''; // Réinitialiser l'année sélectionnée
-  }
+  return userStore.birthDate && userStore.birthDate <= today ? '' : t('birth_date_error');
 });
+const formationError = computed(() =>
+    userStore.requestedFormation ? '' : t('formation_error')
+);
+const gradeError = computed(() =>
+    userStore.requestedGrade ? '' : t('grade_error')
+);
+
+const isFormValid = computed(() =>
+    !firstNameError.value &&
+    !lastNameError.value &&
+    !birthDateError.value &&
+    !formationError.value &&
+    !gradeError.value
+);
+
+// Watch pour détecter les changements de formation
+watch(
+    () => userStore.requestedFormation,
+    (newFormationId) => {
+      if (newFormationId) {
+        formationStore.fetchGradesByFormationId(newFormationId);
+        userStore.requestedGrade = ''; // Réinitialiser l'année sélectionnée
+      }
+    }
+);
 
 // Soumettre le formulaire
 const submitForm = async () => {
   if (!isFormValid.value) {
-    success.value = false;
-    message.value = $t('error_submit_form');
+    userStore.success = false;
+    userStore.message = t('error_submit_form');
     return;
   }
 
   try {
-    await ApiService.updateUserProfile({
-      firstName: firstName.value,
-      lastName: lastName.value,
-      birthDate: birthDate.value,
-      requestedFormation: requestedFormation.value,
-      requestedGrade: requestedGrade.value,
-      status: STATUS_OPTIONS.awaiting_exam
+    await userStore.updateUserProfile({
+      status: 'awaiting_exam',
     });
     emit('statusChanged');
-
-    success.value = true;
-    message.value = $t('update_success');
+    userStore.success = true;
+    userStore.message = t('update_success');
   } catch (error) {
-    success.value = false;
-    message.value = $t('update_error');
+    userStore.success = false;
+    userStore.message = t('update_error');
   }
 };
 
-// Appeler fetchFormations au montage du composant
+// Charger les formations au montage
 onMounted(() => {
-  fetchFormations();
+  formationStore.fetchFormations();
 });
 </script>

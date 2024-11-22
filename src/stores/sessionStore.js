@@ -24,12 +24,21 @@ export const useSessionStore = defineStore('sessionStore', {
             try {
                 const response = await ApiService.getSessions();
                 this.sessions = response;
+                this.success = true;
             } catch (error) {
                 this.error = 'Error fetching sessions';
-                console.error(error);
+                this.success = false;
+                throw error;
             } finally {
                 this.loading = false;
             }
+        },
+
+        getNextSession: (state) => {
+            const now = new Date();
+            return state.sessions
+                .filter(session => new Date(session.startDate) > now)
+                .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))[0] || null;
         },
 
         async addSession() {

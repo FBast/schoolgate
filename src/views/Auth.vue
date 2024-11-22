@@ -65,7 +65,7 @@
       </div>
     </div>
     
-    <p v-if="authStore.message" :class="{ 'error-message': !authStore.success, 'success-message': authStore.success }">
+    <p class="panel" v-if="authStore.message" :class="{ 'error-message': !authStore.success, 'success-message': authStore.success }">
       {{ authStore.message }}
     </p>
   </div>
@@ -105,7 +105,7 @@ const login = async () => {
   try {
     const nextView = await authStore.loginUser(password.value);
     if (nextView === "dashboard") {
-      router.push("/");
+      await router.push("/");
     } else {
       currentView.value = nextView;
     }
@@ -134,7 +134,7 @@ const register = async () => {
 const submitVerificationCode = async () => {
   try {
     await authStore.verifyUser(verificationCode.value);
-    router.push("/");
+    await router.push("/");
   } catch (error) {
     console.error(error);
   }

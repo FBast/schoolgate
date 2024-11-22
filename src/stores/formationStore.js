@@ -3,18 +3,43 @@ import { ApiService } from '@/utils/apiService.js';
 
 export const useFormationStore = defineStore('formationStore', {
     state: () => ({
-        formations: [], // Liste des formations
-        grades: {}, // Map des grades par ID de formation
-        selectedFormation: null, // Formation actuellement sélectionnée
+        formations: [],
+        grades: {},
+        selectedFormation: null,
         error: null,
         loading: false,
     }),
 
     getters: {
-        getFormationById: (state) => (id) =>
+        formationOptions: (state) =>
+            state.formations.map((formation) => ({
+                label: formation.title,
+                value: formation._id,
+            })),
+
+        gradeOptions: (state) => (formationId) => {
+            const grades = state.grades[formationId] || [];
+            return grades.map((grade) => ({
+                label: grade.grade,
+                value: grade._id,
+            }));
+        },
+        
+        getFormationById: (state) => (id) => 
             state.formations.find((formation) => formation._id === id),
-        getGradesByFormationId: (state) => (id) =>
-            state.grades[id] || [], // Renvoie un tableau vide si aucun grade pour l'ID donné
+        
+        getGradesByFormationId: (state) => (id) => 
+            state.grades[id] || [],
+        
+        getFormationTitle: (state) => (formationId) => {
+            const formation = state.formations.find(f => f._id === formationId);
+            return formation ? formation.title : 'Unknown Formation';
+        },
+
+        getGradeLabel: (state) => (gradeId) => {
+            const grade = Object.values(state.grades).flat().find(g => g._id === gradeId);
+            return grade ? grade.grade : 'Unknown Grade';
+        },
     },
 
     actions: {

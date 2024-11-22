@@ -66,6 +66,7 @@ export const ApiService = {
                     Authorization: `Bearer ${localStorage.getItem('authToken')}`
                 }
             });
+            
             return response.data;
         } 
         catch (error) {
@@ -75,14 +76,20 @@ export const ApiService = {
 
     async updateUserProfile(userData) {
         try {
-            const response = await axiosInstance.put('/users/me', userData, {
+            const formData = new FormData();
+
+            Object.keys(userData).forEach((key) => {
+                formData.append(key, userData[key]);
+            });
+
+            const response = await axiosInstance.put('/users/me', formData, {
                 headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
-                }
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+                    'Content-Type': 'multipart/form-data',
+                },
             });
             return response.data;
-        } 
-        catch (error) {
+        } catch (error) {
             throw new Error('Erreur lors de la mise à jour des informations utilisateur.');
         }
     },

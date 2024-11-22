@@ -5,6 +5,13 @@ export const useUserStore = defineStore('userStore', {
     state: () => ({
         users: [],
         selectedUser: null,
+        firstName: '',
+        lastName: '',
+        birthDate: '',
+        requestedFormation: '',
+        requestedGrade: '',
+        examPdf: null,
+        examDeposit: null,
         message: '',
         success: false,
         error: null,
@@ -12,7 +19,8 @@ export const useUserStore = defineStore('userStore', {
     }),
 
     getters: {
-        getUserById: (state) => (id) => state.users.find((user) => user._id === id),
+        getUserById: (state) => (id) => 
+            state.users.find((user) => user._id === id),
     },
 
     actions: {
@@ -106,6 +114,61 @@ export const useUserStore = defineStore('userStore', {
             }
         },
 
+        async fetchUserProfile() {
+            this.loading = true;
+            this.error = null;
+
+            try {
+                const response = await ApiService.getUserProfile();
+                this.firstName = response.firstName;
+                this.lastName = response.lastName;
+                this.birthDate = response.birthDate;
+                this.requestedFormation = response.requestedFormation;
+                this.requestedGrade = response.requestedGrade;
+                this.examPdf = response.examPdf;
+                this.examDeposit = response.examDeposit;
+                this.success = true;
+            } catch (error) {
+                this.success = false;
+                this.message = 'Error fetching user profile.';
+                throw error;
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async updateUserProfile(updatedData) {
+            this.loading = true;
+            this.error = null;
+
+            try {
+                const response = await ApiService.updateUserProfile({
+                    firstName: this.firstName,
+                    lastName: this.lastName,
+                    birthDate: this.birthDate,
+                    requestedFormation: this.requestedFormation,
+                    requestedGrade: this.requestedGrade,
+                    ...updatedData, // Ajout de données spécifiques, comme le statut
+                });
+
+                // Mettre à jour l'utilisateur localement
+                this.firstName = response.firstName;
+                this.lastName = response.lastName;
+                this.birthDate = response.birthDate;
+                this.requestedFormation = response.requestedFormation;
+                this.requestedGrade = response.requestedGrade;
+
+                this.success = true;
+                this.message = 'Profile updated successfully.';
+            } catch (error) {
+                this.success = false;
+                this.message = 'Error updating profile.';
+                throw error;
+            } finally {
+                this.loading = false;
+            }
+        },
+        
         selectUser(user) {
             this.selectedUser = user;
         },

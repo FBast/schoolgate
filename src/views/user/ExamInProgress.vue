@@ -8,17 +8,16 @@
       <div>
         <p>{{ $t('exam_in_progress_description') }}</p>
         <div class="actions flex-horizontal gap-md">
-          <button
-              v-if="examPdfAvailable"
-              class="button"
+          <FormButton
+              v-if="userStore.examPdf"
+              :label="$t('download_exam_pdf')"
               @click="downloadExamPdf"
-          >
-            {{ $t('download_exam_pdf') }}
-          </button>
-          <label class="upload-label">
-            <input type="file" @change="uploadFile" />
-            {{ $t('upload_submission') }}
-          </label>
+          />
+          <FormInput
+              type="file"
+              :label="$t('upload_submission')"
+              @update:modelValue="uploadFile"
+          />
         </div>
       </div>
     </div>
@@ -27,54 +26,39 @@
       <div class="header">
         <h2 class="title">{{ $t('candidate_information') }}</h2>
       </div>
-      <label>{{ $t('first_name') }} : {{ userInfo.firstName }}</label>
-      <label>{{ $t('last_name') }} : {{ userInfo.lastName }}</label>
-      <label>{{ $t('birth_date') }} : {{ formatDate(userInfo.birthDate) }}</label>
-      <label>{{ $t('requested_formation') }} : {{ formations[userInfo.requestedFormation] }}</label>
-      <label>{{ $t('requested_grade') }} : {{ grades[userInfo.requestedGrade] }}</label>
-      <p v-if="message" :class="{'success-message': success, 'error-message': !success}">
-        {{ message }}
+      <label>{{ $t('first_name') }} : {{ userStore.firstName }}</label>
+      <label>{{ $t('last_name') }} : {{ userStore.lastName }}</label>
+      <label>{{ $t('birth_date') }} : {{ formatDate(userStore.birthDate) }}</label>
+      <label>{{ $t('requested_formation') }} : {{ formationStore.getFormationTitle(userStore.requestedFormation) }}</label>
+      <label>{{ $t('requested_grade') }} : {{ formationStore.getGradeLabel(userStore.requestedGrade) }}</label>
+      <p v-if="userStore.message" :class="{ 'success-message': userStore.success, 'error-message': !userStore.success }">
+        {{ userStore.message }}
       </p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { ApiService } from '@/utils/apiService.js';
-import { formatDate } from "@/utils/helpers.js";
-import {AxiosHeaders as Buffer} from "axios";
+import {onMounted} from 'vue';
+import {useUserStore} from '@/stores/userStore';
+import {useFormationStore} from '@/stores/formationStore';
+import {formatDate} from '@/utils/helpers.js';
+import FormButton from "@/components/FormButton.vue";
+import FormInput from "@/components/FormInput.vue";
 
-const userInfo = ref({});
-const formations = ref([]);
-const grades = ref([]);
-const message = ref('');
-const success = ref(false);
-const examPdfAvailable = ref(false);
-
-// Récupérer les informations utilisateur
-const fetchUserInfo = async () => {
-  try {
-    userInfo.value = await ApiService.getUserProfile();
-    examPdfAvailable.value = !!userInfo.value.examPdf; // Vérifie si le PDF est disponible
-  } catch (error) {
-    message.value = 'Erreur lors de la récupération des informations utilisateur.';
-    success.value = false;
-    console.error('Erreur lors de la récupération des informations utilisateur :', error);
-  }
-};
+const userStore = useUserStore();
+const formationStore = useFormationStore();
 
 // Télécharger le PDF
 const downloadExamPdf = () => {
-  if (!userInfo.value.examPdf) {
-    message.value = 'Le fichier PDF n\'est pas disponible.';
-    success.value = false;
+  if (!userStore.examPdf) {
+    userStore.message = 'Le fichier PDF n\'est pas disponible.';
+    userStore.success = false;
     return;
   }
 
   try {
-    const pdfBuffer = Buffer.from(userInfo.value.examPdf.data); // Vérifiez la structure des données
-    const blob = new Blob([pdfBuffer], { type: 'application/pdf' });
+    const blob = new Blob([userStore.examPdf], {type: 'application/pdf'});
     const url = URL.createObjectURL(blob);
 
     // Créer un lien pour télécharger
@@ -88,11 +72,11 @@ const downloadExamPdf = () => {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
-    message.value = 'Fichier PDF téléchargé avec succès.';
-    success.value = true;
+    userStore.message = 'Fichier PDF téléchargé avec succès.';
+    userStore.success = true;
   } catch (error) {
-    message.value = 'Erreur lors du téléchargement du fichier PDF.';
-    success.value = false;
+    userStore.message = 'Erreur lors du téléchargement du fichier PDF.';
+    userStore.success = false;
     console.error('Erreur lors du téléchargement du fichier PDF :', error);
   }
 };
@@ -105,24 +89,24 @@ const uploadFile = async (event) => {
   }
 
   try {
-    const formData = new FormData();
-    formData.append('submission', file);
+    const formData = {
+      examDeposit: file,
+    };
 
-    // Appeler le service pour mettre à jour le profil utilisateur
-    const updatedUser = await ApiService.updateUserProfile(formData);
+    await userStore.updateUserProfile(formData);
 
-    userInfo.value = updatedUser;
-    message.value = 'Fichier soumis avec succès.';
-    success.value = true;
+    userStore.message = 'Fichier soumis avec succès.';
+    userStore.success = true;
   } catch (error) {
-    message.value = 'Erreur lors de la soumission du fichier.';
-    success.value = false;
+    userStore.message = 'Erreur lors de la soumission du fichier.';
+    userStore.success = false;
     console.error('Erreur lors de l\'upload du fichier :', error);
   }
 };
 
 // Charger les données au montage
 onMounted(async () => {
-  await fetchUserInfo();
+  await userStore.fetchUserProfile();
+  await formationStore.fetchFormations();
 });
 </script>
