@@ -31,6 +31,7 @@ const onClick = (event) => {
 @import "@/styles/utils/_mixins.scss";
 
 button {
+  flex: 0;
   background-color: $secondary-color;
   border: none;
   cursor: pointer;

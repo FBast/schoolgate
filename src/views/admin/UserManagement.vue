@@ -1,5 +1,5 @@
 ﻿<template>
-  <div class="layout-wide gap-md">
+  <div v-if="!formationStore.loading && !userStore.loading" class="layout-wide gap-md">
     <div class="panel">
       <div class="header">
         <h2 class="title">{{ $t('user_information') }}</h2>
@@ -21,8 +21,8 @@
         >
           <div class="item-content" @click="toggleDetails(user)">
             <label>{{ user.email }}</label>
-            <label>{{ formationStore.getFormationById(user.requestedFormation)?.title || $t('formation_error') }}</label>
-            <label>{{ formationStore.getGradesByFormationId(user.requestedFormation)?.find(grade => grade._id === user.requestedGrade)?.grade || $t('grade_error') }}</label>
+            <label>{{ formationStore.getFormationTitle(user.requestedFormation) || $t('formation_error') }}</label>
+            <label>{{ formationStore.getGradeLabel(user.requestedGrade) || $t('grade_error') }}</label>
             <label>{{ $t(user.status) }}</label>
             <div class="actions">
               <a @click.stop="deleteUser(user._id)">
@@ -40,11 +40,13 @@
       {{ userStore.message }}
     </p>
   </div>
+  <div v-else>
+    <p>Chargement...</p>
+  </div>
 </template>
 
 <script setup>
 import { onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/userStore';
 import { useFormationStore } from '@/stores/formationStore';
 import UserInformation from '@/views/admin/UserInformation.vue';
@@ -66,6 +68,7 @@ const deleteUser = async (userId) => {
 
 onMounted(async () => {
   await formationStore.fetchFormations();
+  await formationStore.fetchGrades();
   await userStore.fetchUsers();
 });
 </script>

@@ -19,7 +19,7 @@
 </template>
 
 <script setup>
-import { reactive, computed, watch, onMounted } from 'vue';
+import { reactive, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/userStore';
 import { useFormationStore } from '@/stores/formationStore';
@@ -33,29 +33,30 @@ const { t } = useI18n();
 const userStore = useUserStore();
 const formationStore = useFormationStore();
 
-const editableUser = reactive({
-  ...userStore.selectedUser,
-  birthDate: userStore.selectedUser?.birthDate?.split('T')[0] || '',
-});
+const editableUser = reactive({});
+
+watch(
+    () => userStore.selectedUser,
+    (newUser) => {
+      if (newUser) {
+        Object.assign(editableUser, {
+          ...newUser,
+          birthDate: newUser.birthDate?.split('T')[0] || '',
+        });
+      }
+    },
+    { immediate: true }
+);
 
 const statusOptions = Object.keys(STATUS_OPTIONS).map((key) => ({
   label: t(key),
   value: STATUS_OPTIONS[key],
 }));
 
-const formationOptions = computed(() =>
-    formationStore.formations.map((formation) => ({
-      label: formation.title,
-      value: formation._id,
-    }))
-);
+const formationOptions = computed(() => formationStore.formationOptions);
 
 const gradeOptions = computed(() => {
-  const grades = formationStore.getGradesByFormationId(editableUser.requestedFormation);
-  return grades.map((grade) => ({
-    label: grade.grade,
-    value: grade._id,
-  }));
+  return formationStore.gradeOptionsByFormationId(editableUser.requestedFormation);
 });
 
 const updateUser = async () => {
@@ -70,7 +71,13 @@ watch(
     () => editableUser.requestedFormation,
     (newFormation) => {
       if (newFormation) {
-        formationStore.fetchGradesByFormationId(newFormation);
+        // Vérifier si le grade actuel est valide pour la nouvelle formation
+        const grades = formationStore.getGradesByFormationId(newFormation);
+        const gradeIds = grades.map(grade => grade._id);
+        if (!gradeIds.includes(editableUser.requestedGrade)) {
+          editableUser.requestedGrade = '';
+        }
+      } else {
         editableUser.requestedGrade = '';
       }
     }

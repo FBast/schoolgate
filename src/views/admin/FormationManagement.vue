@@ -88,39 +88,40 @@
 </template>
 
 <script setup>
-import {ref, onMounted} from "vue";
-import {useI18n} from "vue-i18n";
-import {useFormationStore} from "@/stores/formationStore";
-import {useTopicStore} from "@/stores/topicStore";
+import { ref, onMounted, computed } from "vue";
+import { useI18n } from "vue-i18n";
+import { useFormationStore } from "@/stores/formationStore";
+import { useTopicStore } from "@/stores/topicStore";
+import { ApiService } from "@/utils/apiService"; // Assurez-vous que ApiService est importé
 
-const {t} = useI18n();
+const { t } = useI18n();
 const formationStore = useFormationStore();
 const topicStore = useTopicStore();
 
 const selectedTopics = ref([]);
 const selectedGrade = ref(null);
-const grades = ref([]);
 
 // Fetch initial data
 onMounted(async () => {
   await formationStore.fetchFormations();
-  if (formationStore.selectedFormation) {
-    await fetchGrades(formationStore.selectedFormation._id);
-  }
+  await formationStore.fetchGrades();
   await topicStore.fetchTopics();
 });
 
-// Fetch grades for the selected formation
-const fetchGrades = async (formationId) => {
-  grades.value = await formationStore.fetchGradesByFormationId(formationId);
-};
+// Grades computed property
+const grades = computed(() => {
+  if (formationStore.selectedFormation) {
+    return formationStore.getGradesByFormationId(formationStore.selectedFormation._id);
+  } else {
+    return [];
+  }
+});
 
-// Select formation and fetch grades
-const selectFormation = async (formation) => {
+// Select formation
+const selectFormation = (formation) => {
   formationStore.selectFormation(formation);
   selectedGrade.value = null;
   selectedTopics.value = [];
-  await fetchGrades(formation._id);
 };
 
 // Select grade and update selected topics
@@ -134,9 +135,6 @@ const addFormation = async () => {
   const title = prompt(t("add_formation"));
   if (title) {
     await formationStore.addFormation(title);
-    if (formationStore.selectedFormation) {
-      await fetchGrades(formationStore.selectedFormation._id);
-    }
   }
 };
 
@@ -151,8 +149,10 @@ const updateFormation = async (formationId) => {
 // Delete formation
 const deleteFormation = async (formationId) => {
   await formationStore.deleteFormation(formationId);
-  if (formationStore.selectedFormation) {
-    await fetchGrades(formationStore.selectedFormation._id);
+  if (formationStore.selectedFormation?._id === formationId) {
+    formationStore.selectedFormation = null;
+    selectedGrade.value = null;
+    selectedTopics.value = [];
   }
 };
 
@@ -160,8 +160,7 @@ const deleteFormation = async (formationId) => {
 const addGrade = async () => {
   const gradeValue = prompt(t("add_grade"));
   if (gradeValue && formationStore.selectedFormation) {
-    await formationStore.addGradeToFormation(formationStore.selectedFormation._id, {grade: gradeValue});
-    await fetchGrades(formationStore.selectedFormation._id);
+    await formationStore.addGradeToFormation(formationStore.selectedFormation._id, { grade: gradeValue });
   }
 };
 
@@ -169,15 +168,17 @@ const addGrade = async () => {
 const updateGrade = async (gradeId) => {
   const gradeValue = prompt(t("edit_grade"));
   if (gradeValue) {
-    await formationStore.updateGrade(gradeId, {grade: gradeValue});
-    await fetchGrades(formationStore.selectedFormation._id);
+    await formationStore.updateGrade(gradeId, { grade: gradeValue });
   }
 };
 
 // Delete grade
 const deleteGrade = async (gradeId) => {
   await formationStore.deleteGrade(gradeId);
-  await fetchGrades(formationStore.selectedFormation._id);
+  if (selectedGrade.value?._id === gradeId) {
+    selectedGrade.value = null;
+    selectedTopics.value = [];
+  }
 };
 
 // Generate exam for grade
@@ -187,7 +188,7 @@ const generateExam = async (gradeId) => {
 
   try {
     const response = await ApiService.generateExam(gradeId);
-    const blob = new Blob([response.pdf], {type: "application/pdf"});
+    const blob = new Blob([response.pdf], { type: "application/pdf" });
     const url = URL.createObjectURL(blob);
 
     const link = document.createElement("a");

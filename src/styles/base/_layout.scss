@@ -1,6 +1,9 @@
-.layout-wide {}
+.layout-wide {
+  flex-wrap: wrap;
+}
 
 .layout-restricted {
+  flex-wrap: wrap;
   max-width: 400px;
   margin: 0 auto;
 }

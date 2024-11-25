@@ -9,7 +9,7 @@
         <p>{{ $t('exam_in_progress_description') }}</p>
         <div class="actions flex-horizontal gap-md">
           <FormButton
-              v-if="userStore.examPdf"
+              v-if="examPdfAvailable"
               :label="$t('download_exam_pdf')"
               @click="downloadExamPdf"
           />
@@ -39,26 +39,27 @@
 </template>
 
 <script setup>
-import {onMounted} from 'vue';
-import {useUserStore} from '@/stores/userStore';
-import {useFormationStore} from '@/stores/formationStore';
-import {formatDate} from '@/utils/helpers.js';
+import { ref, computed, onMounted } from 'vue';
+import { useUserStore } from '@/stores/userStore';
+import { useFormationStore } from '@/stores/formationStore';
+import { formatDate } from '@/utils/helpers.js';
 import FormButton from "@/components/FormButton.vue";
 import FormInput from "@/components/FormInput.vue";
+import { useI18n } from 'vue-i18n';
+import { ApiService } from '@/utils/apiService';
 
 const userStore = useUserStore();
 const formationStore = useFormationStore();
+const { t } = useI18n();
+
+// Vérifier si le PDF de l'examen est disponible
+const examPdfAvailable = computed(() => !!userStore.examPdf);
 
 // Télécharger le PDF
-const downloadExamPdf = () => {
-  if (!userStore.examPdf) {
-    userStore.message = 'Le fichier PDF n\'est pas disponible.';
-    userStore.success = false;
-    return;
-  }
-
+const downloadExamPdf = async () => {
   try {
-    const blob = new Blob([userStore.examPdf], {type: 'application/pdf'});
+    const response = await ApiService.downloadExamPdf();
+    const blob = new Blob([response.data], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
 
     // Créer un lien pour télécharger
@@ -72,12 +73,12 @@ const downloadExamPdf = () => {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
-    userStore.message = 'Fichier PDF téléchargé avec succès.';
+    userStore.message = t('pdf_download_success');
     userStore.success = true;
   } catch (error) {
-    userStore.message = 'Erreur lors du téléchargement du fichier PDF.';
+    userStore.message = t('pdf_download_error');
     userStore.success = false;
-    console.error('Erreur lors du téléchargement du fichier PDF :', error);
+    console.error(t('pdf_download_error'), error);
   }
 };
 
@@ -89,24 +90,17 @@ const uploadFile = async (event) => {
   }
 
   try {
-    const formData = {
-      examDeposit: file,
-    };
+    const formData = new FormData();
+    formData.append('examDeposit', file);
 
-    await userStore.updateUserProfile(formData);
+    // await userStore.uploadExamDeposit(formData);
 
-    userStore.message = 'Fichier soumis avec succès.';
+    userStore.message = t('file_submission_success');
     userStore.success = true;
   } catch (error) {
-    userStore.message = 'Erreur lors de la soumission du fichier.';
+    userStore.message = t('file_submission_error');
     userStore.success = false;
-    console.error('Erreur lors de l\'upload du fichier :', error);
+    console.error(t('file_upload_error'), error);
   }
 };
-
-// Charger les données au montage
-onMounted(async () => {
-  await userStore.fetchUserProfile();
-  await formationStore.fetchFormations();
-});
 </script>

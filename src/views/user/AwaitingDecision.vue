@@ -1,5 +1,5 @@
 <template>
-  <h2>{{ $t('waiting_interview') }}</h2>
+  <h2>{{ $t('awaiting_interview') }}</h2>
 </template>
 
 <script setup>

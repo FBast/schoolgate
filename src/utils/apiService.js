@@ -76,17 +76,10 @@ export const ApiService = {
 
     async updateUserProfile(userData) {
         try {
-            const formData = new FormData();
-
-            Object.keys(userData).forEach((key) => {
-                formData.append(key, userData[key]);
-            });
-
-            const response = await axiosInstance.put('/users/me', formData, {
+            const response = await axiosInstance.put('/users/me', userData, {
                 headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-                    'Content-Type': 'multipart/form-data',
-                },
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
+                }
             });
             return response.data;
         } catch (error) {

@@ -14,6 +14,13 @@ export const useSessionStore = defineStore('sessionStore', {
 
     getters: {
         getSessionById: (state) => (id) => state.sessions.find((session) => session._id === id),
+
+        getNextSession: (state) => {
+            const now = new Date();
+            return state.sessions
+                .filter(session => new Date(session.startDate) > now)
+                .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))[0] || null;
+        },
     },
 
     actions: {
@@ -32,13 +39,6 @@ export const useSessionStore = defineStore('sessionStore', {
             } finally {
                 this.loading = false;
             }
-        },
-
-        getNextSession: (state) => {
-            const now = new Date();
-            return state.sessions
-                .filter(session => new Date(session.startDate) > now)
-                .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))[0] || null;
         },
 
         async addSession() {

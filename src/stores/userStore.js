@@ -1,5 +1,6 @@
 ﻿import { defineStore } from 'pinia';
 import { ApiService } from '@/utils/apiService.js';
+import {useRoute} from "vue-router";
 
 export const useUserStore = defineStore('userStore', {
     state: () => ({
@@ -30,7 +31,7 @@ export const useUserStore = defineStore('userStore', {
 
             try {
                 const response = await ApiService.getUsers();
-                this.users = response;
+                this.users = response.filter(user => user.role === "user");
             } catch (error) {
                 this.error = 'Error fetching users';
                 console.error(error);
@@ -120,13 +121,13 @@ export const useUserStore = defineStore('userStore', {
 
             try {
                 const response = await ApiService.getUserProfile();
-                this.firstName = response.firstName;
-                this.lastName = response.lastName;
-                this.birthDate = response.birthDate;
-                this.requestedFormation = response.requestedFormation;
-                this.requestedGrade = response.requestedGrade;
-                this.examPdf = response.examPdf;
-                this.examDeposit = response.examDeposit;
+                this.firstName = response.firstName || '';
+                this.lastName = response.lastName || '';
+                this.birthDate = response.birthDate || '';
+                this.requestedFormation = response.requestedFormation || '';
+                this.requestedGrade = response.requestedGrade || '';
+                this.examPdf = response.examPdf || null;
+                this.examDeposit = response.examDeposit || null;
                 this.success = true;
             } catch (error) {
                 this.success = false;

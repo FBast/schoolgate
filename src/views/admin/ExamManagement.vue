@@ -58,12 +58,15 @@
     <div v-if="exerciseStore.selectedExercise" class="panel enonce">
       <div class="header">
         <h2 class="title">{{ $t('statement') }}</h2>
+        <div class="actions">
+          <FormButton :label="$t('save')" @click="saveExercise" />
+        </div>
       </div>
       <div class="form-group">
         <label for="exercise-content">{{ $t('exercise_content') }}</label>
         <textarea
             id="exercise-content"
-            v-model="exerciseStore.selectedExercise.text"
+            v-model="localExercise.text"
             :placeholder="$t('exercise_content')"
         ></textarea>
       </div>
@@ -73,32 +76,52 @@
         <input type="file" id="file-upload" @change="handleFileUpload" />
       </div>
 
-      <div v-if="exerciseStore.selectedExercise.image" class="form-group">
-        <span class="file-name">{{ exerciseStore.selectedExercise.image }}</span>
+      <div v-if="localExercise.image" class="form-group">
+        <span class="file-name">{{ localExercise.image }}</span>
       </div>
     </div>
+
   </div>
 </template>
 
 <script setup>
-import {onMounted} from "vue";
-import {useI18n} from "vue-i18n";
-import {useTopicStore} from "@/stores/topicStore";
-import {useExerciseStore} from "@/stores/exerciseStore";
+import { onMounted, reactive, watch } from "vue";
+import { useI18n } from "vue-i18n";
+import { useTopicStore } from "@/stores/topicStore";
+import { useExerciseStore } from "@/stores/exerciseStore";
+import { ApiService } from "@/utils/apiService"; // Assurez-vous que ApiService est importé
 
-const {t} = useI18n();
+const { t } = useI18n();
 const topicStore = useTopicStore();
 const exerciseStore = useExerciseStore();
+
+const localExercise = reactive({});
 
 // Charger les topics au montage
 onMounted(() => {
   topicStore.fetchTopics();
 });
 
+// Synchroniser localExercise avec selectedExercise
+watch(
+    () => exerciseStore.selectedExercise,
+    (newExercise) => {
+      if (newExercise) {
+        Object.assign(localExercise, newExercise);
+      } else {
+        Object.keys(localExercise).forEach((key) => {
+          delete localExercise[key];
+        });
+      }
+    },
+    { immediate: true }
+);
+
 // Sélectionner un topic
 const selectTopic = async (topic) => {
   topicStore.selectTopic(topic);
   await exerciseStore.fetchExercises(topic._id);
+  exerciseStore.selectExercise(null); // Réinitialiser l'exercice sélectionné
 };
 
 // Ajouter un topic
@@ -112,6 +135,11 @@ const addTopic = async () => {
 // Supprimer un topic
 const deleteTopic = async (id) => {
   await topicStore.deleteTopic(id);
+  if (topicStore.selectedTopic?._id === id) {
+    topicStore.selectTopic(null);
+    exerciseStore.exercises = [];
+    exerciseStore.selectExercise(null);
+  }
 };
 
 // Modifier un topic
@@ -126,21 +154,27 @@ const updateTopic = async (id) => {
 const addExercise = async () => {
   const title = prompt(t("new_exercise"));
   const text = t("exercise_content");
-  if (title) {
+  if (title && topicStore.selectedTopic) {
     await exerciseStore.createExercise(topicStore.selectedTopic._id, title, text);
+    await exerciseStore.fetchExercises(topicStore.selectedTopic._id);
   }
 };
 
 // Supprimer un exercice
 const deleteExercise = async (id) => {
   await exerciseStore.deleteExercise(id);
+  await exerciseStore.fetchExercises(topicStore.selectedTopic._id);
+  if (exerciseStore.selectedExercise?._id === id) {
+    exerciseStore.selectExercise(null);
+  }
 };
 
 // Modifier un exercice
 const updateExercise = async (id) => {
   const newTitle = prompt(t("edit_exercise"));
   if (newTitle) {
-    await exerciseStore.updateExercise(id, {title: newTitle});
+    await exerciseStore.updateExercise(id, { title: newTitle });
+    await exerciseStore.fetchExercises(topicStore.selectedTopic._id);
   }
 };
 
@@ -150,10 +184,31 @@ const selectExercise = (exercise) => {
 };
 
 // Gérer le téléchargement d'un fichier pour l'exercice
-const handleFileUpload = (event) => {
+const handleFileUpload = async (event) => {
   const file = event.target.files[0];
   if (file && exerciseStore.selectedExercise) {
-    exerciseStore.updateSelectedExercise({image: file.name});
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await ApiService.uploadExerciseImage(exerciseStore.selectedExercise._id, formData);
+      localExercise.image = response.imageUrl;
+    } catch (error) {
+      console.error(t("error_uploading_image"), error);
+    }
+  }
+};
+
+// Sauvegarder les modifications de l'exercice
+const saveExercise = async () => {
+  if (exerciseStore.selectedExercise) {
+    try {
+      await exerciseStore.updateExercise(exerciseStore.selectedExercise._id, localExercise);
+      exerciseStore.selectExercise({ ...localExercise });
+      await exerciseStore.fetchExercises(topicStore.selectedTopic._id);
+    } catch (error) {
+      console.error(t("error_updating_exercise"), error);
+    }
   }
 };
 </script>

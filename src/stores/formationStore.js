@@ -4,7 +4,7 @@ import { ApiService } from '@/utils/apiService.js';
 export const useFormationStore = defineStore('formationStore', {
     state: () => ({
         formations: [],
-        grades: {},
+        grades: [],
         selectedFormation: null,
         error: null,
         loading: false,
@@ -17,19 +17,25 @@ export const useFormationStore = defineStore('formationStore', {
                 value: formation._id,
             })),
 
-        gradeOptions: (state) => (formationId) => {
-            const grades = state.grades[formationId] || [];
-            return grades.map((grade) => ({
+        gradeOptions: (state) =>
+            state.grades.map((grade) => ({
                 label: grade.grade,
                 value: grade._id,
-            }));
-        },
-        
-        getFormationById: (state) => (id) => 
+            })),
+
+        gradeOptionsByFormationId: (state) => (formationId) =>
+            state.grades
+                .filter((grade) => grade.formationId === formationId)
+                .map((grade) => ({
+                    label: grade.grade,
+                    value: grade._id,
+                })),
+
+        getFormationById: (state) => (id) =>
             state.formations.find((formation) => formation._id === id),
-        
-        getGradesByFormationId: (state) => (id) => 
-            state.grades[id] || [],
+
+        getGradesByFormationId: (state) => (formationId) =>
+            state.grades.filter((grade) => grade.formationId === formationId),
         
         getFormationTitle: (state) => (formationId) => {
             const formation = state.formations.find(f => f._id === formationId);
@@ -37,7 +43,7 @@ export const useFormationStore = defineStore('formationStore', {
         },
 
         getGradeLabel: (state) => (gradeId) => {
-            const grade = Object.values(state.grades).flat().find(g => g._id === gradeId);
+            const grade = state.grades.find((g) => g._id === gradeId);
             return grade ? grade.grade : 'Unknown Grade';
         },
     },
@@ -61,21 +67,15 @@ export const useFormationStore = defineStore('formationStore', {
             }
         },
 
-        // Récupérer les grades pour une formation donnée
-        async fetchGradesByFormationId(formationId) {
-            if (!formationId) {
-                throw new Error('Formation ID is required to fetch grades');
-            }
+        async fetchGrades() {
             this.loading = true;
             this.error = null;
             try {
-                const response = await ApiService.getFormationGrades(formationId);
-                this.grades[formationId] = response;
-                return response;
+                const response = await ApiService.getGrades();
+                this.grades = response;
             } catch (error) {
                 this.error = 'Error fetching grades';
                 console.error(error);
-                throw error;
             } finally {
                 this.loading = false;
             }
@@ -110,10 +110,9 @@ export const useFormationStore = defineStore('formationStore', {
                 });
                 const newGrade = response.grade;
 
-                if (!this.grades[formationId]) {
-                    this.grades[formationId] = [];
-                }
-                this.grades[formationId].push(newGrade);
+                // Ajouter le nouveau grade au tableau des grades
+                this.grades.push(newGrade);
+
                 return newGrade;
             } catch (error) {
                 this.error = 'Error adding grade';
@@ -150,12 +149,10 @@ export const useFormationStore = defineStore('formationStore', {
                 const response = await ApiService.updateGrade(gradeId, gradeData);
                 const updatedGrade = response.grade;
 
-                Object.keys(this.grades).forEach((formationId) => {
-                    const index = this.grades[formationId]?.findIndex((grade) => grade._id === gradeId);
-                    if (index !== -1) {
-                        this.grades[formationId][index] = updatedGrade;
-                    }
-                });
+                const index = this.grades.findIndex((grade) => grade._id === gradeId);
+                if (index !== -1) {
+                    this.grades[index] = updatedGrade;
+                }
 
                 return updatedGrade;
             } catch (error) {
@@ -171,7 +168,10 @@ export const useFormationStore = defineStore('formationStore', {
             try {
                 await ApiService.deleteFormation(id);
                 this.formations = this.formations.filter((formation) => formation._id !== id);
-                delete this.grades[id];
+
+                // Supprimer les grades associés à la formation supprimée
+                this.grades = this.grades.filter((grade) => grade.formationId !== id);
+
                 if (this.selectedFormation && this.selectedFormation._id === id) {
                     this.selectedFormation = this.formations.length > 0 ? this.formations[0] : null;
                 }
@@ -187,9 +187,7 @@ export const useFormationStore = defineStore('formationStore', {
             this.error = null;
             try {
                 await ApiService.deleteGrade(gradeId);
-                Object.keys(this.grades).forEach((formationId) => {
-                    this.grades[formationId] = this.grades[formationId]?.filter((grade) => grade._id !== gradeId);
-                });
+                this.grades = this.grades.filter((grade) => grade._id !== gradeId);
             } catch (error) {
                 this.error = 'Error deleting grade';
                 console.error(error);

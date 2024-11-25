@@ -32,23 +32,16 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue';
-import { useUserStore } from '@/stores/userStore';
-import { useFormationStore } from '@/stores/formationStore';
-import { useSessionStore } from '@/stores/sessionStore';
-import { formatDate } from "@/utils/helpers.js";
+import {computed} from 'vue';
+import {useUserStore} from '@/stores/userStore';
+import {useFormationStore} from '@/stores/formationStore';
+import {useSessionStore} from '@/stores/sessionStore';
+import {formatDate} from "@/utils/helpers.js";
 
 const userStore = useUserStore();
 const formationStore = useFormationStore();
 const sessionStore = useSessionStore();
 
 // Récupérer la prochaine session
-const nextSession = computed(() => sessionStore.getNextSession());
-
-// Charger les données nécessaires au montage
-onMounted(() => {
-  userStore.fetchUserProfile();
-  formationStore.fetchFormations();
-  sessionStore.fetchSessions();
-});
+const nextSession = computed(() => sessionStore.getNextSession);
 </script>

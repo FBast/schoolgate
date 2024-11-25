@@ -1,18 +1,21 @@
 <template>
   <div class="dashboard">
     <header>
-      <nav class="progress-indicator">
-        <div v-for="(step, key, index) in stepMap" :key="index" :class="{ 'active-step': key === status, 'step': true }">
-          <span class="step-number">{{ index + 1 }}</span>
-          <span class="step-label">{{ $t(key) }}</span>
-        </div>
-      </nav>
+      <ProgressIndicator
+          :steps="Object.values(STATUS_OPTIONS)"
+          :currentStep="currentStepIndex"
+      />
       <FormButton @click="logout" :label="$t('logout')"></FormButton>
     </header>
 
     <section class="content">
-      <div v-if="loading">Chargement...</div>
-      <component v-else :is="currentComponent" @statusChanged="updateStatus" :message="errorMessage"></component>
+      <div v-if="loading">{{ $t('loading') }}</div>
+      <component
+          v-else
+          :is="currentComponent"
+          @statusChanged="updateStatus"
+          :message="errorMessage"
+      ></component>
     </section>
   </div>
 </template>
@@ -20,48 +23,56 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import PendingInfos from "@/views/user/PendingInfos.vue";
-import ExamWaiting from "@/views/user/ExamWaiting.vue";
-import ExamPending from "@/views/user/ExamInProgress.vue";
-import ExamDone from "@/views/user/ExamDone.vue";
-import Interview from "@/views/user/Interview.vue";
-import Results from "@/views/user/Results.vue";
-import ErrorComponent from "@/components/ErrorComponent.vue";
+import { useI18n } from 'vue-i18n';
+import ProgressIndicator from "@/components/ProgressIndicator.vue";
 import FormButton from '@/components/FormButton.vue';
-import { ApiService } from "@/utils/apiService.js";
-import {STATUS_OPTIONS} from "@/utils/constants.js";
+import ErrorComponent from "@/components/ErrorComponent.vue";
+import { useUserStore } from '@/stores/userStore';
+import { useFormationStore } from '@/stores/formationStore';
+import { useSessionStore } from '@/stores/sessionStore';
+import { STATUS_OPTIONS } from "@/utils/constants.js";
+import AwaitingDecision from "@/views/user/AwaitingDecision.vue";
+import AwaitingInterview from "@/views/user/AwaitingInterview.vue";
+import AwaitingAppointment from "@/views/user/AwaitingAppointment.vue";
+import ExamInProgress from "@/views/user/ExamInProgress.vue";
+import AwaitingInformation from "@/views/user/AwaitingInformation.vue";
+import AwaitingSession from "@/views/user/AwaitingSession.vue";
+import ApplicationProcessed from "@/views/user/ApplicationProcessed.vue";
 
+const { t } = useI18n();
+const userStore = useUserStore();
+const formationStore = useFormationStore();
+const sessionStore = useSessionStore();
+
+// Map des statuts avec leurs composants
 const stepMap = {
-  [STATUS_OPTIONS.verified]: { component: PendingInfos },
-  [STATUS_OPTIONS.awaiting_exam]: { component: ExamWaiting },
-  [STATUS_OPTIONS.exam_in_progress]: { component: ExamPending },
-  [STATUS_OPTIONS.awaiting_appointment]: { component: ExamDone },
-  [STATUS_OPTIONS.awaiting_interview]: { component: Interview },
-  [STATUS_OPTIONS.awaiting_decision]: { component: Results },
-  [STATUS_OPTIONS.application_validated]: { component: Results },
-  [STATUS_OPTIONS.application_refused]: { component: Results },
-  [STATUS_OPTIONS.application_pending]: { component: Results },
+  [STATUS_OPTIONS.awaiting_information]: AwaitingInformation,
+  [STATUS_OPTIONS.awaiting_session]: AwaitingSession,
+  [STATUS_OPTIONS.exam_in_progress]: ExamInProgress,
+  [STATUS_OPTIONS.awaiting_appointment]: AwaitingAppointment,
+  [STATUS_OPTIONS.awaiting_interview]: AwaitingInterview,
+  [STATUS_OPTIONS.awaiting_decision]: AwaitingDecision,
+  [STATUS_OPTIONS.application_processed]: ApplicationProcessed,
 };
 
-const status = ref('verified');
+// Statut et composant actuel
+const status = ref(STATUS_OPTIONS.awaiting_information);
 const errorMessage = ref('');
 const loading = ref(true);
 
-// Composant à afficher selon le statut actuel
-const currentComponent = computed(() => {
-  const step = stepMap[status.value];
-  return step ? step.component : ErrorComponent;
-});
+const currentStepIndex = computed(() =>
+    Object.values(STATUS_OPTIONS).indexOf(status.value)
+);
+
+const currentComponent = computed(() => stepMap[status.value] || ErrorComponent);
 
 const updateStatus = async () => {
   try {
-    const responseData = await ApiService.getUserProfile();
-    status.value = responseData.status;
+    await userStore.fetchUserProfile();
+    status.value = userStore.status; // Supposant que le statut est stocké dans userStore.status
   } catch (error) {
-    errorMessage.value = 'Erreur lors de la récupération du statut utilisateur.';
+    errorMessage.value = t('error_fetching_status');
     status.value = 'error';
-  } finally {
-    loading.value = false;
   }
 };
 
@@ -71,8 +82,19 @@ const logout = () => {
   router.push('/');
 };
 
-onMounted(() => {
-  updateStatus();
+onMounted(async () => {
+  try {
+    await Promise.all([
+      userStore.fetchUserProfile(),
+      formationStore.fetchFormations(),
+      formationStore.fetchGrades(),
+      sessionStore.fetchSessions(),
+    ]);
+  } catch (error) {
+    console.error(t('error_initializing_dashboard'), error);
+  } finally {
+    loading.value = false;
+  }
 });
 </script>
 
@@ -80,61 +102,12 @@ onMounted(() => {
 @import "@/styles/utils/_variables.scss";
 
 .dashboard {
-  padding: $spacing-md;
-}
-
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: $spacing-md;
-
-  .progress-indicator {
+  header {
     display: flex;
-    gap: $spacing-md;
+    justify-content: space-between;
     align-items: center;
-
-    .step {
-      display: flex;
-      align-items: center;
-      text-align: center;
-
-      .step-number {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-weight: bold;
-        color: white;
-        background-color: $primary-color;
-        margin-right: $spacing-sm;
-      }
-
-      .step-label {
-        color: $text-color;
-        font-weight: bold;
-      }
-    }
-
-    .active-step .step-number {
-      background-color: $accent-color;
-    }
-
-    .active-step .step-label {
-      color: $accent-color;
-    }
+    margin-bottom: $spacing-md;
+    gap: $spacing-md;
   }
-
-  button {
-    width: auto;
-    max-width: 200px;
-    margin-left: $spacing-lg;
-  }
-}
-
-.content {
-  margin-top: $spacing-md;
 }
 </style>
