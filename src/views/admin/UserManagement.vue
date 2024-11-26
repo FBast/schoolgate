@@ -66,9 +66,4 @@ const deleteUser = async (userId) => {
   await userStore.deleteUser(userId);
 };
 
-onMounted(async () => {
-  await formationStore.fetchFormations();
-  await formationStore.fetchGrades();
-  await userStore.fetchUsers();
-});
 </script>

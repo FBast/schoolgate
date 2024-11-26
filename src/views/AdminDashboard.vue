@@ -30,8 +30,14 @@ import ExamManagement from "@/views/admin/ExamManagement.vue";
 import FormationManagement from "@/views/admin/FormationManagement.vue";
 import SessionManagement from "@/views/admin/SessionManagement.vue";
 import { useUserStore } from "@/stores/userStore.js";
+import {useFormationStore} from "@/stores/formationStore.js";
+import {useSessionStore} from "@/stores/sessionStore.js";
+import {useTopicStore} from "@/stores/topicStore.js";
 
 const userStore = useUserStore();
+const formationStore = useFormationStore();
+const sessionStore = useSessionStore();
+const topicStore = useTopicStore();
 
 const stepMap = {
   user_management: { label: "users", component: UserManagement },
@@ -55,7 +61,16 @@ const loading = ref(true);
 onMounted(async () => {
   try {
     loading.value = true;
-    await userStore.fetchUsers();
+    await Promise.all([
+      userStore.fetchUserProfile(),
+      userStore.fetchUsers(),
+      formationStore.fetchFormations(),
+      formationStore.fetchGrades(),
+      sessionStore.fetchSessions(),
+      topicStore.fetchTopics()
+    ]);
+  } catch (error) {
+    console.error(t('error_initializing_dashboard'), error);
   } finally {
     loading.value = false;
   }

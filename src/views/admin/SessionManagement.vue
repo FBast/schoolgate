@@ -16,11 +16,9 @@
         </div>
       </div>
       <div class="items-list">
-        <div
-            v-for="session in sessionStore.sessions"
+        <div v-for="session in sessionStore.sessions"
             :key="session._id"
-            class="item"
-        >
+            class="item">
           <div class="item-content" @click="toggleDetails(session)">
             <label>{{ session.name }}</label>
             <label>{{ formatDate(session.startDate) }}</label>
@@ -42,13 +40,13 @@
               />
               <FormInput
                   :label="$t('start_date')"
-                  type="date"
+                  type="datetime-local"
                   v-model="sessionStore.selectedSession.startDate"
                   :error="sessionStore.sessionErrors[session._id]?.startDate"
               />
               <FormInput
                   :label="$t('end_date')"
-                  type="date"
+                  type="datetime-local"
                   v-model="sessionStore.selectedSession.endDate"
                   :error="sessionStore.sessionErrors[session._id]?.endDate"
               />
@@ -65,7 +63,6 @@
 </template>
 
 <script setup>
-import { onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useSessionStore } from "@/stores/sessionStore.js";
 import FormInput from "@/components/FormInput.vue";
@@ -97,7 +94,4 @@ const deleteSession = async (sessionId) => {
   await sessionStore.deleteSession(sessionId);
 };
 
-onMounted(() => {
-  sessionStore.fetchSessions();
-});
 </script>

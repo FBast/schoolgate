@@ -6,8 +6,9 @@ export const useFormationStore = defineStore('formationStore', {
         formations: [],
         grades: [],
         selectedFormation: null,
+        selectedGrade: null,
         error: null,
-        loading: false,
+        loading: false
     }),
 
     getters: {
@@ -56,8 +57,10 @@ export const useFormationStore = defineStore('formationStore', {
             try {
                 const response = await ApiService.getFormations();
                 this.formations = response;
-                if (!this.selectedFormation && this.formations.length > 0) {
-                    this.selectedFormation = this.formations[0];
+
+                // Sélectionner automatiquement la première formation si elle existe
+                if (this.formations.length > 0) {
+                    this.selectFormation(this.formations[0]);
                 }
             } catch (error) {
                 this.error = 'Error fetching formations';
@@ -73,6 +76,13 @@ export const useFormationStore = defineStore('formationStore', {
             try {
                 const response = await ApiService.getGrades();
                 this.grades = response;
+
+                if (this.selectedFormation) {
+                    const grades = this.getGradesByFormationId(this.selectedFormation._id);
+                    if (grades.length > 0) {
+                        this.selectGrade(grades[0]);
+                    }
+                }
             } catch (error) {
                 this.error = 'Error fetching grades';
                 console.error(error);
@@ -88,7 +98,8 @@ export const useFormationStore = defineStore('formationStore', {
                 const response = await ApiService.createFormation({ title });
                 const newFormation = response.formation;
                 this.formations.push(newFormation);
-                this.selectedFormation = newFormation;
+                this.selectFormation(newFormation);
+                
                 return newFormation;
             } catch (error) {
                 this.error = 'Error adding formation';
@@ -112,6 +123,7 @@ export const useFormationStore = defineStore('formationStore', {
 
                 // Ajouter le nouveau grade au tableau des grades
                 this.grades.push(newGrade);
+                this.selectGrade(newGrade);
 
                 return newGrade;
             } catch (error) {
@@ -195,9 +207,20 @@ export const useFormationStore = defineStore('formationStore', {
             }
         },
 
-        // Sélectionner une formation
         selectFormation(formation) {
             this.selectedFormation = formation;
+
+            const grades = this.getGradesByFormationId(formation._id);
+            if (grades.length > 0) {
+                this.selectGrade(grades[0]);
+            } else {
+                this.selectedGrade = null;
+            }
         },
+        
+        selectGrade(grade) {
+            this.selectedGrade = grade;
+        },
+
     },
 });

@@ -1,10 +1,11 @@
 ﻿import { defineStore } from 'pinia';
 import { ApiService } from '@/utils/apiService.js';
+import {toDatetimeLocal, toISOString} from "@/utils/helpers.js";
 
 export const useSessionStore = defineStore('sessionStore', {
     state: () => ({
         sessions: [],
-        selectedSession: null, // Stocke la session sélectionnée
+        selectedSession: null,
         sessionErrors: {},
         message: '',
         success: false,
@@ -30,7 +31,12 @@ export const useSessionStore = defineStore('sessionStore', {
 
             try {
                 const response = await ApiService.getSessions();
-                this.sessions = response;
+                // Convertir les dates ISO en format datetime-local
+                this.sessions = response.map((session) => ({
+                    ...session,
+                    startDate: toDatetimeLocal(session.startDate),
+                    endDate: toDatetimeLocal(session.endDate),
+                }));
                 this.success = true;
             } catch (error) {
                 this.error = 'Error fetching sessions';
@@ -46,16 +52,18 @@ export const useSessionStore = defineStore('sessionStore', {
             this.error = null;
 
             try {
-                const defaultStartDate = new Date().toISOString().slice(0, 10);
-                const defaultEndDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+                const defaultStartDate = toISOString(new Date());
+                const defaultEndDate = toISOString(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
+
                 const newSession = {
                     name: `New Session ${this.sessions.length + 1}`,
                     startDate: defaultStartDate,
                     endDate: defaultEndDate,
                 };
 
-                const response = await ApiService.createSession(newSession);
-                this.sessions.push(response);
+                await ApiService.createSession(newSession);
+                await this.fetchSessions();
+                
                 this.message = 'Session added successfully';
                 this.success = true;
             } catch (error) {
@@ -72,16 +80,17 @@ export const useSessionStore = defineStore('sessionStore', {
             this.loading = true;
             this.error = null;
 
-            try {
-                const response = await ApiService.updateSession(sessionId, updatedSession);
-                const index = this.sessions.findIndex((session) => session._id === sessionId);
-                if (index !== -1) {
-                    this.sessions[index] = response;
+            const preparedSession = {
+                ...updatedSession,
+                startDate: toISOString(updatedSession.startDate),
+                endDate: toISOString(updatedSession.endDate),
+            };
 
-                    if (this.selectedSession && this.selectedSession._id === sessionId) {
-                        this.selectedSession = response;
-                    }
-                }
+            try {
+                await ApiService.updateSession(sessionId, preparedSession);
+
+                await this.fetchSessions();
+                this.selectedSession = this.getSessionById(sessionId);
 
                 this.message = 'Session updated successfully';
                 this.success = true;
@@ -120,11 +129,16 @@ export const useSessionStore = defineStore('sessionStore', {
         },
 
         selectSession(session) {
-            this.selectedSession = session;
+            if (!session) return;
+            this.selectedSession = {
+                ...session,
+                startDate: toDatetimeLocal(session.startDate),
+                endDate: toDatetimeLocal(session.endDate),
+            };
         },
 
         clearSelectedSession() {
             this.selectedSession = null;
-        },
-    },
+        }
+    }
 });

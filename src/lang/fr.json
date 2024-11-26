@@ -13,6 +13,7 @@
   "birth_date": "Date de naissance",
   "birth_date_error": "La date de naissance doit être valide.",
   "steps": "Etapes",
+  "application_processed": "Demande traité",
   "candidate_information": "Informations du Candidat",
   "confirm_new_email_adress": "Confirmer la nouvelle adresse email",
   "confirm_password": "Confirmez votre mot de passe",

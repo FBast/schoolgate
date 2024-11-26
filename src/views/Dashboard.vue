@@ -84,6 +84,7 @@ const logout = () => {
 
 onMounted(async () => {
   try {
+    loading.value = true;
     await Promise.all([
       userStore.fetchUserProfile(),
       formationStore.fetchFormations(),

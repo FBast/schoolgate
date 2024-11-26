@@ -14,7 +14,7 @@
             :key="formation._id"
             class="item"
             :class="{ active: formation._id === formationStore.selectedFormation?._id }"
-            @click="selectFormation(formation)"
+            @click="formationStore.selectFormation(formation)"
         >
           <div class="item-content">
             <label>{{ formation.title }}</label>
@@ -44,8 +44,8 @@
             v-for="grade in grades"
             :key="grade._id"
             class="item"
-            :class="{ active: grade._id === selectedGrade?._id }"
-            @click="selectGrade(grade)"
+            :class="{ active: grade._id === formationStore.selectedGrade?._id }"
+            @click="formationStore.selectGrade(grade)"
         >
           <div class="item-content">
             <label>{{ grade.grade }}</label>
@@ -66,7 +66,7 @@
     </div>
 
     <!-- Topics column -->
-    <div class="panel topics" :class="{ disabled: !selectedGrade }">
+    <div class="panel topics" :class="{ disabled: !formationStore.selectedGrade }">
       <div class="header">
         <h2 class="title">{{ $t('topics') }}</h2>
       </div>
@@ -88,25 +88,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useFormationStore } from "@/stores/formationStore";
 import { useTopicStore } from "@/stores/topicStore";
-import { ApiService } from "@/utils/apiService"; // Assurez-vous que ApiService est importé
 
 const { t } = useI18n();
 const formationStore = useFormationStore();
 const topicStore = useTopicStore();
-
-const selectedTopics = ref([]);
-const selectedGrade = ref(null);
-
-// Fetch initial data
-onMounted(async () => {
-  await formationStore.fetchFormations();
-  await formationStore.fetchGrades();
-  await topicStore.fetchTopics();
-});
 
 // Grades computed property
 const grades = computed(() => {
@@ -117,18 +106,10 @@ const grades = computed(() => {
   }
 });
 
-// Select formation
-const selectFormation = (formation) => {
-  formationStore.selectFormation(formation);
-  selectedGrade.value = null;
-  selectedTopics.value = [];
-};
-
-// Select grade and update selected topics
-const selectGrade = (grade) => {
-  selectedGrade.value = grade;
-  selectedTopics.value = grade.topics || [];
-};
+// Selected topics
+const selectedTopics = computed(() => {
+  return formationStore.selectedGrade?.topics || [];
+});
 
 // Add formation
 const addFormation = async () => {
@@ -149,11 +130,6 @@ const updateFormation = async (formationId) => {
 // Delete formation
 const deleteFormation = async (formationId) => {
   await formationStore.deleteFormation(formationId);
-  if (formationStore.selectedFormation?._id === formationId) {
-    formationStore.selectedFormation = null;
-    selectedGrade.value = null;
-    selectedTopics.value = [];
-  }
 };
 
 // Add grade
@@ -175,10 +151,6 @@ const updateGrade = async (gradeId) => {
 // Delete grade
 const deleteGrade = async (gradeId) => {
   await formationStore.deleteGrade(gradeId);
-  if (selectedGrade.value?._id === gradeId) {
-    selectedGrade.value = null;
-    selectedTopics.value = [];
-  }
 };
 
 // Generate exam for grade
@@ -187,7 +159,7 @@ const generateExam = async (gradeId) => {
   if (!grade) return;
 
   try {
-    const response = await ApiService.generateExam(gradeId);
+    const response = await formationStore.generateExam(gradeId);
     const blob = new Blob([response.pdf], { type: "application/pdf" });
     const url = URL.createObjectURL(blob);
 
@@ -211,13 +183,13 @@ const toggleTopicSelection = async (topic) => {
     selectedTopics.value.splice(index, 1);
   }
 
-  if (selectedGrade.value) {
+  if (formationStore.selectedGrade) {
     try {
       const gradeData = {
-        grade: selectedGrade.value.grade,
+        grade: formationStore.selectedGrade.grade,
         topics: selectedTopics.value,
       };
-      await formationStore.updateGrade(selectedGrade.value._id, gradeData);
+      await formationStore.updateGrade(formationStore.selectedGrade._id, gradeData);
     } catch (error) {
       console.error(t("error_updating_grade"), error);
     }
