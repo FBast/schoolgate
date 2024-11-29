@@ -14,11 +14,9 @@
         </div>
       </div>
       <div class="items-list">
-        <div
-            v-for="user in userStore.users"
+        <div v-for="user in userStore.users"
             :key="user._id"
-            class="item"
-        >
+            class="item">
           <div class="item-content" @click="toggleDetails(user)">
             <label>{{ user.email }}</label>
             <label>{{ formationStore.getFormationTitle(user.requestedFormation) || $t('formation_error') }}</label>
@@ -46,7 +44,6 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
 import { useUserStore } from '@/stores/userStore';
 import { useFormationStore } from '@/stores/formationStore';
 import UserInformation from '@/views/admin/UserInformation.vue';

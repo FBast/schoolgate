@@ -27,9 +27,9 @@ import { useI18n } from 'vue-i18n';
 import ProgressIndicator from "@/components/ProgressIndicator.vue";
 import FormButton from '@/components/FormButton.vue';
 import ErrorComponent from "@/components/ErrorComponent.vue";
-import { useUserStore } from '@/stores/userStore';
 import { useFormationStore } from '@/stores/formationStore';
 import { useSessionStore } from '@/stores/sessionStore';
+import { useAuthStore } from "@/stores/authStore.js";
 import { STATUS_OPTIONS } from "@/utils/constants.js";
 import AwaitingDecision from "@/views/user/AwaitingDecision.vue";
 import AwaitingInterview from "@/views/user/AwaitingInterview.vue";
@@ -40,7 +40,7 @@ import AwaitingSession from "@/views/user/AwaitingSession.vue";
 import ApplicationProcessed from "@/views/user/ApplicationProcessed.vue";
 
 const { t } = useI18n();
-const userStore = useUserStore();
+const authStore = useAuthStore();
 const formationStore = useFormationStore();
 const sessionStore = useSessionStore();
 
@@ -56,41 +56,47 @@ const stepMap = {
 };
 
 // Statut et composant actuel
-const status = ref(STATUS_OPTIONS.awaiting_information);
 const errorMessage = ref('');
 const loading = ref(true);
 
 const currentStepIndex = computed(() =>
-    Object.values(STATUS_OPTIONS).indexOf(status.value)
+    Object.values(STATUS_OPTIONS).indexOf(authStore.currentUser?.status || STATUS_OPTIONS.error)
 );
 
-const currentComponent = computed(() => stepMap[status.value] || ErrorComponent);
+const currentComponent = computed(() => stepMap[authStore.currentUser?.status] || ErrorComponent);
 
 const updateStatus = async () => {
   try {
-    await userStore.fetchUserProfile();
-    status.value = userStore.status; // Supposant que le statut est stocké dans userStore.status
+    await authStore.fetchCurrentUser();
   } catch (error) {
     errorMessage.value = t('error_fetching_status');
-    status.value = 'error';
   }
 };
 
 const router = useRouter();
+
 const logout = () => {
-  localStorage.removeItem('authToken');
-  router.push('/');
+  authStore.logout();
+  router.push('/auth');
 };
 
 onMounted(async () => {
   try {
+    const token = localStorage.getItem("authToken");
+    
+    if (!token) {
+      await router.push('/auth');
+      return;
+    }
+
     loading.value = true;
     await Promise.all([
-      userStore.fetchUserProfile(),
+      authStore.fetchCurrentUser(),
       formationStore.fetchFormations(),
       formationStore.fetchGrades(),
       sessionStore.fetchSessions(),
     ]);
+
   } catch (error) {
     console.error(t('error_initializing_dashboard'), error);
   } finally {

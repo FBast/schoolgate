@@ -7,7 +7,6 @@
         :class="{ 'active-step': index === currentStep, 'step': true }"
     >
       <span class="step-number">{{ index + 1 }}</span>
-      <span v-if="index === currentStep" class="step-label">{{ $t(stepKey) }}</span>
     </div>
   </div>
 </template>
@@ -65,15 +64,7 @@ const props = defineProps({
       background-color: $secondary-color;
       z-index: 1;
     }
-
-    .step-label {
-      flex: 0;
-      margin-left: 10px;
-      font-weight: bold;
-      color: $text-color;
-      text-align: left;
-    }
-
+    
     &.active-step {
       flex: 1;
     }
@@ -82,11 +73,6 @@ const props = defineProps({
       flex: 0;
       background-color: $accent-color;
       color: white;
-    }
-
-    &.active-step .step-label {
-      flex: 1;
-      color: $text-color;
     }
   }
 }

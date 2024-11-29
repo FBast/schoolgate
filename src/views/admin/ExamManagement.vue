@@ -9,13 +9,11 @@
         </div>
       </div>
       <div class="items-list">
-        <div
-            v-for="topic in topicStore.topics"
+        <div v-for="topic in topicStore.topics"
             :key="topic._id"
             class="item"
             :class="{ active: topic._id === topicStore.selectedTopic?._id }"
-            @click="selectTopic(topic)"
-        >
+            @click="selectTopic(topic)">
           <div class="item-content">
             <label>{{ topic.title }}</label>
             <div class="actions">
@@ -49,8 +47,10 @@
             <div class="form-group">
               <form @submit.prevent="updateExercise">
                 <div class="flex-vertical padding-md gap-md">
+                  <FormInput v-model="topicStore.selectedExercise.title" :label="$t('exercice_title')" type="text" required />
                   <FormTextarea v-model="topicStore.selectedExercise.text" :label="$t('exercise_content')"/>
                   <FormInput type="file" :label="$t('upload_submission')" @update:modelValue="handleFileUpload"/>
+                  <FormButton :label="$t('update')" type="submit" />
                 </div>
               </form>
             </div>
@@ -67,6 +67,7 @@ import { useTopicStore } from "@/stores/topicStore";
 import { ApiService } from "@/utils/apiService";
 import FormTextarea from "@/components/FormTextarea.vue";
 import FormInput from "@/components/FormInput.vue";
+import FormButton from "@/components/FormButton.vue";
 
 const { t } = useI18n();
 const topicStore = useTopicStore();
@@ -102,20 +103,27 @@ const updateTopic = async (id) => {
 
 // Ajouter un exercice
 const addExercise = async () => {
-  const title = prompt(t("new_exercise"));
+  const title = t("new_exercise");
   const text = t("exercise_content");
   if (title && topicStore.selectedTopic) {
-    await topicStore.createExercise(topicStore.selectedTopic._id, title, text);
+    await topicStore.createExercise(title, text);
   }
 };
 
 // Modifier un exercice
-const updateExercise = async (id) => {
-  const newTitle = prompt(t("edit_exercise"));
-  if (newTitle) {
-    await topicStore.updateExercise(id, { title: newTitle });
+const updateExercise = async () => {
+  if (topicStore.selectedExercise) {
+    await topicStore.updateExercise(topicStore.selectedExercise._id, topicStore.selectedExercise);
   }
 };
+
+// Modifier un exercice
+// const updateExercise = async (id) => {
+//   const newTitle = prompt(t("edit_exercise"));
+//   if (newTitle) {
+//     await topicStore.updateExercise(id, { title: newTitle });
+//   }
+// };
 
 // Gérer le téléchargement d'un fichier pour l'exercice
 const handleFileUpload = async (event) => {

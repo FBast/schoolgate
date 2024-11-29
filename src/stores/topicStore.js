@@ -87,7 +87,10 @@ export const useTopicStore = defineStore('topic', {
                 return;
             }
             try {
-                const response = await ApiService.createExercise(this.selectedTopic._id, { title, text });
+                const response = await ApiService.createExercise(this.selectedTopic._id, { 
+                    title: title, 
+                    text: text 
+                });
                 this.exercises.push(response.exercise);
                 this.selectExercise(response.exercise);
             } catch (error) {

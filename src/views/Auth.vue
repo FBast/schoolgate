@@ -9,6 +9,9 @@
           <FormInput v-model="password" :label="$t('password')" type="password" required />
           <FormButton :label="$t('login')" type="submit" />
         </form>
+        <p class="link">
+          <a href="#" @click.prevent="switchView('resetPassword')">{{ $t('forgot_password') }}</a>
+        </p>
       </div>
       <Separator :text="$t('or')" />
       <div class="panel">
@@ -19,7 +22,7 @@
     <div v-else>
       <div class="panel flex-vertical gap-md">
         <!-- Formulaire d'inscription -->
-        <div class="flex-vertical gap-md" v-if="currentView === 'register'">
+        <div v-if="currentView === 'register'" class="flex-vertical gap-md">
           <h2>{{ $t("register") }}</h2>
           <form class="flex-vertical gap-md" @submit.prevent="register">
             <FormInput v-model="authStore.email" :label="$t('email')" type="email" required />
@@ -30,7 +33,7 @@
         </div>
 
         <!-- Formulaire de vérification -->
-        <div class="flex-vertical gap-md" v-else-if="currentView === 'verify'">
+        <div v-else-if="currentView === 'verify'" class="flex-vertical gap-md">
           <h2>{{ $t("verify_account") }}</h2>
           <form class="flex-vertical gap-md" @submit.prevent="submitVerificationCode">
             <FormInput v-model="verificationCode" :label="$t('verification_code')" type="text" required />
@@ -40,7 +43,7 @@
         </div>
 
         <!-- Formulaire de réinitialisation du mot de passe -->
-        <div class="flex-vertical gap-md" v-else-if="currentView === 'resetPassword'">
+        <div v-else-if="currentView === 'resetPassword'" class="flex-vertical gap-md">
           <h2>{{ $t("reset_password") }}</h2>
           <form class="flex-vertical gap-md" @submit.prevent="resetPassword">
             <FormInput v-model="authStore.email" :label="$t('email')" type="email" required />
@@ -49,7 +52,7 @@
         </div>
 
         <!-- Formulaire de confirmation de réinitialisation -->
-        <div class="flex-vertical gap-md" v-else-if="currentView === 'confirmResetPassword'">
+        <div v-else-if="currentView === 'confirmResetPassword'" class="flex-vertical gap-md">
           <h2>{{ $t("define_new_password") }}</h2>
           <form class="flex-vertical gap-md" @submit.prevent="submitNewPassword">
             <FormInput v-model="resetToken" :label="$t('verification_code')" type="text" required />
@@ -65,7 +68,7 @@
       </div>
     </div>
 
-    <p class="panel" v-if="authStore.message" :class="{ 'error-message': !authStore.success, 'success-message': authStore.success }">
+    <p v-if="authStore.message" class="panel" :class="{ 'error-message': !authStore.success, 'success-message': authStore.success }">
       {{ authStore.message }}
     </p>
   </div>

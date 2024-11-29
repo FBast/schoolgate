@@ -21,8 +21,8 @@
             class="item">
           <div class="item-content" @click="toggleDetails(session)">
             <label>{{ session.name }}</label>
-            <label>{{ formatDate(session.startDate) }}</label>
-            <label>{{ formatDate(session.endDate) }}</label>
+            <label>{{ formatDateWithTime(session.startDate) }}</label>
+            <label>{{ formatDateWithTime(session.endDate) }}</label>
             <div class="actions">
               <a @click.stop="deleteSession(session._id)">
                 <i class="fa-solid fa-trash"></i>
@@ -67,7 +67,7 @@ import { useI18n } from "vue-i18n";
 import { useSessionStore } from "@/stores/sessionStore.js";
 import FormInput from "@/components/FormInput.vue";
 import FormButton from "@/components/FormButton.vue";
-import { formatDate } from "@/utils/helpers.js";
+import { formatDateWithTime } from "@/utils/helpers.js";
 
 const { t } = useI18n();
 const sessionStore = useSessionStore();

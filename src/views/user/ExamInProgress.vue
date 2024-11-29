@@ -5,20 +5,18 @@
       <div class="header">
         <h2 class="title">{{ $t('exam_in_progress') }}</h2>
       </div>
-      <div>
-        <p>{{ $t('exam_in_progress_description') }}</p>
-        <div class="actions flex-horizontal gap-md">
-          <FormButton
-              v-if="examPdfAvailable"
-              :label="$t('download_exam_pdf')"
-              @click="downloadExamPdf"
-          />
-          <FormInput
-              type="file"
-              :label="$t('upload_submission')"
-              @update:modelValue="uploadFile"
-          />
-        </div>
+      <p>{{ $t('exam_in_progress_description') }}</p>
+      <div class="actions flex-vertical gap-md">
+        <FormInput
+            type="file"
+            :label="$t('upload_submission')"
+            @change="handleUploadExamReport"
+        />
+        <FormButton
+            v-if="authStore.currentUser.examSubject"
+            :label="$t('download_exam_pdf')"
+            @click="handleDownloadExamSubject"
+        />
       </div>
     </div>
     <!-- Informations utilisateur -->
@@ -26,74 +24,52 @@
       <div class="header">
         <h2 class="title">{{ $t('candidate_information') }}</h2>
       </div>
-      <label>{{ $t('first_name') }} : {{ userStore.firstName }}</label>
-      <label>{{ $t('last_name') }} : {{ userStore.lastName }}</label>
-      <label>{{ $t('birth_date') }} : {{ formatDate(userStore.birthDate) }}</label>
-      <label>{{ $t('requested_formation') }} : {{ formationStore.getFormationTitle(userStore.requestedFormation) }}</label>
-      <label>{{ $t('requested_grade') }} : {{ formationStore.getGradeLabel(userStore.requestedGrade) }}</label>
-      <p v-if="userStore.message" :class="{ 'success-message': userStore.success, 'error-message': !userStore.success }">
-        {{ userStore.message }}
-      </p>
+      <label>{{ $t('first_name') }} : {{ authStore.currentUser.firstName }}</label>
+      <label>{{ $t('last_name') }} : {{ authStore.currentUser.lastName }}</label>
+      <label>{{ $t('birth_date') }} : {{ formatDate(authStore.currentUser.birthDate) }}</label>
+      <label>{{ $t('requested_formation') }} : {{ formationStore.getFormationTitle(authStore.currentUser.requestedFormation) }}</label>
+      <label>{{ $t('requested_grade') }} : {{ formationStore.getGradeLabel(authStore.currentUser.requestedGrade) }}</label>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
 import { useUserStore } from '@/stores/userStore';
 import { useFormationStore } from '@/stores/formationStore';
-import { formatDate } from '@/utils/helpers.js';
+import {downloadFile, formatDate} from '@/utils/helpers.js';
 import FormButton from "@/components/FormButton.vue";
 import FormInput from "@/components/FormInput.vue";
 import { useI18n } from 'vue-i18n';
-import { ApiService } from '@/utils/apiService';
+import {useAuthStore} from "@/stores/authStore.js";
+import {ApiService} from "@/utils/apiService.js";
 
 const userStore = useUserStore();
+const authStore = useAuthStore();
 const formationStore = useFormationStore();
 const { t } = useI18n();
 
-// Vérifier si le PDF de l'examen est disponible
-const examPdfAvailable = computed(() => !!userStore.examPdf);
-
-// Télécharger le PDF
-const downloadExamPdf = async () => {
-  try {
-    const response = await ApiService.downloadExamPdf();
-    const blob = new Blob([response.data], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-
-    // Créer un lien pour télécharger
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', 'exam.pdf');
-    document.body.appendChild(link);
-    link.click();
-
-    // Nettoyer le lien temporaire
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-
-    userStore.message = t('pdf_download_success');
-    userStore.success = true;
-  } catch (error) {
-    userStore.message = t('pdf_download_error');
-    userStore.success = false;
-    console.error(t('pdf_download_error'), error);
+const handleDownloadExamSubject = () => {
+  if (authStore.currentUser.examSubject) {
+    downloadFile(authStore.currentUser.examSubject, 'ENSI_Examen');
+  } else {
+    console.error('No exam PDF available to download.');
   }
 };
 
 // Uploader le fichier de rendu
-const uploadFile = async (event) => {
+const handleUploadExamReport = async (event) => {
   const file = event.target.files[0];
   if (!file) {
+    console.error('No file selected.');
     return;
   }
 
   try {
-    const formData = new FormData();
-    formData.append('examDeposit', file);
+    // Appel de l'API pour uploader le fichier
+    await ApiService.uploadReport(file);
 
-    // await userStore.uploadExamDeposit(formData);
+    // Met à jour le profil utilisateur pour afficher le fichier uploadé
+    await authStore.fetchCurrentUser();
 
     userStore.message = t('file_submission_success');
     userStore.success = true;

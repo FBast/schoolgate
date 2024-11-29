@@ -1,5 +1,5 @@
-﻿import { defineStore } from "pinia";
-import { ApiService } from "@/utils/apiService.js";
+﻿import {defineStore} from "pinia";
+import {ApiService} from "@/utils/apiService.js";
 
 export const useAuthStore = defineStore("authStore", {
     state: () => ({
@@ -7,12 +7,12 @@ export const useAuthStore = defineStore("authStore", {
         message: "",
         success: false,
         loading: false,
-        userRole: null,
+        currentUser: null
     }),
 
     getters: {
-        isAuthenticated: (state) => !!state.userRole,
-        isAdmin: (state) => state.userRole === "admin",
+        isAuthenticated: (state) => !!state.currentUser,
+        isAdmin: (state) => state.currentUser?.role === "admin",
     },
 
     actions: {
@@ -21,6 +21,29 @@ export const useAuthStore = defineStore("authStore", {
             this.message = "";
             this.success = false;
             this.loading = false;
+            this.currentUser = null;
+        },
+
+        decodeToken(token) {
+            try {
+                return JSON.parse(atob(token.split(".")[1]));
+            } catch (error) {
+                console.error("Failed to decode token:", error);
+                return null;
+            }
+        },
+
+        async fetchCurrentUser() {
+            try {
+                this.loading = true;
+                this.currentUser = await ApiService.getUserProfile();
+            } catch (error) {
+                console.error("Error fetching current user:", error);
+                this.logout();
+                throw error;
+            } finally {
+                this.loading = false;
+            }
         },
 
         async loginUser(password) {
@@ -39,11 +62,12 @@ export const useAuthStore = defineStore("authStore", {
 
                 // Stockage du token et mise à jour du rôle utilisateur
                 localStorage.setItem("authToken", authToken);
-                this.userRole = decodedToken.role;
+                
+                // Récupération des données complètes de l'utilisateur depuis l'API
+                await this.fetchCurrentUser();
+                
                 this.success = true;
                 this.message = "Login successful.";
-
-                // Retourner la vue cible
                 return "dashboard";
             } catch (error) {
                 this.success = false;
@@ -77,9 +101,8 @@ export const useAuthStore = defineStore("authStore", {
 
                 // Stocker le token après vérification
                 localStorage.setItem("authToken", authToken);
-                const decodedToken = this.decodeToken(authToken);
+                await this.fetchCurrentUser();
 
-                this.userRole = decodedToken.role;
                 this.success = true;
                 this.message = "Verification successful.";
             } catch (error) {
@@ -91,6 +114,27 @@ export const useAuthStore = defineStore("authStore", {
             }
         },
 
+        async updateCurrentUser(data) {
+            try {
+                this.loading = true;
+                this.currentUser = await ApiService.updateUserProfile(data);
+                this.message = "Profile updated successfully.";
+                this.success = true;
+            } catch (error) {
+                this.success = false;
+                this.message = "Failed to update profile.";
+                console.error(error);
+                throw error;
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        logout() {
+            localStorage.removeItem("authToken");
+            this.resetState();
+        },
+        
         async resendVerificationCode() {
             try {
                 this.loading = true;
@@ -134,21 +178,6 @@ export const useAuthStore = defineStore("authStore", {
             } finally {
                 this.loading = false;
             }
-        },
-
-        decodeToken(token) {
-            try {
-                return JSON.parse(atob(token.split(".")[1]));
-            } catch (error) {
-                console.error("Failed to decode token:", error);
-                return null;
-            }
-        },
-
-        logout() {
-            localStorage.removeItem("authToken");
-            this.userRole = null;
-            this.resetState();
-        },
+        }
     },
 });

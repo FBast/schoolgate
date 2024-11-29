@@ -66,7 +66,7 @@ export const ApiService = {
                     Authorization: `Bearer ${localStorage.getItem('authToken')}`
                 }
             });
-            
+
             return response.data;
         } 
         catch (error) {
@@ -84,6 +84,23 @@ export const ApiService = {
             return response.data;
         } catch (error) {
             throw new Error('Erreur lors de la mise à jour des informations utilisateur.');
+        }
+    },
+
+    async uploadReport(pdfFile) {
+        try {
+            const formData = new FormData();
+            formData.append('examReport', pdfFile);
+
+            const response = await axiosInstance.post('/users/me/upload-report', formData, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
+                }
+            });
+
+            return response.data;
+        } catch (error) {
+            throw new Error('Erreur lors de l\'upload du fichier PDF.');
         }
     },
 
