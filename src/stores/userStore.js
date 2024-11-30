@@ -23,32 +23,18 @@ export const useUserStore = defineStore('userStore', {
 
             try {
                 const response = await ApiService.getUsers();
-                this.users = response.filter(user => user.role === "user");
+
+                // Formater les dates pour chaque utilisateur
+                this.users = response
+                    .filter(user => user.role === "user")
+                    .map(user => ({
+                        ...user,
+                        birthDate: user.birthDate ? new Date(user.birthDate).toISOString().split("T")[0] : null,
+                        meetingDate: user.meetingDate ? new Date(user.meetingDate).toISOString().slice(0, 16) : null,
+                    }));
             } catch (error) {
                 this.error = 'Error fetching users';
                 console.error(error);
-            } finally {
-                this.loading = false;
-            }
-        },
-
-        async fetchUserById(userId) {
-            this.loading = true;
-            this.error = null;
-
-            try {
-                const cachedUser = this.getUserById(userId);
-                if (cachedUser) {
-                    return cachedUser;
-                }
-
-                const response = await ApiService.getUser(userId);
-                this.users.push(response);
-                return response;
-            } catch (error) {
-                this.error = 'Error fetching user by ID';
-                console.error(error);
-                throw error;
             } finally {
                 this.loading = false;
             }

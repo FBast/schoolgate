@@ -187,9 +187,9 @@ export const ApiService = {
         }
     },
 
-    async getTopic(examId) {
+    async getTopic(topicId) {
         try {
-            const response = await axiosInstance.get(`/topics/${examId}`, {
+            const response = await axiosInstance.get(`/topics/${topicId}`, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('authToken')}`
                 }
@@ -200,9 +200,9 @@ export const ApiService = {
         }
     },
 
-    async updateTopic(examId, examData) {
+    async updateTopic(topicId, topicData) {
         try {
-            const response = await axiosInstance.put(`/topics/${examId}`, examData, {
+            const response = await axiosInstance.put(`/topics/${topicId}`, topicData, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('authToken')}`
                 }
@@ -213,9 +213,9 @@ export const ApiService = {
         }
     },
 
-    async deleteTopic(examId) {
+    async deleteTopic(topicId) {
         try {
-            const response = await axiosInstance.delete(`/topics/${examId}`, {
+            const response = await axiosInstance.delete(`/topics/${topicId}`, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('authToken')}`
                 }

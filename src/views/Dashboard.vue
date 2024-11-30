@@ -19,6 +19,13 @@
           @statusChanged="updateStatus"
           :message="errorMessage"
       ></component>
+
+      <!-- Notification Panel -->
+      <div v-if="notification.message" class="notification-panel">
+        <p :class="{ 'error-message': !notification.success, 'success-message': notification.success }">
+          {{ notification.message }}
+        </p>
+      </div>
     </section>
   </main>
 </template>
@@ -47,7 +54,6 @@ const authStore = useAuthStore();
 const formationStore = useFormationStore();
 const sessionStore = useSessionStore();
 
-// Map des statuts avec leurs composants
 const stepMap = {
   [STATUS_OPTIONS.awaiting_information]: AwaitingInformation,
   [STATUS_OPTIONS.awaiting_session]: AwaitingSession,
@@ -58,12 +64,10 @@ const stepMap = {
   [STATUS_OPTIONS.application_processed]: ApplicationProcessed,
 };
 
-// Extraire les clés de `stepMap` pour les étapes
 const stepKeys = Object.keys(stepMap);
-
-// Statut et composant actuel
 const errorMessage = ref('');
 const loading = ref(true);
+const notification = ref({ message: '', success: true });
 
 const currentStepIndex = computed(() =>
     stepKeys.indexOf(authStore.currentUser?.status || STATUS_OPTIONS.error)
@@ -77,6 +81,13 @@ const updateStatus = async () => {
   } catch (error) {
     errorMessage.value = t('error_fetching_status');
   }
+};
+
+const handleNotification = ({ message, success }) => {
+  notification.value = { message, success };
+  setTimeout(() => {
+    notification.value = { message: '', success: true };
+  }, 5000);
 };
 
 const router = useRouter();

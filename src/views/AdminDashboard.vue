@@ -16,7 +16,19 @@
   <main>
     <section class="content layout-wide gap-md">
       <div v-if="loading">{{ $t('loading') }}</div>
-      <component v-else :is="currentComponent" />
+
+      <component
+          v-else
+          :is="currentComponent"
+          @notify="handleNotification"
+      />
+
+      <!-- Notification Panel -->
+      <div v-if="notification.message" class="panel">
+        <p :class="{ 'error-message': !notification.success, 'success-message': notification.success }">
+          {{ notification.message }}
+        </p>
+      </div>
     </section>
   </main>
 </template>
@@ -50,6 +62,8 @@ const stepMap = {
 };
 
 const currentView = ref("user_management");
+const notification = ref({ message: '', success: true });
+
 const currentComponent = computed(() => {
   const step = stepMap[currentView.value];
   return step ? step.component : ErrorComponent;
@@ -57,6 +71,13 @@ const currentComponent = computed(() => {
 
 const changeView = (key) => {
   currentView.value = key;
+};
+
+const handleNotification = ({ message, success }) => {
+  notification.value = { message, success };
+  setTimeout(() => {
+    notification.value = { message: '', success: true };
+  }, 5000);
 };
 
 const loading = ref(true);

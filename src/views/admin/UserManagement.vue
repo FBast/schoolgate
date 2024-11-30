@@ -17,12 +17,15 @@
         <div v-for="user in userStore.users"
             :key="user._id"
             class="item">
-          <div class="item-content" @click="toggleDetails(user)">
+          <div class="item-content" :class="{ selected: userStore.selectedUser?._id === user._id }">
             <label>{{ user.email }}</label>
             <label>{{ formationStore.getFormationTitle(user.requestedFormation) || $t('formation_error') }}</label>
             <label>{{ formationStore.getGradeLabel(user.requestedGrade) || $t('grade_error') }}</label>
             <label>{{ $t(user.status) }}</label>
             <div class="actions">
+              <a @click.stop="toggleDetails(user)">
+                <i class="fa-solid fa-pen-to-square"></i>
+              </a>
               <a @click.stop="deleteUser(user._id)">
                 <i class="fa-solid fa-trash"></i>
               </a>
@@ -34,9 +37,12 @@
         </div>
       </div>
     </div>
-    <p v-if="userStore.message" :class="{'success-message': userStore.success, 'error-message': !userStore.success}">
-      {{ userStore.message }}
-    </p>
+
+    <div v-if="userStore.message" class="panel flex-vertical gap-md">
+      <p :class="{ 'error-message': !userStore.success, 'success-message': userStore.success }">
+        {{ userStore.message }}
+      </p>
+    </div>
   </div>
   <div v-else>
     <p>Chargement...</p>

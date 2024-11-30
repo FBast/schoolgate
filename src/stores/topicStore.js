@@ -34,13 +34,11 @@ export const useTopicStore = defineStore('topic', {
             }
         },
         
-        async updateTopic(id, title) {
+        async updateTopic(id, updatedTopic) {
             try {
-                const response = await ApiService.updateTopic(id, { title });
-                const index = this.topics.findIndex((topic) => topic._id === id);
-                if (index !== -1) {
-                    this.topics[index] = response.topic;
-                }
+                await ApiService.updateTopic(id, updatedTopic);
+                await this.fetchTopics();
+
             } catch (error) {
                 console.error('Error updating topic:', error);
             }
@@ -66,6 +64,12 @@ export const useTopicStore = defineStore('topic', {
                 this.exercises = [];
                 this.selectedExercise = null;
             }
+        },
+
+        clearSelectedTopic() {
+            this.selectedTopic = null;
+            this.exercises = [];
+            this.selectedExercise = null;
         },
 
         // Exercises
@@ -121,13 +125,13 @@ export const useTopicStore = defineStore('topic', {
                 console.error('Error deleting exercise:', error);
             }
         },
-        
+
         selectExercise(exercise) {
             this.selectedExercise = exercise;
         },
 
         clearSelectedExercise() {
-            this.selectedSession = null;
+            this.selectedExercise = null;
         }
     },
 });

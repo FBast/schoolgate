@@ -1,15 +1,12 @@
 ﻿import { defineStore } from 'pinia';
 import { ApiService } from '@/utils/apiService.js';
-import {toDatetimeLocal, toISOString} from "@/utils/helpers.js";
+import { toDatetimeLocal, toISOString } from "@/utils/helpers.js";
 
 export const useSessionStore = defineStore('sessionStore', {
     state: () => ({
         sessions: [],
         selectedSession: null,
         sessionErrors: {},
-        message: '',
-        success: false,
-        error: null,
         loading: false,
     }),
 
@@ -22,83 +19,93 @@ export const useSessionStore = defineStore('sessionStore', {
                 .filter(session => new Date(session.startDate) > now)
                 .sort((a, b) => new Date(a.startDate) - new Date(b.startDate))[0] || null;
         },
+
+        getModifiedSessions: (state) => state.sessions.filter(session => session.isModified || session.isNew),
     },
 
     actions: {
         async fetchSessions() {
             this.loading = true;
-            this.error = null;
 
             try {
                 const response = await ApiService.getSessions();
-                // Convertir les dates ISO en format datetime-local
                 this.sessions = response.map((session) => ({
                     ...session,
                     startDate: toDatetimeLocal(session.startDate),
                     endDate: toDatetimeLocal(session.endDate),
+                    isNew: false, // Les sessions existantes ne sont pas nouvelles
+                    isModified: false, // Aucune modification initialement
                 }));
-                this.success = true;
+
+                console.log('Sessions fetched successfully');
             } catch (error) {
-                this.error = 'Error fetching sessions';
-                this.success = false;
-                throw error;
+                throw new Error(`Error fetching sessions: ${error.message}`);
             } finally {
                 this.loading = false;
             }
         },
 
-        async addSession() {
-            this.loading = true;
-            this.error = null;
+        addSession() {
+            const defaultStartDate = toISOString(new Date());
+            const defaultEndDate = toISOString(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
 
-            try {
-                const defaultStartDate = toISOString(new Date());
-                const defaultEndDate = toISOString(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
-
-                const newSession = {
-                    name: `New Session ${this.sessions.length + 1}`,
-                    startDate: defaultStartDate,
-                    endDate: defaultEndDate,
-                };
-
-                await ApiService.createSession(newSession);
-                await this.fetchSessions();
-                
-                this.message = 'Session added successfully';
-                this.success = true;
-            } catch (error) {
-                this.error = 'Error adding session';
-                this.message = this.error;
-                this.success = false;
-                console.error(error);
-            } finally {
-                this.loading = false;
-            }
-        },
-
-        async updateSession(sessionId, updatedSession) {
-            this.loading = true;
-            this.error = null;
-
-            const preparedSession = {
-                ...updatedSession,
-                startDate: toISOString(updatedSession.startDate),
-                endDate: toISOString(updatedSession.endDate),
+            const newSession = {
+                _id: `temp-${Date.now()}`,
+                name: `New Session ${this.sessions.length + 1}`,
+                startDate: defaultStartDate,
+                endDate: defaultEndDate,
+                enabled: false,
+                isNew: true,
+                isModified: true,
             };
 
+            this.sessions.push({
+                ...newSession,
+                startDate: toDatetimeLocal(newSession.startDate),
+                endDate: toDatetimeLocal(newSession.endDate),
+            });
+
+            this.selectSession(newSession);
+
+            console.log('New session added locally');
+        },
+
+        async saveSession(session) {
+            const preparedSession = {
+                ...session,
+                startDate: toISOString(session.startDate),
+                endDate: toISOString(session.endDate),
+            };
+
+            if (session.isNew) {
+                // Création d'une nouvelle session
+                delete preparedSession._id;
+                const apiResponse = await ApiService.createSession(preparedSession);
+                session._id = apiResponse.session._id;
+                session.isNew = false;
+            } else {
+                // Mise à jour d'une session existante
+                await ApiService.updateSession(session._id, preparedSession);
+            }
+
+            session.isModified = false;
+
+            console.log(`Session ${session.isNew ? 'created' : 'updated'} successfully`);
+        },
+
+        async updateAllSessions() {
+            this.loading = true;
+
             try {
-                await ApiService.updateSession(sessionId, preparedSession);
+                const modifiedSessions = this.getModifiedSessions;
 
-                await this.fetchSessions();
-                this.selectedSession = this.getSessionById(sessionId);
+                for (const session of modifiedSessions) {
+                    await this.saveSession(session);
+                }
 
-                this.message = 'Session updated successfully';
-                this.success = true;
+                console.log('All modified sessions saved successfully');
             } catch (error) {
-                this.error = 'Error updating session';
-                this.message = this.error;
-                this.success = false;
-                console.error(error);
+                throw new Error(`Error saving modified sessions: ${error.message}`);
             } finally {
                 this.loading = false;
             }
@@ -106,30 +113,46 @@ export const useSessionStore = defineStore('sessionStore', {
 
         async deleteSession(sessionId) {
             this.loading = true;
-            this.error = null;
 
             try {
-                await ApiService.deleteSession(sessionId);
-                this.sessions = this.sessions.filter((session) => session._id !== sessionId);
+                const sessionIndex = this.sessions.findIndex((s) => s._id === sessionId);
+                if (sessionIndex === -1) {
+                    throw new Error(`Session with ID ${sessionId} not found`);
+                }
+
+                const session = this.sessions[sessionIndex];
+
+                if (session.isNew) {
+                    // Suppression uniquement locale
+                    this.sessions.splice(sessionIndex, 1);
+                    console.log('New session deleted locally');
+                } else {
+                    // Suppression via l'API
+                    await ApiService.deleteSession(sessionId);
+                    this.sessions.splice(sessionIndex, 1);
+                    console.log('Session deleted successfully');
+                }
 
                 if (this.selectedSession && this.selectedSession._id === sessionId) {
                     this.selectedSession = null;
                 }
-
-                this.message = 'Session deleted successfully';
-                this.success = true;
             } catch (error) {
-                this.error = 'Error deleting session';
-                this.message = this.error;
-                this.success = false;
-                console.error(error);
+                throw new Error(`Error deleting session: ${error.message}`);
             } finally {
                 this.loading = false;
             }
         },
 
+        markAsModified(sessionId) {
+            const session = this.sessions.find((s) => s._id === sessionId);
+            if (session && !session.isNew) {
+                session.isModified = true;
+            }
+        },
+
         selectSession(session) {
             if (!session) return;
+
             this.selectedSession = {
                 ...session,
                 startDate: toDatetimeLocal(session.startDate),
@@ -139,6 +162,6 @@ export const useSessionStore = defineStore('sessionStore', {
 
         clearSelectedSession() {
             this.selectedSession = null;
-        }
-    }
+        },
+    },
 });

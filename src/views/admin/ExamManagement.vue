@@ -1,5 +1,6 @@
 ﻿<template>
   <div class="flex-vertical gap-md">
+
     <!-- Topic column -->
     <div class="panel">
       <div class="header">
@@ -8,48 +9,65 @@
           <a @click="addTopic"><i class="fas fa-square-plus"></i></a>
         </div>
       </div>
+
       <div class="items-list">
-        <div v-for="topic in topicStore.topics"
-            :key="topic._id"
-            class="item"
-            :class="{ active: topic._id === topicStore.selectedTopic?._id }"
-            @click="selectTopic(topic)">
-          <div class="item-content">
+        <div v-for="topic in topicStore.topics" :key="topic._id" class="item">
+          <div class="item-content" :class="{ selected: topicStore.selectedTopic?._id === topic._id }">
             <label>{{ topic.title }}</label>
             <div class="actions">
-              <a @click.stop="updateTopic(topic._id)"><i class="fa-solid fa-pen-to-square"></i></a>
-              <a @click.stop="topicStore.deleteTopic(topic._id)"><i class="fa-solid fa-trash"></i></a>
+              <a @click.stop="toggleTopicDetails(topic)">
+                <i class="fa-solid fa-pen-to-square"></i>
+              </a>
+              <a @click.stop="topicStore.deleteTopic(topic._id)">
+                <i class="fa-solid fa-trash"></i>
+              </a>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Exercises column -->
-    <div v-if="topicStore.selectedTopic" class="panel exercises">
-      <div class="header">
-        <h2 class="title">{{ $t('exercises') }}</h2>
-        <div class="actions">
-          <a @click="addExercise"><i class="fas fa-square-plus"></i></a>
-        </div>
-      </div>
-      <div class="items-list">
-        <div v-for="exercise in topicStore.exercises"
-            :key="exercise._id"
-            class="item">
-          <div class="item-content" @click="toggleDetails(exercise)">
-            <label>{{ exercise.title }}</label>
-            <div class="actions">
-              <a @click.stop="topicStore.deleteExercise(exercise._id)"><i class="fa-solid fa-trash"></i></a>
-            </div>
-          </div>
-          <div v-if="topicStore.selectedExercise" class="item-foldout" :class="{ expanded: topicStore.selectedExercise._id === exercise._id }">
+          <div v-if="topicStore.selectedTopic" class="item-foldout" :class="{ expanded: topicStore.selectedTopic?._id === topic._id }">
             <div class="form-group">
-              <form @submit.prevent="updateExercise">
+              <form @submit.prevent="updateTopic">
                 <div class="flex-vertical padding-md gap-md">
-                  <FormInput v-model="topicStore.selectedExercise.title" :label="$t('exercice_title')" type="text" required />
-                  <FormTextarea v-model="topicStore.selectedExercise.text" :label="$t('exercise_content')"/>
-                  <FormInput type="file" :label="$t('upload_submission')" @update:modelValue="handleFileUpload"/>
+                  <FormInput v-model="topicStore.selectedTopic.title" :label="$t('topic_title')" type="text" required />
+
+                  <!-- Exercises column -->
+                  <div v-if="topicStore.selectedTopic" class="sub-panel exercises">
+                    <div class="header">
+                      <h3 class="title">{{ $t('exercises') }}</h3>
+                      <div class="actions">
+                        <a @click="addExercise"><i class="fas fa-square-plus"></i></a>
+                      </div>
+                    </div>
+                    <div class="items-list">
+                      <div v-for="exercise in topicStore.exercises" :key="exercise._id" class="item">
+                        <div class="item-content" :class="{ selected: topicStore.selectedExercise?._id === exercise._id }">
+                          <label>{{ exercise.title }}</label>
+                          <div class="actions">
+                            <a @click.stop="toggleExerciseDetails(exercise)">
+                              <i class="fa-solid fa-pen-to-square"></i>
+                            </a>
+                            <a @click.stop="topicStore.deleteExercise(exercise._id)">
+                              <i class="fa-solid fa-trash"></i>
+                            </a>
+                          </div>
+                        </div>
+                        <div v-if="topicStore.selectedExercise" class="item-foldout" :class="{ expanded: topicStore.selectedExercise?._id === exercise._id }">
+                          <div class="form-group">
+                            <form @submit.prevent="updateExercise">
+                              <div class="flex-vertical padding-md gap-md">
+                                <FormInput v-model="topicStore.selectedExercise.title" :label="$t('exercise_title')" type="text" required />
+                                <FormTextarea v-model="topicStore.selectedExercise.text" :label="$t('exercise_content')"/>
+                                <FormInput type="file" :label="$t('upload_submission')" @update:modelValue="handleFileUpload"/>
+                                <FormButton :label="$t('update')" type="submit" />
+                              </div>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- End of Exercises column -->
+
                   <FormButton :label="$t('update')" type="submit" />
                 </div>
               </form>
@@ -57,6 +75,12 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div v-if="topicStore.message" class="panel flex-vertical gap-md">
+      <p :class="{ 'error-message': !topicStore.success, 'success-message': topicStore.success }">
+        {{ topicStore.message }}
+      </p>
     </div>
   </div>
 </template>
@@ -72,7 +96,15 @@ import FormButton from "@/components/FormButton.vue";
 const { t } = useI18n();
 const topicStore = useTopicStore();
 
-const toggleDetails = (exercise) => {
+const toggleTopicDetails = (topic) => {
+  if (topicStore.selectedTopic?._id === topic._id) {
+    topicStore.clearSelectedTopic();
+  } else {
+    topicStore.selectTopic(topic);
+  }
+};
+
+const toggleExerciseDetails = (exercise) => {
   if (topicStore.selectedExercise?._id === exercise._id) {
     topicStore.clearSelectedExercise();
   } else {
@@ -94,10 +126,9 @@ const addTopic = async () => {
 };
 
 // Modifier un topic
-const updateTopic = async (id) => {
-  const newTitle = prompt(t("edit_topic"));
-  if (newTitle) {
-    await topicStore.updateTopic(id, newTitle);
+const updateTopic = async () => {
+  if (topicStore.selectedTopic) {
+    await topicStore.updateTopic(topicStore.selectedTopic._id, topicStore.selectedTopic);
   }
 };
 

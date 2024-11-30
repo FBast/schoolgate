@@ -84,6 +84,12 @@
         </div>
       </div>
     </div>
+
+    <div v-if="topicStore.message" class="panel flex-vertical gap-md">
+      <p :class="{ 'error-message': !topicStore.success, 'success-message': topicStore.success }">
+        {{ topicStore.message }}
+      </p>
+    </div>
   </div>
 </template>
 

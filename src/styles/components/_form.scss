@@ -3,11 +3,6 @@
   display: flex;
   flex-direction: column;
 
-  label {
-    color: $text-color;
-    margin-bottom: $spacing-xs;
-  }
-
   input,
   select,
   textarea {

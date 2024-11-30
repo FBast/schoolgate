@@ -73,9 +73,11 @@
         </div>
       </div>
 
-      <p v-if="authStore.message" class="panel" :class="{ 'error-message': !authStore.success, 'success-message': authStore.success }">
-        {{ authStore.message }}
-      </p>
+      <div v-if="authStore.message" class="panel flex-vertical gap-md">
+        <p :class="{ 'error-message': !authStore.success, 'success-message': authStore.success }">
+          {{ authStore.message }}
+        </p>
+      </div>
     </div>
   </main>
 </template>
