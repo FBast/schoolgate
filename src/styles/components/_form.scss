@@ -13,11 +13,12 @@
   textarea {
     flex: 0;
     padding: $spacing-sm;
-    border: 1px solid $text-color;
+    border: 1px solid $text-color-alt;
     border-radius: $border-radius;
     font-family: $font-family;
     width: 100%;
     box-sizing: border-box;
+    background-color: $primary-color;
   }
   
   textarea {

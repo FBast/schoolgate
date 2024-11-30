@@ -24,7 +24,7 @@
 
   p {
     margin-bottom: $spacing-md;
-    color: $text-color;
+    color: $text-color-alt;
   }
 
   a {

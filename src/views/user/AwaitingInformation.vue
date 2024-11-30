@@ -1,5 +1,5 @@
 <template>
-  <div class="layout-wide flex-horizontal gap-md">
+  <div class="flex-horizontal gap-md">
     <div class="panel flex-vertical gap-md">
       <div class="header">
         <h2 class="title">{{ $t('step_description') }}</h2>
@@ -51,10 +51,10 @@ const emit = defineEmits(['statusChanged']);
 
 // Validation des champs
 const firstNameError = computed(() =>
-    authStore.currentUser.firstName.length >= 2 ? '' : t('first_name_error')
+    authStore.currentUser.firstName && authStore.currentUser.firstName.length >= 2 ? '' : t('first_name_error')
 );
 const lastNameError = computed(() =>
-    authStore.currentUser.lastName.length >= 2 ? '' : t('last_name_error')
+    authStore.currentUser.lastName && authStore.currentUser.lastName.length >= 2 ? '' : t('last_name_error')
 );
 const birthDateError = computed(() => {
   const today = new Date().toISOString().split('T')[0];
@@ -101,6 +101,11 @@ const submitForm = async () => {
 
   try {
     await authStore.updateCurrentUser({
+      firstName: authStore.currentUser.firstName,
+      lastName: authStore.currentUser.lastName,
+      birthDate: authStore.currentUser.birthDate,
+      requestedFormation: authStore.currentUser.requestedFormation,
+      requestedGrade: authStore.currentUser.requestedGrade,
       status: STATUS_OPTIONS.awaiting_session,
     });
     emit('statusChanged');

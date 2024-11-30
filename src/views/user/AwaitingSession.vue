@@ -1,5 +1,5 @@
 <template>
-  <div class="layout-wide flex-horizontal gap-md">
+  <div class="flex-horizontal gap-md">
     <!-- Description de l'étape -->
     <div class="panel flex-vertical gap-md">
       <div class="header">
@@ -39,6 +39,8 @@ import {useAuthStore} from "@/stores/authStore.js";
 const authStore = useAuthStore();
 const formationStore = useFormationStore();
 const sessionStore = useSessionStore();
+
+console.log(authStore.currentUser)
 
 // Récupérer la prochaine session
 const nextSession = computed(() => sessionStore.getNextSession);

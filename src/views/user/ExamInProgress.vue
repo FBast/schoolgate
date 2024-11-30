@@ -1,5 +1,5 @@
 <template>
-  <div class="layout-wide flex-horizontal gap-md">
+  <div class="flex-horizontal gap-md">
     <!-- Description de l'étape -->
     <div class="panel flex-vertical gap-md">
       <div class="header">

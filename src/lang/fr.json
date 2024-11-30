@@ -8,6 +8,8 @@
   "awaiting_appointment": "En attente de rendez vous",
   "awaiting_decision": "En attente de décision",
   "awaiting_session": "En attente de session",
+  "verify_mail_description": "Un mail contenant un code de vérification as été envoyé à l'adresse renseigné, récupérer le code et entrez le ici afin de vérifier votre compte.",
+  "awaiting_information_description": "Veuillez entrez vos informations personnelles et selectionner la formation ainsi que l'année pour laquelle vous aimeriez postulez.",
   "exam_in_progress_description": "Votre épreuve est actuellement en cours. Veuillez terminer et soumettre votre rendu avant la fin du délai imparti. Assurez-vous d'avoir téléchargé toutes les ressources nécessaires et de suivre les consignes fournies.",
   "awaiting_interview": "En attente de l'entretien",
   "birth_date": "Date de naissance",

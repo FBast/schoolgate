@@ -31,7 +31,7 @@ const props = defineProps({
 
   span {
     padding: 0 $spacing-sm;
-    color: $text-alt-color;
+    color: $text-color;
   }
 }
 </style>

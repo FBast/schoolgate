@@ -1,14 +1,17 @@
 <template>
-  <div class="dashboard">
-    <header>
+  <header>
+    <img src="@/assets/logo.png" alt="Logo ENSI" class="logo">
+    <nav>
       <ProgressIndicator
-          :steps="Object.values(STATUS_OPTIONS)"
+          :steps="stepKeys"
           :currentStep="currentStepIndex"
       />
-      <FormButton @click="logout" :label="$t('logout')"></FormButton>
-    </header>
+    </nav>
+    <FormButton @click="logout" :label="$t('logout')"></FormButton>
+  </header>
 
-    <section class="content">
+  <main>
+    <section class="content layout-wide gap-md">
       <div v-if="loading">{{ $t('loading') }}</div>
       <component
           v-else
@@ -17,7 +20,7 @@
           :message="errorMessage"
       ></component>
     </section>
-  </div>
+  </main>
 </template>
 
 <script setup>
@@ -55,12 +58,15 @@ const stepMap = {
   [STATUS_OPTIONS.application_processed]: ApplicationProcessed,
 };
 
+// Extraire les clés de `stepMap` pour les étapes
+const stepKeys = Object.keys(stepMap);
+
 // Statut et composant actuel
 const errorMessage = ref('');
 const loading = ref(true);
 
 const currentStepIndex = computed(() =>
-    Object.values(STATUS_OPTIONS).indexOf(authStore.currentUser?.status || STATUS_OPTIONS.error)
+    stepKeys.indexOf(authStore.currentUser?.status || STATUS_OPTIONS.error)
 );
 
 const currentComponent = computed(() => stepMap[authStore.currentUser?.status] || ErrorComponent);
@@ -104,17 +110,3 @@ onMounted(async () => {
   }
 });
 </script>
-
-<style scoped lang="scss">
-@import "@/styles/utils/_variables.scss";
-
-.dashboard {
-  header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: $spacing-md;
-    gap: $spacing-md;
-  }
-}
-</style>

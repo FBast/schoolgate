@@ -1,16 +1,29 @@
 // _variables.scss
 
+// Grey Colors
+//$background: #ffffff;
+//$primary-color: #4f4f4f;
+//$secondary-color: #737373;
+//$accent-color: #a5a5a5;
+//$text-color-alt: #ffffff;
+//$text-color: #333333;
+//$error-color: #a0a0a0;
+//$success-color: #7a7a7a;
+//$border-color: #d3d3d3;
+//$disabled-color: #727272;
+
 // Colors
 $background: #ffffff;
-$primary-color: #4f4f4f;
-$secondary-color: #737373;
-$accent-color: #a5a5a5;
-$text-color: #ffffff;
-$text-alt-color: #333333;
-$error-color: #a0a0a0;
-$success-color: #7a7a7a;
-$border-color: #d3d3d3;
-$disabled-color: #727272;
+$primary-color: #f0f0f0;
+$secondary-color: #3c3c3c;
+$accent-color: #e52959;
+$text-color-alt: #ffffff;
+$text-color: #333333;
+$error-color: #ff0000;
+$success-color: #5cff4a;
+$link-color: #204eff;
+$border-color: #dcdcdc;
+$disabled-color: #c8c8c8;
 
 // Typography
 $font-family: 'Arial', sans-serif;
@@ -45,5 +58,5 @@ $line-height-lg: 1.8;
 $line-height-xl: 2;
 
 // Border
-$border-radius: 5px;
-$box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+$border-radius: 10px;
+$box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);

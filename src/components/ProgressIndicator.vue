@@ -31,12 +31,11 @@ const props = defineProps({
   flex: 1;
   display: flex;
   align-items: center;
-  background-color: $primary-color;
   border-radius: 10px;
   padding: 10px 20px;
-  border: 1px solid #ccc;
   height: 50px;
   gap: $spacing-md;
+  color: $text-color-alt;
 
   label {
     font-weight: bold;

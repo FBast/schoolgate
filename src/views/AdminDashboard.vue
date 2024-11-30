@@ -1,23 +1,24 @@
 <template>
-  <div class="admin-dashboard">
-    <header>
-      <nav class="admin-nav">
-        <FormButton
-            v-for="(step, key, index) in stepMap"
-            :key="index"
-            :class="{ active: key === currentView }"
-            :label="$t(step.label)"
-            @click="changeView(key)"
-        />
-      </nav>
-      <FormButton @click="logout" :label="$t('logout')" />
-    </header>
+  <header>
+    <img src="@/assets/logo.png" alt="Logo ENSI" class="logo">
+    <nav>
+      <FormButton
+          v-for="(step, key, index) in stepMap"
+          :key="index"
+          :class="{ active: key === currentView }"
+          :label="$t(step.label)"
+          @click="changeView(key)"
+      />
+    </nav>
+    <FormButton @click="logout" :label="$t('logout')" />
+  </header>
 
-    <section class="content">
+  <main>
+    <section class="content layout-wide gap-md">
       <div v-if="loading">{{ $t('loading') }}</div>
       <component v-else :is="currentComponent" />
     </section>
-  </div>
+  </main>
 </template>
 
 <script setup>
@@ -84,22 +85,3 @@ const logout = () => {
   router.push("/");
 };
 </script>
-
-<style scoped lang="scss">
-@import "@/styles/utils/_variables.scss";
-
-.admin-dashboard {
-  header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: $spacing-md;
-    gap: $spacing-md;
-
-    .admin-nav {
-      display: flex;
-      gap: $spacing-md;
-    }
-  }
-}
-</style>

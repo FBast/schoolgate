@@ -1,14 +1,6 @@
 ﻿<template>
   <div id="app">
-    <header>
-      <nav>
-        <img src="@/assets/logo.png" alt="Logo ENSI" class="logo">
-      </nav>
-    </header>
-
-    <main>
-      <router-view />
-    </main>
+    <router-view />
 
     <footer>
       <p>&copy; 2024 École des Nouvelles Images</p>
@@ -39,52 +31,3 @@ export default {
   }
 };
 </script>
-
-<style scoped lang="scss">
-
-#app {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-}
-
-header {
-  background-color: $primary-color;
-  padding: 10px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-nav a {
-  color: white;
-  text-decoration: none;
-  font-weight: bold;
-}
-
-.logo {
-  width: 150px;
-}
-
-main {
-  flex: 1;
-  padding: $spacing-md;
-  margin-top: $spacing-md;
-}
-
-footer {
-  background-color: $primary-color;
-  color: white;
-  text-align: center;
-  padding: 10px 0;
-  width: 100%;
-  position: relative;
-  bottom: 0;
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-}
-</style>

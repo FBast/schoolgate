@@ -24,7 +24,7 @@ export const ApiService = {
 
     async resendVerificationCode(email) {
         try {
-            const response = await axiosInstance.post('/users/resend', { email });
+            const response = await axiosInstance.post('/users/resend-code', { email });
             return response.data;
         } catch (error) {
             throw new Error('Erreur lors de l\'envoi du code de vérification');

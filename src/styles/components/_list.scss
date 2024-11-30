@@ -8,7 +8,7 @@
     display: flex;
     flex-direction: column;
     border: 1px solid $border-color;
-    border-radius: $border-radius;
+    //border-radius: $border-radius;
     transition: background-color 0.3s, border-color 0.3s;
 
     &:hover .item-content {
@@ -27,7 +27,7 @@
       gap: $spacing-md;
       align-items: center;
       background-color: $secondary-color;
-      border-radius: $border-radius;
+      color: $text-color-alt;
       
       label {
         flex: 1;
@@ -39,10 +39,6 @@
         font-size: $font-size-md;
         gap: $spacing-md;
         justify-content: flex-end;
-
-        a {
-          color: $text-color;
-        }
       }
     }
 

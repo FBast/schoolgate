@@ -4,7 +4,6 @@
   flex-direction: column;
   border: 1px solid $border-color;
   padding: $spacing-md;
-  background-color: $primary-color;
   border-radius: $border-radius;
   box-shadow: $box-shadow;
   min-width: 400px;
@@ -17,6 +16,7 @@
     .title {
       flex: 1;
       font-weight: bold;
+      color: $text-color;
     }
 
     .actions {

@@ -1,5 +1,5 @@
 ﻿<template>
-  <div v-if="!formationStore.loading && !userStore.loading" class="layout-wide gap-md">
+  <div v-if="!formationStore.loading && !userStore.loading">
     <div class="panel">
       <div class="header">
         <h2 class="title">{{ $t('user_information') }}</h2>

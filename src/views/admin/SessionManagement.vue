@@ -1,5 +1,5 @@
 ﻿<template>
-  <div class="layout-wide flex-vertical gap-md">
+  <div class="flex-vertical gap-md">
     <div class="panel">
       <div class="header">
         <h2 class="title">{{ $t('sessions') }}</h2>
