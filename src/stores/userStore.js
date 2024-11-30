@@ -5,15 +5,13 @@ export const useUserStore = defineStore('userStore', {
     state: () => ({
         users: [],
         selectedUser: null,
-        message: '',
-        success: false,
         error: null,
         loading: false,
     }),
 
     getters: {
-        getUserById: (state) => (id) => 
-            state.users.find((user) => user._id === id),
+        getUserById: (state) => (id) => state.users.find((user) => user._id === id),
+        getModifiedUsers: (state) => state.users.filter(user => user.isModified),
     },
 
     actions: {
@@ -23,17 +21,47 @@ export const useUserStore = defineStore('userStore', {
 
             try {
                 const response = await ApiService.getUsers();
-
-                // Formater les dates pour chaque utilisateur
                 this.users = response
                     .filter(user => user.role === "user")
                     .map(user => ({
                         ...user,
                         birthDate: user.birthDate ? new Date(user.birthDate).toISOString().split("T")[0] : null,
                         meetingDate: user.meetingDate ? new Date(user.meetingDate).toISOString().slice(0, 16) : null,
+                        isModified: false,
                     }));
             } catch (error) {
                 this.error = 'Error fetching users';
+                console.error(error);
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async updateUser(user) {
+            try {
+                await ApiService.updateUser(user._id, user);
+                user.isModified = false;
+                console.log('User updated successfully');
+            } catch (error) {
+                console.error(`Error saving user: ${error.message}`);
+                throw new Error('Error saving user');
+            }
+        },
+
+        async updateAllUsers() {
+            this.loading = true;
+            this.error = null;
+
+            try {
+                const modifiedUsers = this.getModifiedUsers;
+
+                for (const user of modifiedUsers) {
+                    await this.updateUser(user);
+                }
+
+                console.log('All modified users saved successfully');
+            } catch (error) {
+                this.error = 'Error saving users';
                 console.error(error);
             } finally {
                 this.loading = false;
@@ -45,55 +73,38 @@ export const useUserStore = defineStore('userStore', {
             this.error = null;
 
             try {
-                await ApiService.deleteUser(userId);
-                this.users = this.users.filter((user) => user._id !== userId);
+                const userIndex = this.users.findIndex(user => user._id === userId);
+                if (userIndex === -1) throw new Error(`User with ID ${userId} not found`);
 
-                // Réinitialiser l'utilisateur sélectionné si supprimé
+                await ApiService.deleteUser(userId);
+                this.users.splice(userIndex, 1);
+
                 if (this.selectedUser && this.selectedUser._id === userId) {
                     this.selectedUser = null;
                 }
 
-                this.message = 'User deleted successfully';
-                this.success = true;
+                console.log('User deleted successfully');
             } catch (error) {
                 this.error = 'Error deleting user';
-                this.message = this.error;
-                this.success = false;
                 console.error(error);
             } finally {
                 this.loading = false;
             }
         },
 
-        async updateUser(userId, updatedUserData) {
-            this.loading = true;
-            this.error = null;
-
-            try {
-                const response = await ApiService.updateUser(userId, updatedUserData);
-                const index = this.users.findIndex((user) => user._id === userId);
-                if (index !== -1) {
-                    this.users[index] = response;
-
-                    if (this.selectedUser && this.selectedUser._id === userId) {
-                        this.selectedUser = response;
-                    }
-                }
-
-                this.message = 'User updated successfully';
-                this.success = true;
-            } catch (error) {
-                this.error = 'Error updating user';
-                this.message = this.error;
-                this.success = false;
-                console.error(error);
-            } finally {
-                this.loading = false;
+        markAsModified(userId) {
+            const user = this.users.find(user => user._id === userId);
+            if (user) {
+                user.isModified = true;
             }
         },
 
         selectUser(user) {
-            this.selectedUser = user;
+            if (!user) {
+                this.selectedUser = null;
+            } else {
+                this.selectedUser = { ...user };
+            }
         },
 
         clearSelectedUser() {
