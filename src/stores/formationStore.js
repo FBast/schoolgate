@@ -4,11 +4,9 @@ import { ApiService } from '@/utils/apiService.js';
 export const useFormationStore = defineStore('formationStore', {
     state: () => ({
         formations: [],
-        grades: [],
         selectedFormation: null,
         selectedGrade: null,
-        error: null,
-        loading: false
+        loading: false,
     }),
 
     getters: {
@@ -19,208 +17,215 @@ export const useFormationStore = defineStore('formationStore', {
             })),
 
         gradeOptions: (state) =>
-            state.grades.map((grade) => ({
-                label: grade.grade,
+            (state.selectedFormation?.grades || []).map((grade) => ({
+                label: grade.title,
                 value: grade._id,
             })),
-
-        gradeOptionsByFormationId: (state) => (formationId) =>
-            state.grades
-                .filter((grade) => grade.formationId === formationId)
-                .map((grade) => ({
-                    label: grade.grade,
-                    value: grade._id,
-                })),
 
         getFormationById: (state) => (id) =>
             state.formations.find((formation) => formation._id === id),
 
-        getGradesByFormationId: (state) => (formationId) =>
-            state.grades.filter((grade) => grade.formationId === formationId),
-        
+        getGradeById: (state) => (gradeId) =>
+            state.selectedFormation?.grades.find((grade) => grade._id === gradeId) || null,
+
+        getTopicsByGradeId: (state) => (gradeId) => {
+            const grade = state.selectedFormation?.grades.find((g) => g._id === gradeId);
+            return grade ? grade.topics : [];
+        },
+
         getFormationTitle: (state) => (formationId) => {
             const formation = state.formations.find(f => f._id === formationId);
             return formation ? formation.title : 'Unknown Formation';
         },
 
         getGradeLabel: (state) => (gradeId) => {
-            const grade = state.grades.find((g) => g._id === gradeId);
-            return grade ? grade.grade : 'Unknown Grade';
+            const grade = state.selectedFormation?.grades.find((g) => g._id === gradeId);
+            return grade ? grade.title : 'Unknown Grade';
         },
     },
 
     actions: {
-        // Récupérer toutes les formations
+        // Fetch all formations with their grades
         async fetchFormations() {
             this.loading = true;
-            this.error = null;
             try {
                 const response = await ApiService.getFormations();
-                this.formations = response;
-
-                // Sélectionner automatiquement la première formation si elle existe
+                this.formations = response.map((formation) => ({
+                    ...formation,
+                    grades: formation.grades.map((grade) => ({
+                        ...grade,
+                        isNew: false,
+                    })),
+                    isNew: false,
+                    isModified: false,
+                }));
                 if (this.formations.length > 0) {
                     this.selectFormation(this.formations[0]);
                 }
+                console.log('Formations fetched successfully');
             } catch (error) {
-                this.error = 'Error fetching formations';
-                console.error(error);
+                throw new Error(`Error fetching formations: ${error.message}`);
             } finally {
                 this.loading = false;
             }
         },
 
-        async fetchGrades() {
-            this.loading = true;
-            this.error = null;
-            try {
-                const response = await ApiService.getGrades();
-                this.grades = response;
+        addFormation(title = 'New Formation') {
+            const newFormation = {
+                _id: `temp-${Date.now()}`,
+                title,
+                grades: [],
+                isNew: true,
+                isModified: true,
+            };
+            this.formations.push(newFormation);
+            this.selectFormation(newFormation);
+            console.log('New formation added locally');
+        },
 
-                if (this.selectedFormation) {
-                    const grades = this.getGradesByFormationId(this.selectedFormation._id);
-                    if (grades.length > 0) {
-                        this.selectGrade(grades[0]);
+        addGrade(title = 'New Grade') {
+            if (!this.selectedFormation) {
+                throw new Error('No formation selected to add a grade.');
+            }
+
+            const newGrade = {
+                _id: `temp-${Date.now()}`,
+                title,
+                topics: [],
+                isNew: true,
+            };
+
+            this.selectedFormation.grades.push(newGrade);
+            this.selectedFormation.isModified = true;
+            this.selectGrade(newGrade);
+            console.log('New grade added locally');
+        },
+
+        async updateFormation(formation) {
+            try {
+                let updatedFormation;
+
+                // Prepare grades for backend (exclude tempId)
+                const backendGrades = formation.grades.map((grade) => {
+                    if (grade.isNew) {
+                        const tempId = grade._id;
+                        const { _id, ...rest } = grade;
+                        return { ...rest, tempId };
                     }
+                    return grade;
+                });
+
+                if (formation.isNew) {
+                    const response = await ApiService.createFormation({
+                        title: formation.title,
+                        grades: backendGrades,
+                    });
+
+                    updatedFormation = response.formation;
+                    formation._id = updatedFormation._id;
+                    formation.isNew = false;
+
+                    console.log('New formation created successfully:', formation._id);
+                } else if (formation.isModified) {
+                    const response = await ApiService.updateFormation(formation._id, {
+                        title: formation.title,
+                        grades: backendGrades,
+                    });
+
+                    updatedFormation = response.formation;
+
+                    console.log('Formation updated successfully:', formation._id);
                 }
+
+                // Synchronize IDs for grades
+                updatedFormation.grades.forEach((savedGrade) => {
+                    const localGrade = formation.grades.find((grade) => grade._id === savedGrade.tempId);
+                    if (localGrade) {
+                        localGrade._id = savedGrade._id;
+                    }
+                });
+
+                formation.isModified = false;
             } catch (error) {
-                this.error = 'Error fetching grades';
-                console.error(error);
+                throw new Error(`Error saving formation: ${error.message}`);
+            }
+        },
+
+        async saveAllChanges() {
+            this.loading = true;
+            try {
+                for (const formation of this.formations.filter((f) => f.isNew || f.isModified)) {
+                    await this.updateFormation(formation);
+                }
+                console.log('All changes saved successfully');
+            } catch (error) {
+                throw new Error(`Error saving changes: ${error.message}`);
             } finally {
                 this.loading = false;
             }
         },
 
-        // Ajouter une nouvelle formation
-        async addFormation(title) {
-            this.error = null;
-            try {
-                const response = await ApiService.createFormation({ title });
-                const newFormation = response.formation;
-                this.formations.push(newFormation);
-                this.selectFormation(newFormation);
-                
-                return newFormation;
-            } catch (error) {
-                this.error = 'Error adding formation';
-                console.error(error);
-                throw error;
-            }
-        },
-
-        // Ajouter un grade à une formation
-        async addGradeToFormation(formationId, gradeData) {
-            if (!formationId) {
-                throw new Error('Formation ID is required to add a grade');
-            }
-            this.error = null;
-            try {
-                const response = await ApiService.createGrade({
-                    ...gradeData,
-                    formationId,
-                });
-                const newGrade = response.grade;
-
-                // Ajouter le nouveau grade au tableau des grades
-                this.grades.push(newGrade);
-                this.selectGrade(newGrade);
-
-                return newGrade;
-            } catch (error) {
-                this.error = 'Error adding grade';
-                console.error(error);
-                throw error;
-            }
-        },
-
-        // Mettre à jour une formation
-        async updateFormation(id, title) {
-            this.error = null;
-            try {
-                const response = await ApiService.updateFormation(id, { title });
-                const updatedFormation = response.formation;
-                const index = this.formations.findIndex((formation) => formation._id === id);
-                if (index !== -1) {
-                    this.formations[index] = updatedFormation;
-                }
-                if (this.selectedFormation && this.selectedFormation._id === id) {
-                    this.selectedFormation = updatedFormation;
-                }
-                return updatedFormation;
-            } catch (error) {
-                this.error = 'Error updating formation';
-                console.error(error);
-                throw error;
-            }
-        },
-
-        // Mettre à jour un grade
-        async updateGrade(gradeId, gradeData) {
-            this.error = null;
-            try {
-                const response = await ApiService.updateGrade(gradeId, gradeData);
-                const updatedGrade = response.grade;
-
-                const index = this.grades.findIndex((grade) => grade._id === gradeId);
-                if (index !== -1) {
-                    this.grades[index] = updatedGrade;
-                }
-
-                return updatedGrade;
-            } catch (error) {
-                this.error = 'Error updating grade';
-                console.error(error);
-                throw error;
-            }
-        },
-
-        // Supprimer une formation
         async deleteFormation(id) {
-            this.error = null;
             try {
-                await ApiService.deleteFormation(id);
-                this.formations = this.formations.filter((formation) => formation._id !== id);
+                const index = this.formations.findIndex((f) => f._id === id);
+                if (index === -1) throw new Error('Formation not found');
 
-                // Supprimer les grades associés à la formation supprimée
-                this.grades = this.grades.filter((grade) => grade.formationId !== id);
+                const formation = this.formations[index];
 
-                if (this.selectedFormation && this.selectedFormation._id === id) {
-                    this.selectedFormation = this.formations.length > 0 ? this.formations[0] : null;
+                if (formation.isNew) {
+                    this.formations.splice(index, 1);
+                    console.log('New formation deleted locally:', id);
+                } else {
+                    await ApiService.deleteFormation(id);
+                    this.formations.splice(index, 1);
+                    console.log('Formation deleted successfully:', id);
+                }
+
+                if (this.selectedFormation?._id === id) {
+                    this.selectFormation(this.formations.length > 0 ? this.formations[0] : null);
                 }
             } catch (error) {
-                this.error = 'Error deleting formation';
-                console.error(error);
-                throw error;
+                throw new Error(`Error deleting formation: ${error.message}`);
             }
         },
 
-        // Supprimer un grade
-        async deleteGrade(gradeId) {
-            this.error = null;
-            try {
-                await ApiService.deleteGrade(gradeId);
-                this.grades = this.grades.filter((grade) => grade._id !== gradeId);
-            } catch (error) {
-                this.error = 'Error deleting grade';
-                console.error(error);
-                throw error;
+        deleteGrade(gradeId) {
+            if (!this.selectedFormation) throw new Error('No formation selected to delete a grade.');
+
+            const index = this.selectedFormation.grades.findIndex((g) => g._id === gradeId);
+            if (index === -1) throw new Error('Grade not found');
+
+            const grade = this.selectedFormation.grades[index];
+
+            if (grade.isNew) {
+                this.selectedFormation.grades.splice(index, 1);
+                console.log('New grade deleted locally:', gradeId);
+            } else {
+                this.selectedFormation.grades.splice(index, 1);
+                this.selectedFormation.isModified = true;
+                console.log('Grade deleted locally:', gradeId);
+            }
+
+            if (this.selectedGrade?._id === gradeId) {
+                this.selectedGrade = this.selectedFormation.grades.length > 0 ? this.selectedFormation.grades[0] : null;
+            }
+        },
+
+        markFormationAsModified(formationId) {
+            const formation = this.formations.find(formation => formation._id === formationId);
+            if (formation && !formation.isNew) {
+                formation.isModified = true;
+                console.log('Formation marked as modified:', formationId);
             }
         },
 
         selectFormation(formation) {
             this.selectedFormation = formation;
-
-            const grades = this.getGradesByFormationId(formation._id);
-            if (grades.length > 0) {
-                this.selectGrade(grades[0]);
-            } else {
-                this.selectedGrade = null;
-            }
+            this.selectedGrade = formation?.grades?.length > 0 ? formation.grades[0] : null;
         },
-        
+
         selectGrade(grade) {
             this.selectedGrade = grade;
         },
-
     },
 });

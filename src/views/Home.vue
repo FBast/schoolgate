@@ -25,7 +25,7 @@ const checkAuthentication = () => {
         router.push('/auth');
       } 
       else if (decodedToken.role === ROLES_OPTIONS.admin) {
-        router.push('/adminDashboard');
+        router.push('/admin-dashboard');
       } 
       else {
         router.push('/dashboard');

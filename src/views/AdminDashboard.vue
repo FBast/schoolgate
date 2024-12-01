@@ -15,7 +15,12 @@
 
   <main>
     <section class="content layout-wide gap-md">
-      <div v-if="loading">{{ $t('loading') }}</div>
+      <!-- Loading Panel -->
+      <div v-if="loading" class="panel">
+        <p class="loading-message">
+          {{ $t('loading') }}
+        </p>
+      </div>
 
       <component
           v-else
@@ -34,12 +39,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import { useRouter } from "vue-router";
+import {ref, computed, onMounted, watch} from "vue";
+import {useRoute, useRouter} from "vue-router";
 import FormButton from "@/components/FormButton.vue";
 import UserManagement from "@/views/admin/UserManagement.vue";
 import ErrorComponent from "@/components/ErrorComponent.vue";
-import ExamManagement from "@/views/admin/ExamManagement.vue";
+import TopicManagement from "@/views/admin/TopicManagement.vue";
 import FormationManagement from "@/views/admin/FormationManagement.vue";
 import SessionManagement from "@/views/admin/SessionManagement.vue";
 import {useFormationStore} from "@/stores/formationStore.js";
@@ -48,21 +53,32 @@ import {useTopicStore} from "@/stores/topicStore.js";
 import {useAuthStore} from "@/stores/authStore.js";
 import {useUserStore} from "@/stores/userStore.js";
 
+// Define props
+defineProps({
+  currentView: {
+    type: String,
+    default: "users",
+  },
+});
+
 const authStore = useAuthStore();
 const userStore = useUserStore();
 const formationStore = useFormationStore();
 const sessionStore = useSessionStore();
 const topicStore = useTopicStore();
 
+const router = useRouter();
+const route = useRoute();
+
 const stepMap = {
-  user_management: { label: "users", component: UserManagement },
-  date_management: { label: "sessions", component: SessionManagement },
-  exam_management: { label: "exams", component: ExamManagement },
-  formation_management: { label: "formations", component: FormationManagement },
+  users: { label: "users", path: "user-management", component: UserManagement },
+  session: { label: "sessions", path: "date-management", component: SessionManagement },
+  topics: { label: "topics", path: "topic-management", component: TopicManagement },
+  formations: { label: "formations", path: "formation-management", component: FormationManagement },
 };
 
-const currentView = ref("user_management");
-const notification = ref({ message: '', success: true });
+const currentView = ref(route.params.currentView || "users");
+const notification = ref({ message: "", success: true });
 
 const currentComponent = computed(() => {
   const step = stepMap[currentView.value];
@@ -71,6 +87,7 @@ const currentComponent = computed(() => {
 
 const changeView = (key) => {
   currentView.value = key;
+  router.push({ name: "AdminDashboard", params: { currentView: key } });
 };
 
 const handleNotification = ({ message, success }) => {
@@ -89,7 +106,6 @@ onMounted(async () => {
       authStore.fetchCurrentUser(),
       userStore.fetchUsers(),
       formationStore.fetchFormations(),
-      formationStore.fetchGrades(),
       sessionStore.fetchSessions(),
       topicStore.fetchTopics()
     ]);
@@ -100,7 +116,15 @@ onMounted(async () => {
   }
 });
 
-const router = useRouter();
+watch(
+    () => route.params.currentView,
+    (newView) => {
+      if (newView && stepMap[newView]) {
+        currentView.value = newView;
+      }
+    }
+);
+
 const logout = () => {
   localStorage.removeItem("authToken");
   router.push("/");

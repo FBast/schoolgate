@@ -27,9 +27,10 @@ const routes = [
         }
     },
     {
-        path: '/adminDashboard',
+        path: '/admin-dashboard/:currentView?',
         name: 'AdminDashboard',
         component: AdminDashboard,
+        props: true,
         meta: {
             requiresAuth: true,
             requiresAdmin: true

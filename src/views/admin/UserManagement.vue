@@ -1,10 +1,10 @@
 ﻿<template>
-  <div v-if="!formationStore.loading && !userStore.loading">
+  <div class="flex-vertical gap-md">
     <div class="panel">
       <div class="header">
         <h2 class="title">{{ $t('user_information') }}</h2>
         <div class="actions">
-          <a @click="updateAllUsers">
+          <a @click="saveAllChanges">
             <i class="fas fa-save"></i>
           </a>
         </div>
@@ -45,31 +45,31 @@
                       v-model="user.firstName"
                       :label="$t('first_name')"
                       type="text"
-                      @input="userStore.markAsModified(user._id)"
+                      @input="userStore.markUserAsModified(user._id)"
                   />
                   <FormInput
                       v-model="user.lastName"
                       :label="$t('last_name')"
                       type="text"
-                      @input="userStore.markAsModified(user._id)"
+                      @input="userStore.markUserAsModified(user._id)"
                   />
                   <FormInput
                       v-model="user.birthDate"
                       :label="$t('birth_date')"
                       type="date"
-                      @input="userStore.markAsModified(user._id)"
+                      @input="userStore.markUserAsModified(user._id)"
                   />
                   <FormSelect
                       v-model="user.requestedFormation"
                       :options="formationStore.formationOptions"
                       :label="$t('requested_formation')"
-                      @change="userStore.markAsModified(user._id)"
+                      @change="userStore.markUserAsModified(user._id)"
                   />
                   <FormSelect
                       v-model="user.requestedGrade"
                       :options="getGradeOptions(user.requestedFormation)"
                       :label="$t('requested_grade')"
-                      @change="userStore.markAsModified(user._id)"
+                      @change="userStore.markUserAsModified(user._id)"
                   />
                 </div>
                 <div class="flex-vertical gap-md">
@@ -77,18 +77,18 @@
                       v-model="user.status"
                       :options="statusOptions"
                       :label="$t('status')"
-                      @change="userStore.markAsModified(user._id)"
+                      @change="userStore.markUserAsModified(user._id)"
                   />
                   <FormTextarea
                       v-model="user.evaluation"
                       :label="$t('evaluation_text')"
-                      @input="userStore.markAsModified(user._id)"
+                      @input="userStore.markUserAsModified(user._id)"
                   />
                   <FormInput
                       v-model="user.meetingDate"
                       :label="$t('meeting_date')"
                       type="datetime-local"
-                      @input="userStore.markAsModified(user._id)"
+                      @input="userStore.markUserAsModified(user._id)"
                   />
                 </div>
               </div>
@@ -98,13 +98,9 @@
       </div>
     </div>
   </div>
-  <div v-else>
-    <p>{{ $t('loading') }}</p>
-  </div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/userStore';
 import { useFormationStore } from '@/stores/formationStore';
@@ -116,13 +112,22 @@ import { STATUS_OPTIONS } from '@/utils/constants';
 const userStore = useUserStore();
 const formationStore = useFormationStore();
 const { t } = useI18n();
+const emit = defineEmits(["notify"]);
 
 const statusOptions = Object.keys(STATUS_OPTIONS).map(key => ({
   label: t(key),
   value: STATUS_OPTIONS[key],
 }));
 
-const getGradeOptions = (formationId) => formationStore.gradeOptionsByFormationId(formationId);
+const getGradeOptions = (formationId) => {
+  if (!formationId) return []; // Retourne un tableau vide si l'ID de formation est absent
+
+  const formation = formationStore.getFormationById(formationId);
+  return formation?.grades.map((grade) => ({
+    label: grade.title,
+    value: grade._id,
+  })) || [];
+};
 
 const toggleDetails = (user) => {
   if (userStore.selectedUser?._id === user._id) {
@@ -135,17 +140,18 @@ const toggleDetails = (user) => {
 const deleteUser = async (userId) => {
   try {
     await userStore.deleteUser(userId);
+    emit("notify", { success: true, message: t("success_deleting_user") });
   } catch (error) {
-    console.error(error);
+    emit("notify", { success: true, message: t("error_deleting_user") });
   }
 };
 
-const updateAllUsers = async () => {
+const saveAllChanges = async () => {
   try {
-    await userStore.updateAllUsers();
-    console.log('All modified users saved successfully');
+    await userStore.saveAllChanges();
+    emit("notify", { success: true, message: t("all_changes_saved_successfully") });
   } catch (error) {
-    console.error('Error updating users:', error);
+    emit("notify", { success: false, message: t("error_saving_changes") });
   }
 };
 </script>

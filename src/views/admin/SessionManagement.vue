@@ -4,7 +4,7 @@
       <div class="header">
         <h2 class="title">{{ $t('sessions') }}</h2>
         <div class="actions">
-          <a @click="updateAllSessions">
+          <a @click="saveAllChanges">
             <i class="fas fa-save"></i>
           </a>
           <a @click="addSession">
@@ -57,19 +57,19 @@
                   :label="$t('name')"
                   type="text"
                   v-model="session.name"
-                  @input="sessionStore.markAsModified(session._id)"
+                  @input="sessionStore.markSessionAsModified(session._id)"
               />
               <FormInput
                   :label="$t('start_date')"
                   type="datetime-local"
                   v-model="session.startDate"
-                  @input="sessionStore.markAsModified(session._id)"
+                  @input="sessionStore.markSessionAsModified(session._id)"
               />
               <FormInput
                   :label="$t('end_date')"
                   type="datetime-local"
                   v-model="session.endDate"
-                  @input="sessionStore.markAsModified(session._id)"
+                  @input="sessionStore.markSessionAsModified(session._id)"
               />
             </div>
           </div>
@@ -105,9 +105,9 @@ const addSession = () => {
 };
 
 // Mise à jour de toutes les sessions modifiées
-const updateAllSessions = async () => {
+const saveAllChanges = async () => {
   try {
-    await sessionStore.updateAllSessions();
+    await sessionStore.saveAllChanges();
     emit("notify", { success: true, message: t("all_changes_saved_successfully") });
   } catch (error) {
     emit("notify", { success: false, message: t("error_saving_changes") });

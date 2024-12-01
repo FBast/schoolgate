@@ -5,7 +5,6 @@ export const useUserStore = defineStore('userStore', {
     state: () => ({
         users: [],
         selectedUser: null,
-        error: null,
         loading: false,
     }),
 
@@ -17,7 +16,6 @@ export const useUserStore = defineStore('userStore', {
     actions: {
         async fetchUsers() {
             this.loading = true;
-            this.error = null;
 
             try {
                 const response = await ApiService.getUsers();
@@ -29,9 +27,9 @@ export const useUserStore = defineStore('userStore', {
                         meetingDate: user.meetingDate ? new Date(user.meetingDate).toISOString().slice(0, 16) : null,
                         isModified: false,
                     }));
+                console.log('Users fetched successfully');
             } catch (error) {
-                this.error = 'Error fetching users';
-                console.error(error);
+                throw new Error(`Error fetching users: ${error.message}`);
             } finally {
                 this.loading = false;
             }
@@ -43,14 +41,12 @@ export const useUserStore = defineStore('userStore', {
                 user.isModified = false;
                 console.log('User updated successfully');
             } catch (error) {
-                console.error(`Error saving user: ${error.message}`);
-                throw new Error('Error saving user');
+                throw new Error(`Error updating user: ${error.message}`);
             }
         },
 
-        async updateAllUsers() {
+        async saveAllChanges() {
             this.loading = true;
-            this.error = null;
 
             try {
                 const modifiedUsers = this.getModifiedUsers;
@@ -61,8 +57,7 @@ export const useUserStore = defineStore('userStore', {
 
                 console.log('All modified users saved successfully');
             } catch (error) {
-                this.error = 'Error saving users';
-                console.error(error);
+                throw new Error(`Error updating modified users: ${error.message}`);
             } finally {
                 this.loading = false;
             }
@@ -85,14 +80,13 @@ export const useUserStore = defineStore('userStore', {
 
                 console.log('User deleted successfully');
             } catch (error) {
-                this.error = 'Error deleting user';
-                console.error(error);
+                throw new Error(`Error deleting user: ${error.message}`);
             } finally {
                 this.loading = false;
             }
         },
 
-        markAsModified(userId) {
+        markUserAsModified(userId) {
             const user = this.users.find(user => user._id === userId);
             if (user) {
                 user.isModified = true;

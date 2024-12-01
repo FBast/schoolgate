@@ -6,19 +6,17 @@ export const ApiService = {
         try {
             const response = await axiosInstance.post('/users', { email, password });
             return response.data;
-        }
-        catch (error) {
-            throw new Error('Erreur lors de la création de l\'utilisateur');
+        } catch (error) {
+            throw new Error('Error creating user');
         }
     },
-    
+
     async loginUser(email, password) {
         try {
             const response = await axiosInstance.post('/users/login', { email, password });
             return response.data;
-        }
-        catch (error) {
-            throw new Error('Erreur lors de la connexion');
+        } catch (error) {
+            throw new Error('Error logging in');
         }
     },
 
@@ -27,7 +25,7 @@ export const ApiService = {
             const response = await axiosInstance.post('/users/resend-code', { email });
             return response.data;
         } catch (error) {
-            throw new Error('Erreur lors de l\'envoi du code de vérification');
+            throw new Error('Error resending verification code');
         }
     },
 
@@ -36,7 +34,7 @@ export const ApiService = {
             const response = await axiosInstance.post('/users/request-password-reset', { email });
             return response.data;
         } catch (error) {
-            throw new Error(error.response?.data?.message || 'Erreur lors de la demande de réinitialisation du mot de passe');
+            throw new Error(error.response?.data?.message || 'Error requesting password reset');
         }
     },
 
@@ -45,17 +43,16 @@ export const ApiService = {
             const response = await axiosInstance.post('/users/reset-password', { email, validationToken, newPassword });
             return response.data;
         } catch (error) {
-            throw new Error(error.response?.data?.message || 'Erreur lors de la réinitialisation du mot de passe');
+            throw new Error(error.response?.data?.message || 'Error resetting password');
         }
     },
-    
+
     async verifyUser(token, email) {
         try {
             const response = await axiosInstance.post('/users/verify', { token, email });
             return response.data;
-        } 
-        catch (error) {
-            throw new Error('Erreur lors de la vérification de l\'utilisateur');
+        } catch (error) {
+            throw new Error('Error verifying user');
         }
     },
 
@@ -66,11 +63,9 @@ export const ApiService = {
                     Authorization: `Bearer ${localStorage.getItem('authToken')}`
                 }
             });
-
             return response.data;
-        } 
-        catch (error) {
-            throw new Error('Erreur lors de la récupération des informations utilisateur');
+        } catch (error) {
+            throw new Error('Error retrieving user profile');
         }
     },
 
@@ -83,7 +78,7 @@ export const ApiService = {
             });
             return response.data;
         } catch (error) {
-            throw new Error('Erreur lors de la mise à jour des informations utilisateur.');
+            throw new Error('Error updating user profile');
         }
     },
 
@@ -97,10 +92,9 @@ export const ApiService = {
                     Authorization: `Bearer ${localStorage.getItem('authToken')}`
                 }
             });
-
             return response.data;
         } catch (error) {
-            throw new Error('Erreur lors de l\'upload du fichier PDF.');
+            throw new Error('Error uploading PDF report');
         }
     },
 
@@ -112,9 +106,8 @@ export const ApiService = {
                 }
             });
             return response.data;
-        } 
-        catch (error) {
-            throw new Error('Erreur lors de la récupération des utilisateurs');
+        } catch (error) {
+            throw new Error('Error retrieving users');
         }
     },
 
@@ -126,9 +119,8 @@ export const ApiService = {
                 }
             });
             return response.data;
-        } 
-        catch (error) {
-            throw new Error('Erreur lors de la récupération de l\'utilisateur');
+        } catch (error) {
+            throw new Error('Error retrieving user');
         }
     },
 
@@ -140,9 +132,8 @@ export const ApiService = {
                 }
             });
             return response.data;
-        } 
-        catch (error) {
-            throw new Error('Erreur lors de la mise à jour des informations utilisateur');
+        } catch (error) {
+            throw new Error('Error updating user');
         }
     },
 
@@ -154,9 +145,8 @@ export const ApiService = {
                 }
             });
             return response.data;
-        } 
-        catch (error) {
-            throw new Error('Erreur lors de la suppression de l\'utilisateur');
+        } catch (error) {
+            throw new Error('Error deleting user');
         }
     },
 
@@ -226,73 +216,6 @@ export const ApiService = {
         }
     },
 
-    // Exercise API methods
-    async createExercise(topicId, exerciseData) {
-        try {
-            const response = await axiosInstance.post('/exercises', { ...exerciseData, topicId }, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error creating exercise');
-        }
-    },
-
-    async getExercises(topicId = null) {
-        try {
-            const url = topicId ? `/exercises?topicId=${topicId}` : '/exercises';
-            const response = await axiosInstance.get(url, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw new Error(`Error retrieving exercises: ${error.response?.data?.message || error.message}`);
-        }
-    },
-
-    async getExercise(exerciseId) {
-        try {
-            const response = await axiosInstance.get(`/exercises/${exerciseId}`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error retrieving exercise');
-        }
-    },
-
-    async updateExercise(exerciseId, exerciseData) {
-        try {
-            const response = await axiosInstance.put(`/exercises/${exerciseId}`, exerciseData, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error updating exercise');
-        }
-    },
-
-    async deleteExercise(exerciseId) {
-        try {
-            const response = await axiosInstance.delete(`/exercises/${exerciseId}`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error deleting exercise');
-        }
-    },
-
     // Formation API methods
     async createFormation(formationData) {
         try {
@@ -303,7 +226,7 @@ export const ApiService = {
             });
             return response.data;
         } catch (error) {
-            throw new Error(`Error creating formation: ${error.response?.data?.message || error.message}`);
+            throw new Error('Error creating formation');
         }
     },
 
@@ -316,7 +239,7 @@ export const ApiService = {
             });
             return response.data;
         } catch (error) {
-            throw new Error(`Error retrieving grades: ${error.response?.data?.message || error.message}`);
+            throw new Error('Error retrieving grades');
         }
     },
 
@@ -329,7 +252,7 @@ export const ApiService = {
             });
             return response.data;
         } catch (error) {
-            throw new Error(`Error updating formation: ${error.response?.data?.message || error.message}`);
+            throw new Error('Error updating formation');
         }
     },
 
@@ -342,7 +265,7 @@ export const ApiService = {
             });
             return response.data;
         } catch (error) {
-            throw new Error(`Error deleting formation: ${error.response?.data?.message || error.message}`);
+            throw new Error('Error deleting formation');
         }
     },
 
@@ -356,7 +279,7 @@ export const ApiService = {
             });
             return response.data;
         } catch (error) {
-            throw new Error(`Error creating grade: ${error.response?.data?.message || error.message}`);
+            throw new Error('Error creating grade');
         }
     },
 
@@ -369,10 +292,10 @@ export const ApiService = {
             });
             return response.data;
         } catch (error) {
-            throw new Error(`Error retrieving formations: ${error.response?.data?.message || error.message}`);
+            throw new Error('Error retrieving formations');
         }
     },
-    
+
     async getFormationGrades(formationId) {
         try {
             const response = await axiosInstance.get(`/grades?formationId=${formationId}`, {
@@ -382,7 +305,7 @@ export const ApiService = {
             });
             return response.data;
         } catch (error) {
-            throw new Error(`Error retrieving grades: ${error.response?.data?.message || error.message}`);
+            throw new Error('Error retrieving grades');
         }
     },
 
@@ -395,7 +318,7 @@ export const ApiService = {
             });
             return response.data;
         } catch (error) {
-            throw new Error(`Error updating grade: ${error.response?.data?.message || error.message}`);
+            throw new Error('Error updating grade');
         }
     },
 
@@ -408,7 +331,7 @@ export const ApiService = {
             });
             return response.data;
         } catch (error) {
-            throw new Error(`Error deleting grade: ${error.response?.data?.message || error.message}`);
+            throw new Error('Error deleting grade');
         }
     },
 
@@ -424,9 +347,8 @@ export const ApiService = {
             throw new Error('Error generating exam');
         }
     },
-    
-    // Session API Methods
 
+    // Session API Methods
     async getSessions() {
         try {
             const response = await axiosInstance.get('/sessions', {
@@ -436,7 +358,7 @@ export const ApiService = {
             });
             return response.data;
         } catch (error) {
-            throw new Error('Erreur lors de la récupération des sessions');
+            throw new Error('Error retrieving sessions');
         }
     },
 
@@ -449,7 +371,7 @@ export const ApiService = {
             });
             return response.data;
         } catch (error) {
-            throw new Error('Erreur lors de la création de la session');
+            throw new Error('Error creating session');
         }
     },
 
@@ -462,7 +384,7 @@ export const ApiService = {
             });
             return response.data;
         } catch (error) {
-            throw new Error('Erreur lors de la mise à jour de la session');
+            throw new Error('Error updating session');
         }
     },
 
@@ -475,7 +397,7 @@ export const ApiService = {
             });
             return response.data;
         } catch (error) {
-            throw new Error('Erreur lors de la suppression de la session');
+            throw new Error('Error deleting session');
         }
     }
-}
+};

@@ -19,31 +19,3 @@ export default {
   },
 };
 </script>
-
-<!--<style scoped lang="scss">-->
-<!--@import "@/styles/utils/_variables.scss";-->
-
-<!--.form-group {-->
-<!--  display: flex;-->
-<!--  flex-direction: column;-->
-<!--  margin-bottom: 0;-->
-<!--}-->
-
-<!--label {-->
-<!--  margin-bottom: 5px;-->
-<!--  color: white;-->
-<!--}-->
-
-<!--input {-->
-<!--  padding: 10px;-->
-<!--  border: 1px solid #ccc;-->
-<!--  border-radius: 4px;-->
-<!--  width: 100%;-->
-<!--  box-sizing: border-box;-->
-<!--}-->
-
-<!--.error-message {-->
-<!--  padding-top: 5px;-->
-<!--  color: $error-color;-->
-<!--}-->
-<!--</style>-->

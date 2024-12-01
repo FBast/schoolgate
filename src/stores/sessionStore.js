@@ -70,7 +70,7 @@ export const useSessionStore = defineStore('sessionStore', {
             console.log('New session added locally');
         },
 
-        async saveSession(session) {
+        async updateSession(session) {
             const preparedSession = {
                 ...session,
                 startDate: toISOString(session.startDate),
@@ -93,19 +93,19 @@ export const useSessionStore = defineStore('sessionStore', {
             console.log(`Session ${session.isNew ? 'created' : 'updated'} successfully`);
         },
 
-        async updateAllSessions() {
+        async saveAllChanges() {
             this.loading = true;
 
             try {
                 const modifiedSessions = this.getModifiedSessions;
 
                 for (const session of modifiedSessions) {
-                    await this.saveSession(session);
+                    await this.updateSession(session);
                 }
 
-                console.log('All modified sessions saved successfully');
+                console.log('All modified sessions updated successfully');
             } catch (error) {
-                throw new Error(`Error saving modified sessions: ${error.message}`);
+                throw new Error(`Error updating modified sessions: ${error.message}`);
             } finally {
                 this.loading = false;
             }
@@ -143,7 +143,7 @@ export const useSessionStore = defineStore('sessionStore', {
             }
         },
 
-        markAsModified(sessionId) {
+        markSessionAsModified(sessionId) {
             const session = this.sessions.find((s) => s._id === sessionId);
             if (session && !session.isNew) {
                 session.isModified = true;
