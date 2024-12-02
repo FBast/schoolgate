@@ -17,7 +17,7 @@
           v-else
           :is="currentComponent"
           @statusChanged="updateStatus"
-          :message="errorMessage"
+          @notify="handleNotification"
       ></component>
 
       <!-- Notification Panel -->

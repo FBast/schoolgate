@@ -114,13 +114,23 @@ import { useI18n } from "vue-i18n";
 import { useTopicStore } from "@/stores/topicStore";
 import FormInput from "@/components/FormInput.vue";
 import FormTextarea from "@/components/FormTextarea.vue";
-import { defineEmits } from "vue";
+import {defineEmits, onMounted} from "vue";
 
 const { t } = useI18n();
 const topicStore = useTopicStore();
 const emit = defineEmits(["notify"]);
 
-// Save All Changes
+onMounted(async () => {
+  try {
+    emit("notify", { success: true, message: t("loading_topics") });
+    await topicStore.fetchTopics();
+    emit("notify", { success: true, message: t("topics_loaded_successfully") });
+  } catch (error) {
+    emit("notify", { success: false, message: t("error_loading_topics") });
+    console.error("Error loading topics:", error);
+  }
+});
+
 const saveAllChanges = async () => {
   try {
     await topicStore.saveAllChanges();
@@ -130,13 +140,11 @@ const saveAllChanges = async () => {
   }
 };
 
-// Add Topic
 const addTopic = () => {
   topicStore.addTopic();
   emit("notify", { success: true, message: t("new_topic_added_successfully") });
 };
 
-// Delete Topic
 const deleteTopic = async (topicId) => {
   try {
     topicStore.deleteTopic(topicId);
@@ -146,19 +154,16 @@ const deleteTopic = async (topicId) => {
   }
 };
 
-// Add Exercise
 const addExercise = () => {
   topicStore.addExercise();
   emit("notify", { success: true, message: t("new_exercise_added_successfully") });
 };
 
-// Delete Exercise
 const deleteExercise = (exerciseId) => {
   topicStore.deleteExercise(exerciseId);
   emit("notify", { success: true, message: t("exercise_deleted_successfully") });
 };
 
-// Toggle Topic Details
 const toggleTopicDetails = (topic) => {
   if (topicStore.selectedTopic?._id === topic._id) {
     topicStore.selectTopic(null);
@@ -167,7 +172,6 @@ const toggleTopicDetails = (topic) => {
   }
 };
 
-// Toggle Exercise Details
 const toggleExerciseDetails = (exercise) => {
   if (topicStore.selectedExercise?._id === exercise._id) {
     topicStore.selectExercise(null);
@@ -176,12 +180,10 @@ const toggleExerciseDetails = (exercise) => {
   }
 };
 
-// Mark Topic as Modified
 const markTopicAsModified = (topicId) => {
   topicStore.markTopicAsModified(topicId);
 };
 
-// Handle File Upload
 const handleFileUpload = async (event, exerciseId) => {
   const file = event.target.files[0];
   if (file) {

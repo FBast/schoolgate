@@ -2,13 +2,14 @@
   <header>
     <img src="@/assets/logo.png" alt="Logo ENSI" class="logo">
     <nav>
-      <FormButton
-          v-for="(step, key, index) in stepMap"
-          :key="index"
-          :class="{ active: key === currentView }"
-          :label="$t(step.label)"
-          @click="changeView(key)"
-      />
+      <router-link
+          v-for="(step, key) in stepMap"
+          :key="key"
+          :to="`/admin-dashboard/${step.path}`"
+          :class="{ active: $route.params.currentView === step.path }"
+      >
+        {{ $t(step.label) }}
+      </router-link>
     </nav>
     <FormButton @click="logout" :label="$t('logout')" />
   </header>
@@ -22,11 +23,8 @@
         </p>
       </div>
 
-      <component
-          v-else
-          :is="currentComponent"
-          @notify="handleNotification"
-      />
+      <!-- Dynamic Child Component -->
+      <router-view v-else @notify="handleNotification" />
 
       <!-- Notification Panel -->
       <div v-if="notification.message" class="panel">
@@ -42,11 +40,6 @@
 import {ref, computed, onMounted, watch} from "vue";
 import {useRoute, useRouter} from "vue-router";
 import FormButton from "@/components/FormButton.vue";
-import CandidateManagement from "@/views/admin/CandidateManagement.vue";
-import ErrorComponent from "@/components/ErrorComponent.vue";
-import TopicManagement from "@/views/admin/TopicManagement.vue";
-import FormationManagement from "@/views/admin/FormationManagement.vue";
-import SessionManagement from "@/views/admin/SessionManagement.vue";
 import {useFormationStore} from "@/stores/formationStore.js";
 import {useSessionStore} from "@/stores/sessionStore.js";
 import {useTopicStore} from "@/stores/topicStore.js";
@@ -57,7 +50,7 @@ import {useUserStore} from "@/stores/userStore.js";
 defineProps({
   currentView: {
     type: String,
-    default: "users",
+    default: "candidate",
   },
 });
 
@@ -71,62 +64,48 @@ const router = useRouter();
 const route = useRoute();
 
 const stepMap = {
-  candidate: { label: "candidates", path: "candidates", component: CandidateManagement },
-  session: { label: "sessions", path: "sessions", component: SessionManagement },
-  topics: { label: "topics", path: "topics", component: TopicManagement },
-  formations: { label: "formations", path: "formations", component: FormationManagement },
+  candidates: { label: "candidates", path: "candidates" },
+  sessions: { label: "sessions", path: "sessions" },
+  topics: { label: "topics", path: "topics" },
+  formations: { label: "formations", path: "formations" },
 };
 
-const currentView = ref(route.params.currentView || "users");
-const notification = ref({ message: "", success: true });
+// Computed property for the current view
+const currentView = computed(() => route.name);
 
-const currentComponent = computed(() => {
-  const step = stepMap[currentView.value];
-  return step ? step.component : ErrorComponent;
-});
+// State for notifications and loading
+const loading = ref(false);
+const notification = ref({ message: "", success: true });
 
 const changeView = (key) => {
   currentView.value = key;
   router.push({ name: "AdminDashboard", params: { currentView: key } });
 };
 
+// Function to log out
+const logout = () => {
+  localStorage.removeItem("authToken");
+  router.push("/auth");
+};
+
+// Notification handler
 const handleNotification = ({ message, success }) => {
   notification.value = { message, success };
   setTimeout(() => {
-    notification.value = { message: '', success: true };
+    notification.value = { message: "", success: true };
   }, 5000);
 };
 
-const loading = ref(true);
-
+// Initialization on mount
 onMounted(async () => {
+  loading.value = true;
   try {
-    loading.value = true;
-    await Promise.all([
-      authStore.fetchCurrentUser(),
-      userStore.fetchUsers(),
-      formationStore.fetchFormations(),
-      sessionStore.fetchSessions(),
-      topicStore.fetchTopics()
-    ]);
+    await authStore.fetchCurrentUser();
   } catch (error) {
-    console.error(t('error_initializing_dashboard'), error);
+    console.error("Error initializing dashboard:", error);
+    notification.value = { message: "Error loading dashboard", success: false };
   } finally {
     loading.value = false;
   }
 });
-
-watch(
-    () => route.params.currentView,
-    (newView) => {
-      if (newView && stepMap[newView]) {
-        currentView.value = newView;
-      }
-    }
-);
-
-const logout = () => {
-  localStorage.removeItem("authToken");
-  router.push("/");
-};
 </script>

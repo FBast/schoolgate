@@ -38,7 +38,7 @@ export const useFormationStore = defineStore('formationStore', {
             return formation ? formation.title : 'Unknown Formation';
         },
 
-        getGradeLabel: (state) => (gradeId) => {
+        getGradeTitle: (state) => (gradeId) => {
             const grade = state.selectedFormation?.grades.find((g) => g._id === gradeId);
             return grade ? grade.title : 'Unknown Grade';
         },

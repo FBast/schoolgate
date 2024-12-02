@@ -106,7 +106,7 @@
 </template>
 
 <script setup>
-import {defineEmits} from "vue";
+import {defineEmits, onMounted} from "vue";
 import { useI18n } from "vue-i18n";
 import { useFormationStore } from "@/stores/formationStore";
 import { useTopicStore } from "@/stores/topicStore";
@@ -118,7 +118,20 @@ const formationStore = useFormationStore();
 const topicStore = useTopicStore();
 const emit = defineEmits(["notify"]);
 
-// Save All Changes
+onMounted(async () => {
+  try {
+    emit("notify", { success: true, message: t("loading_formations_and_topics") });
+    await Promise.all([
+      formationStore.fetchFormations(),
+      topicStore.fetchTopics(),
+    ]);
+    emit("notify", { success: true, message: t("formations_and_topics_loaded_successfully") });
+  } catch (error) {
+    emit("notify", { success: false, message: t("error_loading_formations_and_topics") });
+    console.error("Error loading formations and topics:", error);
+  }
+});
+
 const saveAllChanges = async () => {
   try {
     await formationStore.saveAllChanges();
@@ -128,13 +141,11 @@ const saveAllChanges = async () => {
   }
 };
 
-// Add Topic
 const addFormation = () => {
   formationStore.addFormation();
   emit("notify", { success: true, message: t("new_formation_added_successfully") });
 };
 
-// Delete Topic
 const deleteFormation = async (topicId) => {
   try {
     await formationStore.deleteFormation(topicId);
@@ -144,19 +155,16 @@ const deleteFormation = async (topicId) => {
   }
 };
 
-// Add Grade
 const addGrade = () => {
   formationStore.addGrade();
   emit("notify", { success: true, message: t("new_grade_added_successfully") });
 };
 
-// Delete Grade
 const deleteGrade = (gradeId) => {
   formationStore.deleteGrade(gradeId);
   emit("notify", { success: true, message: t("grade_deleted_successfully") });
 };
 
-// Toggle Topic Details
 const toggleFormationDetails = (formation) => {
   if (formationStore.selectedFormation?._id === formation._id) {
     formationStore.selectFormation(null);
@@ -165,7 +173,6 @@ const toggleFormationDetails = (formation) => {
   }
 };
 
-// Toggle Grade Details
 const toggleGradeDetails = (grade) => {
   if (formationStore.selectedGrade?._id === grade._id) {
     formationStore.selectGrade(null);
@@ -174,12 +181,10 @@ const toggleGradeDetails = (grade) => {
   }
 };
 
-// Mark Formation as Modified
 const markFormationAsModified = (formationId) => {
   formationStore.markFormationAsModified(formationId);
 };
 
-// Generate exam for grade
 const generateExam = async (gradeId) => {
   const grade = grades.value.find((g) => g._id === gradeId);
   if (!grade) return;
@@ -199,4 +204,5 @@ const generateExam = async (gradeId) => {
     console.error(t("error_generating_exam"), error);
   }
 };
+
 </script>

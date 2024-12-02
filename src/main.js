@@ -2,7 +2,6 @@
 import App from './App.vue';
 import router from './router';
 import '@fortawesome/fontawesome-free/css/all.css';
-import "vue-multiselect/dist/vue-multiselect.min.css";
 import './styles/main.scss';
 import i18n from "./utils/i18n.js";
 import {createPinia} from "pinia";

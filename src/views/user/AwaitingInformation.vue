@@ -2,7 +2,7 @@
   <div class="flex-horizontal gap-md">
     <div class="panel flex-vertical gap-md">
       <div class="header">
-        <h2 class="title">{{ $t('step_description') }}</h2>
+        <h2 class="title">{{ $t('awaiting_information_title') }}</h2>
       </div>
       <div>
         <p>
@@ -13,7 +13,7 @@
     </div>
     <div class="panel flex-vertical gap-md">
       <div class="header">
-        <h2 class="title">{{ $t('user_information') }}</h2>
+        <h2 class="title">{{ $t('information_title') }}</h2>
       </div>
       <form @submit.prevent="submitForm">
         <div class="flex-vertical gap-sm">
@@ -21,7 +21,7 @@
           <FormInput v-model="authStore.currentUser.lastName" :label="$t('last_name')" type="text" :error="lastNameError" />
           <FormInput v-model="authStore.currentUser.birthDate" :label="$t('birth_date')" type="date" :error="birthDateError" />
           <FormSelect v-model="authStore.currentUser.requestedFormation" :options="formationStore.formationOptions" :label="$t('formation')" :error="formationError" />
-          <FormSelect v-model="authStore.currentUser.requestedGrade" :options="gradeOptions" :label="$t('grade')" :error="gradeError" />
+          <FormSelect v-model="authStore.currentUser.requestedGrade" :options="formationStore.gradeOptions" :label="$t('grade')" :error="gradeError" />
           <FormButton type="submit" :label="$t('update')" :disabled="!isFormValid"></FormButton>
         </div>
       </form>
@@ -74,11 +74,6 @@ const isFormValid = computed(() =>
     !formationError.value &&
     !gradeError.value
 );
-
-// Options des grades en fonction de la formation sélectionnée
-const gradeOptions = computed(() => {
-  return formationStore.gradeOptionsByFormationId(authStore.currentUser.requestedFormation);
-});
 
 // Watch pour détecter les changements de formation
 watch(

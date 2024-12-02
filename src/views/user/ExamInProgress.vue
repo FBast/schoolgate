@@ -7,76 +7,107 @@
       </div>
       <p>{{ $t('exam_in_progress_description') }}</p>
       <div class="actions flex-vertical gap-md">
-        <FormInput
-            type="file"
-            :label="$t('upload_submission')"
-            @change="handleUploadExamReport"
-        />
         <FormButton
             v-if="authStore.currentUser.examSubject"
             :label="$t('download_exam_pdf')"
             @click="handleDownloadExamSubject"
         />
+        <FormInput
+            type="file"
+            :label="$t('upload_submission')"
+            @change="handleStoreExamFile"
+        />
+        <FormButton
+            v-if="storedFile"
+            :label="$t('finish_exam')"
+            @click="handleFinishExam"
+        />
       </div>
     </div>
+
     <!-- Informations utilisateur -->
     <div class="panel flex-vertical gap-md">
       <div class="header">
-        <h2 class="title">{{ $t('candidate_information') }}</h2>
+        <h2 class="title">{{ $t('information_title') }}</h2>
       </div>
       <label>{{ $t('first_name') }} : {{ authStore.currentUser.firstName }}</label>
       <label>{{ $t('last_name') }} : {{ authStore.currentUser.lastName }}</label>
       <label>{{ $t('birth_date') }} : {{ formatDate(authStore.currentUser.birthDate) }}</label>
       <label>{{ $t('requested_formation') }} : {{ formationStore.getFormationTitle(authStore.currentUser.requestedFormation) }}</label>
-      <label>{{ $t('requested_grade') }} : {{ formationStore.getGradeLabel(authStore.currentUser.requestedGrade) }}</label>
+      <label>{{ $t('requested_grade') }} : {{ formationStore.getGradeTitle(authStore.currentUser.requestedGrade) }}</label>
     </div>
   </div>
 </template>
 
 <script setup>
-import { useUserStore } from '@/stores/userStore';
+import { ref } from 'vue';
 import { useFormationStore } from '@/stores/formationStore';
-import {downloadFile, formatDate} from '@/utils/helpers.js';
+import { downloadFile, formatDate } from '@/utils/helpers.js';
 import FormButton from "@/components/FormButton.vue";
 import FormInput from "@/components/FormInput.vue";
 import { useI18n } from 'vue-i18n';
-import {useAuthStore} from "@/stores/authStore.js";
-import {ApiService} from "@/utils/apiService.js";
+import { useAuthStore } from "@/stores/authStore.js";
+import { ApiService } from "@/utils/apiService.js";
+import { STATUS_OPTIONS } from "@/utils/constants.js";
 
-const userStore = useUserStore();
+// Stores et services
 const authStore = useAuthStore();
 const formationStore = useFormationStore();
 const { t } = useI18n();
 
+// Événements
+const emit = defineEmits(["notify", "statusChanged"]);
+
+// Stocke le fichier localement jusqu'à la soumission
+const storedFile = ref(null);
+
+// Télécharger le sujet de l'examen
 const handleDownloadExamSubject = () => {
   if (authStore.currentUser.examSubject) {
     downloadFile(authStore.currentUser.examSubject, 'ENSI_Examen');
+    emit("notify", { success: true, message: t("file_download_success") });
   } else {
+    emit("notify", { success: false, message: t("file_download_error") });
     console.error('No exam PDF available to download.');
   }
 };
 
-// Uploader le fichier de rendu
-const handleUploadExamReport = async (event) => {
+// Stocker le fichier en interne
+const handleStoreExamFile = (event) => {
   const file = event.target.files[0];
   if (!file) {
+    emit("notify", { success: false, message: t("file_selection_error") });
     console.error('No file selected.');
     return;
   }
+  storedFile.value = file;
+  emit("notify", { success: true, message: t("file_stored_success") });
+};
 
+// Terminer l'examen
+const handleFinishExam = async () => {
   try {
-    // Appel de l'API pour uploader le fichier
-    await ApiService.uploadReport(file);
+    if (!storedFile.value) {
+      emit("notify", { success: false, message: t("file_missing_error") });
+      console.error('No file to upload.');
+      return;
+    }
 
-    // Met à jour le profil utilisateur pour afficher le fichier uploadé
-    await authStore.fetchCurrentUser();
+    // Uploader le fichier via l'API
+    await ApiService.uploadReport(storedFile.value);
 
-    userStore.message = t('file_submission_success');
-    userStore.success = true;
+    // Mettre à jour le statut de l'utilisateur
+    await authStore.updateCurrentUser({
+      status: STATUS_OPTIONS.awaiting_appointment
+    });
+    emit('statusChanged');
+
+    storedFile.value = null; // Réinitialiser le fichier stocké
+
+    emit("notify", { success: true, message: t("exam_finished_successfully") });
   } catch (error) {
-    userStore.message = t('file_submission_error');
-    userStore.success = false;
-    console.error(t('file_upload_error'), error);
+    emit("notify", { success: false, message: t("exam_finish_error") });
+    console.error(t('error_finishing_exam'), error);
   }
 };
 </script>

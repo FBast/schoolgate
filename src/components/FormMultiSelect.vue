@@ -86,9 +86,4 @@ export default {
   background-color: var(--accent-color, #007bff);
   color: var(--text-color-alt, #fff);
 }
-
-.error-message {
-  color: red;
-  font-size: 0.875rem;
-}
 </style>

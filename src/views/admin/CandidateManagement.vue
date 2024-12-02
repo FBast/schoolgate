@@ -26,7 +26,7 @@
           >
             <label>{{ user.email }}</label>
             <label>{{ formationStore.getFormationTitle(user.requestedFormation) || $t('formation_error') }}</label>
-            <label>{{ formationStore.getGradeLabel(user.requestedGrade) || $t('grade_error') }}</label>
+            <label>{{ formationStore.getGradeTitle(user.requestedGrade) || $t('grade_error') }}</label>
             <label>{{ $t(user.status) }}</label>
             <div class="actions">
               <a @click.stop="toggleDetails(user)">
@@ -71,6 +71,18 @@
                       :label="$t('requested_grade')"
                       @change="userStore.markUserAsModified(user._id)"
                   />
+                  <div class="flex-horizontal gap-md">
+                    <FormButton
+                        v-if="user.examSubject"
+                        :label="$t('download_exam_subject')"
+                        @click="downloadFile(user.examSubject, 'ENSI_Examen.pdf')"
+                    />
+                    <FormButton
+                        v-if="user.examReport"
+                        :label="$t('download_exam_report')"
+                        @click="downloadFile(user.examReport, 'ENSI_Rendu.pdf')"
+                    />
+                  </div>
                 </div>
                 <div class="flex-vertical gap-md">
                   <FormSelect
@@ -79,16 +91,22 @@
                       :label="$t('status')"
                       @change="userStore.markUserAsModified(user._id)"
                   />
-                  <FormTextarea
-                      v-model="user.evaluation"
-                      :label="$t('evaluation_text')"
-                      @input="userStore.markUserAsModified(user._id)"
-                  />
                   <FormInput
                       v-model="user.meetingDate"
                       :label="$t('meeting_date')"
                       type="datetime-local"
                       @input="userStore.markUserAsModified(user._id)"
+                  />
+                  <FormTextarea
+                      v-model="user.evaluation"
+                      :label="$t('evaluation_text')"
+                      @input="userStore.markUserAsModified(user._id)"
+                  />
+                  <FormSelect
+                      v-model="user.decision"
+                      :options="decisionOptions"
+                      :label="$t('candidate_decision')"
+                      @change="userStore.markUserAsModified(user._id)"
                   />
                 </div>
               </div>
@@ -108,6 +126,9 @@ import FormInput from '@/components/FormInput.vue';
 import FormSelect from '@/components/FormSelect.vue';
 import FormTextarea from '@/components/FormTextarea.vue';
 import { STATUS_OPTIONS } from '@/utils/constants';
+import {onMounted} from "vue";
+import FormButton from "@/components/FormButton.vue";
+import {downloadFile} from "@/utils/helpers.js";
 
 const userStore = useUserStore();
 const formationStore = useFormationStore();
@@ -118,6 +139,26 @@ const statusOptions = Object.keys(STATUS_OPTIONS).map(key => ({
   label: t(key),
   value: STATUS_OPTIONS[key],
 }));
+
+const decisionOptions = [
+  { label: t('accept'), value: 'accepted' },
+  { label: t('reject'), value: 'rejected' },
+  { label: t('waitlist'), value: 'waitlisted' }
+];
+
+onMounted(async () => {
+  try {
+    emit("notify", { success: true, message: t("loading_users") });
+    await Promise.all([
+      userStore.fetchUsers(),
+      formationStore.fetchFormations(),
+    ]);
+    emit("notify", { success: true, message: t("users_loaded_successfully") });
+  } catch (error) {
+    emit("notify", { success: false, message: t("error_loading_users") });
+    console.error("Error loading users or formations", error);
+  }
+});
 
 const getGradeOptions = (formationId) => {
   if (!formationId) return []; // Retourne un tableau vide si l'ID de formation est absent

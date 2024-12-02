@@ -3,7 +3,7 @@
     <img src="@/assets/logo.png" alt="Logo ENSI" class="logo">
   </header>
   <main>
-    <div class="layout-restricted">
+    <div class="layout-restricted gap-md">
       <!-- Formulaire de connexion -->
       <div v-if="currentView === 'login'">
         <div class="panel flex-vertical gap-md">

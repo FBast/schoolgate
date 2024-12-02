@@ -1,7 +1,6 @@
 <template>
-  <div class="error-component">
-    <h3>Erreur</h3>
-    <p>{{ message }}</p>
+  <div class="panel error-component">
+    <p class="error-message">{{ message }}</p>
   </div>
 </template>
 
@@ -14,11 +13,3 @@ defineProps({
   }
 });
 </script>
-
-<style scoped>
-.error-component {
-  color: var(--error-color);
-  padding: 20px;
-  text-align: center;
-}
-</style>

@@ -1,46 +1,69 @@
-﻿import { createRouter, createWebHistory } from 'vue-router';
-import Home from '@/views/Home.vue';
+﻿import { createRouter, createWebHistory } from "vue-router";
+import Home from "@/views/Home.vue";
+import Auth from "@/views/Auth.vue";
 import Dashboard from "@/views/Dashboard.vue";
 import AdminDashboard from "@/views/AdminDashboard.vue";
 import NotFound from "@/views/NotFound.vue";
-import {jwtDecode} from "jwt-decode";
-import Auth from "@/views/Auth.vue";
-import {ROLES_OPTIONS} from "@/utils/constants.js";
+import CandidateManagement from "@/views/admin/CandidateManagement.vue";
+import SessionManagement from "@/views/admin/SessionManagement.vue";
+import TopicManagement from "@/views/admin/TopicManagement.vue";
+import FormationManagement from "@/views/admin/FormationManagement.vue";
+import { jwtDecode } from "jwt-decode";
+import { ROLES_OPTIONS } from "@/utils/constants";
 
 const routes = [
     {
-        path: '/',
-        name: 'Home',
+        path: "/",
+        name: "Home",
         component: Home,
+        meta: { public: true },
     },
     {
-        path: '/auth',
-        name: 'Auth',
+        path: "/auth",
+        name: "Auth",
         component: Auth,
+        meta: { public: true },
     },
     {
-        path: '/dashboard',
-        name: 'Dashboard',
+        path: "/dashboard",
+        name: "Dashboard",
         component: Dashboard,
-        meta: {
-            requiresAuth: true
-        }
+        meta: { requiresAuth: true },
     },
     {
-        path: '/admin-dashboard/:currentView?',
-        name: 'AdminDashboard',
+        path: "/admin-dashboard",
+        name: "AdminDashboard",
         component: AdminDashboard,
-        props: true,
-        meta: {
-            requiresAuth: true,
-            requiresAdmin: true
-        }
+        meta: { requiresAuth: true, requiresAdmin: true },
+        redirect: "/admin-dashboard/candidates",
+        children: [
+            {
+                path: "candidates",
+                name: "Candidates",
+                component: CandidateManagement,
+            },
+            {
+                path: "sessions",
+                name: "Sessions",
+                component: SessionManagement,
+            },
+            {
+                path: "topics",
+                name: "Topics",
+                component: TopicManagement,
+            },
+            {
+                path: "formations",
+                name: "Formations",
+                component: FormationManagement,
+            },
+        ],
     },
     {
-        path: '/:pathMatch(.*)*', // Catch-all route pour capturer toutes les URL non trouvées
-        name: 'NotFound',
-        component: NotFound
-    }
+        path: "/:pathMatch(.*)*",
+        name: "NotFound",
+        component: NotFound,
+    },
 ];
 
 const router = createRouter({
@@ -48,27 +71,42 @@ const router = createRouter({
     routes,
 });
 
-// Vérifier les routes protégées avant chaque navigation
-router.beforeEach(async (to, from, next) => {
-    let token = localStorage.getItem('authToken');
-    let decodedToken;
-    
-    // Check if the token has expired
+// Garde globale pour la navigation
+router.beforeEach((to, from, next) => {
+    const token = localStorage.getItem("authToken");
+    let decodedToken = null;
+
     if (token) {
-        decodedToken = jwtDecode(token);
-        const now = Math.floor(Date.now() / 1000);
-        if (decodedToken.exp < now) token = undefined;
+        try {
+            decodedToken = jwtDecode(token);
+            const now = Math.floor(Date.now() / 1000);
+
+            if (decodedToken.exp < now) {
+                localStorage.removeItem("authToken"); // Expiration du token
+                return next("/auth");
+            }
+        } catch {
+            localStorage.removeItem("authToken"); // Token invalide
+            return next("/auth");
+        }
     }
-    
+
+    // Gestion des routes publiques
+    if (to.meta.public) {
+        return next();
+    }
+
+    // Gestion des routes nécessitant une authentification
     if (to.meta.requiresAuth && !token) {
-        return next('/');
+        return next("/auth");
     }
-    
-    if (to.meta.requiresAdmin && token && decodedToken.role !== ROLES_OPTIONS.admin) {
-        return next('/');
+
+    // Gestion des routes nécessitant un rôle admin
+    if (to.meta.requiresAdmin && decodedToken?.role !== ROLES_OPTIONS.admin) {
+        return next("/dashboard");
     }
-    
-    next();
+
+    next(); // Autoriser la navigation
 });
 
 export default router;

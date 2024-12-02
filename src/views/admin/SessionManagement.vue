@@ -84,12 +84,23 @@ import { useI18n } from "vue-i18n";
 import { useSessionStore } from "@/stores/sessionStore.js";
 import FormInput from "@/components/FormInput.vue";
 import { formatDateWithTime } from "@/utils/helpers.js";
+import {onMounted} from "vue";
 
 const { t } = useI18n();
 const sessionStore = useSessionStore();
 const emit = defineEmits(["notify"]);
 
-// Toggle des détails
+onMounted(async () => {
+  try {
+    emit("notify", { success: true, message: t("loading_sessions") });
+    await sessionStore.fetchSessions();
+    emit("notify", { success: true, message: t("sessions_loaded_successfully") });
+  } catch (error) {
+    emit("notify", { success: false, message: t("error_loading_sessions") });
+    console.error("Error loading sessions:", error);
+  }
+});
+
 const toggleDetails = (session) => {
   if (sessionStore.selectedSession?._id === session._id) {
     sessionStore.clearSelectedSession();
@@ -98,13 +109,11 @@ const toggleDetails = (session) => {
   }
 };
 
-// Ajout d'une session
 const addSession = () => {
   sessionStore.addSession();
   emit("notify", { success: true, message: t("success_adding_session") });
 };
 
-// Mise à jour de toutes les sessions modifiées
 const saveAllChanges = async () => {
   try {
     await sessionStore.saveAllChanges();
@@ -114,7 +123,6 @@ const saveAllChanges = async () => {
   }
 };
 
-// Suppression d'une session
 const deleteSession = async (sessionId) => {
   try {
     await sessionStore.deleteSession(sessionId);
@@ -124,7 +132,6 @@ const deleteSession = async (sessionId) => {
   }
 };
 
-// Activation/désactivation d'une session
 const switchSessionEnabled = (sessionId) => {
   const session = sessionStore.getSessionById(sessionId);
   if (session) {
