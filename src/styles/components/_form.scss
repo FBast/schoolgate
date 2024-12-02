@@ -7,15 +7,14 @@
   select,
   textarea {
     flex: 0;
-    padding: $spacing-sm;
-    border: 1px solid $text-color-alt;
-    border-radius: $border-radius;
-    font-family: $font-family;
+    padding: var(--spacing-sm);
+    border: 1px solid var(--text-color-alt);
+    border-radius: var(--border-radius);
     width: 100%;
     box-sizing: border-box;
-    background-color: $primary-color;
+    background-color: var(--primary-color);
   }
-  
+
   textarea {
     flex: 1;
     resize: none;

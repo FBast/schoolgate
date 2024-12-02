@@ -2,15 +2,26 @@
 import App from './App.vue';
 import router from './router';
 import '@fortawesome/fontawesome-free/css/all.css';
+import "vue-multiselect/dist/vue-multiselect.min.css";
 import './styles/main.scss';
 import i18n from "./utils/i18n.js";
 import {createPinia} from "pinia";
 
-const pinia = createPinia()
+// Create a new Vue application instance
 const app = createApp(App);
 
-app.config.globalProperties.$log = console.log;
-app.use(i18n);
+// Initialize state management with Pinia
+const pinia = createPinia();
 app.use(pinia);
+
+// Register the Vue Router
 app.use(router);
+
+// Register the i18n plugin for translations
+app.use(i18n);
+
+// Add global properties for debugging
+app.config.globalProperties.$log = console.log; // Shortcut for console.log
+
+// Mount the app to the DOM
 app.mount('#app');

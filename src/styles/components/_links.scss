@@ -1,8 +1,8 @@
 ﻿.link {
-  margin-top: $spacing-sm;
+  margin-top: var(--spacing-sm);
 
   a {
-    color: $link-color;
+    color: var(--link-color);
     text-decoration: underline;
     cursor: pointer;
   }

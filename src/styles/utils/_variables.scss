@@ -1,50 +1,53 @@
-// _variables.scss
+/* _variables.css */
 
-// Colors
-$background: #ffffff;
-$primary-color: #f0f0f0;
-$secondary-color: #646464;
-$accent-color: #e52959;
-$text-color-alt: #ffffff;
-$text-color: #333333;
-$error-color: #ff0000;
-$success-color: #5cff4a;
-$link-color: #204eff;
-$border-color: #dcdcdc;
-$disabled-color: #c8c8c8;
 
-// Typography
-$font-family: 'Arial', sans-serif;
-$font-size-base: 16px;
-$font-size-heading: 24px;
+:root {
+  /* Colors */
+  --background: #ffffff;
+  --primary-color: #f0f0f0;
+  --secondary-color: #646464;
+  --accent-color: #e52959;
+  --text-color-alt: #ffffff;
+  --text-color: #333333;
+  --error-color: #ff0000;
+  --success-color: #5cff4a;
+  --link-color: #204eff;
+  --border-color: #dcdcdc;
+  --disabled-color: #c8c8c8;
 
-// Spacing
-$spacing-xs: 4px;
-$spacing-sm: 8px;
-$spacing-md: 16px;
-$spacing-lg: 32px;
-$spacing-xl: 64px;
+  /* Typography */
+  --font-family: 'Arial', sans-serif;
+  --font-size-base: 16px;
+  --font-size-heading: 24px;
 
-// Font Sizes
-$font-size-xs: 12px;  // Très petite police
-$font-size-sm: 14px;  // Petite police
-$font-size-md: 16px;  // Police de base (par défaut)
-$font-size-lg: 20px;  // Grande police
-$font-size-xl: 24px;  // Très grande police
-$font-size-xxl: 32px; // Extra grande police pour les titres ou bannières
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 32px;
+  --spacing-xl: 64px;
 
-// Font Weights
-$font-weight-light: 300;
-$font-weight-normal: 400;
-$font-weight-bold: 700;
+  /* Font Sizes */
+  --font-size-xs: 12px; /* Très petite police */
+  --font-size-sm: 14px; /* Petite police */
+  --font-size-md: 16px; /* Police de base (par défaut) */
+  --font-size-lg: 20px; /* Grande police */
+  --font-size-xl: 24px; /* Très grande police */
+  --font-size-xxl: 32px; /* Extra grande police pour les titres ou bannières */
 
-// Line Heights
-$line-height-xs: 1.2;
-$line-height-sm: 1.4;
-$line-height-md: 1.6;
-$line-height-lg: 1.8;
-$line-height-xl: 2;
+  /* Font Weights */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-bold: 700;
 
-// Border
-$border-radius: 10px;
-$box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  /* Line Heights */
+  --line-height-xs: 1.2;
+  --line-height-sm: 1.4;
+  --line-height-md: 1.6;
+  --line-height-lg: 1.8;
+  --line-height-xl: 2;
+
+  /* Border */
+  --border-radius: 10px;
+  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}

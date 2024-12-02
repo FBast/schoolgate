@@ -21,7 +21,7 @@
   "exercise_title": "Titre de l'exercice",
   "associated_topics": "Sujets associés",
   "application_processed": "Demande traité",
-  "candidate_information": "Informations du Candidat",
+  "candidates": "Candidats",
   "confirm_new_email_adress": "Confirmer la nouvelle adresse email",
   "confirm_password": "Confirmez votre mot de passe",
   "create_account": "Créer un compte",

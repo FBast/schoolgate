@@ -2,7 +2,7 @@
   <div class="flex-vertical gap-md">
     <div class="panel">
       <div class="header">
-        <h2 class="title">{{ $t('user_information') }}</h2>
+        <h2 class="title">{{ $t('candidates') }}</h2>
         <div class="actions">
           <a @click="saveAllChanges">
             <i class="fas fa-save"></i>

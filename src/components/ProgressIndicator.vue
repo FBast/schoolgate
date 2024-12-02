@@ -31,16 +31,16 @@ const props = defineProps({
   flex: 1;
   display: flex;
   align-items: center;
-  border-radius: 10px;
-  padding: 10px 20px;
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md) var(--spacing-lg);
   height: 50px;
-  gap: $spacing-md;
-  color: $text-color-alt;
+  gap: var(--spacing-md);
+  color: var(--text-color-alt);
 
   label {
     font-weight: bold;
-    font-size: $font-size-xl;
-    color: $text-color;
+    font-size: var(--font-size-xl);
+    color: var(--text-color);
   }
 
   .step {
@@ -60,17 +60,17 @@ const props = defineProps({
       justify-content: center;
       align-items: center;
       font-weight: bold;
-      background-color: $secondary-color;
+      background-color: var(--secondary-color);
       z-index: 1;
     }
-    
+
     &.active-step {
       flex: 1;
     }
 
     &.active-step .step-number {
       flex: 0;
-      background-color: $accent-color;
+      background-color: var(--accent-color);
       color: white;
     }
   }

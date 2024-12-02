@@ -19,19 +19,19 @@ const props = defineProps({
 .separator {
   display: flex;
   align-items: center;
-  margin: $spacing-sm 0;
+  margin: var(--spacing-sm) 0;
   text-align: center;
 
   &::before,
   &::after {
     content: '';
     flex: 1;
-    border-bottom: 1px solid #cccccc;
+    border-bottom: 1px solid var(--border-color);
   }
 
   span {
-    padding: 0 $spacing-sm;
-    color: $text-color;
+    padding: 0 var(--spacing-sm);
+    color: var(--text-color);
   }
 }
 </style>

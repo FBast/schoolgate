@@ -11,8 +11,8 @@
     .actions {
       flex: 0;
       display: flex;
-      font-size: $font-size-lg;
-      gap: $spacing-md;
+      font-size: var(--font-size-lg);
+      gap: var(--spacing-md);
       justify-content: flex-end;
       align-content: center;
     }
@@ -20,19 +20,19 @@
 }
 
 .panel {
-  border: 1px solid $border-color;
-  padding: $spacing-md;
-  border-radius: $border-radius;
-  box-shadow: $box-shadow;
+  border: 1px solid var(--border-color);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
   min-width: 400px;
 
   .header {
-    margin: $spacing-sm;
+    margin: var(--spacing-sm);
 
     .title {
       flex: 1;
       font-weight: bold;
-      color: $text-color;
+      color: var(--text-color);
     }
   }
 }
@@ -42,12 +42,12 @@
     .title {
       flex: 1;
       font-weight: bold;
-      color: $text-color;
+      color: var(--text-color);
     }
 
     .actions {
       flex: 0;
-      font-size: $font-size-lg;
+      font-size: var(--font-size-lg);
       align-content: center;
     }
   }

@@ -15,20 +15,20 @@
 
 .not-found {
   text-align: center;
-  margin-top: $spacing-xl;
+  margin-top: var(--spacing-xl);
 
   h1 {
-    color: $primary-color;
-    margin-bottom: $spacing-md;
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-md);
   }
 
   p {
-    margin-bottom: $spacing-md;
-    color: $text-color-alt;
+    margin-bottom: var(--spacing-md);
+    color: var(--text-color-alt);
   }
 
   a {
-    color: $accent-color;
+    color: var(--accent-color);
     text-decoration: none;
     font-weight: bold;
 

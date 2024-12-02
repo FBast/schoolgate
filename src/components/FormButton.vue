@@ -32,26 +32,26 @@ const onClick = (event) => {
 
 button {
   flex: 0;
-  background-color: $secondary-color;
+  background-color: var(--secondary-color);
   border: none;
   cursor: pointer;
-  padding: $spacing-sm $spacing-md;
-  border-radius: $border-radius;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius);
   transition: background-color 0.3s ease;
   color: white;
   font-weight: bold;
   width: 100%;
 
   &:hover {
-    background-color: $accent-color;
+    background-color: var(--accent-color);
   }
 
   &.active {
-    background-color: $accent-color;
+    background-color: var(--accent-color);
   }
-  
+
   &:disabled {
-    background-color: $disabled-color;
+    background-color: var(--disabled-color);
     cursor: not-allowed;
   }
 }

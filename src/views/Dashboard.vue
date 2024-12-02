@@ -110,8 +110,7 @@ onMounted(async () => {
     await Promise.all([
       authStore.fetchCurrentUser(),
       formationStore.fetchFormations(),
-      formationStore.fetchGrades(),
-      sessionStore.fetchSessions(),
+      sessionStore.fetchSessions()
     ]);
 
   } catch (error) {

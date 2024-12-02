@@ -15,25 +15,25 @@
 }
 
 .gap-sm {
-  gap: $spacing-sm;
+  gap: var(--spacing-sm);
 }
 
 .gap-md {
-  gap: $spacing-md;
+  gap: var(--spacing-md);
 }
 
 .gap-lg {
-  gap: $spacing-lg;
+  gap: var(--spacing-lg);
 }
 
 .padding-sm {
-  padding: $spacing-sm;
+  padding: var(--spacing-sm);
 }
 
 .padding-md {
-  padding: $spacing-md;
+  padding: var(--spacing-md);
 }
 
 .padding-lg {
-  padding: $spacing-lg;
+  padding: var(--spacing-lg);
 }

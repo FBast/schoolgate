@@ -42,7 +42,7 @@
 import {ref, computed, onMounted, watch} from "vue";
 import {useRoute, useRouter} from "vue-router";
 import FormButton from "@/components/FormButton.vue";
-import UserManagement from "@/views/admin/UserManagement.vue";
+import CandidateManagement from "@/views/admin/CandidateManagement.vue";
 import ErrorComponent from "@/components/ErrorComponent.vue";
 import TopicManagement from "@/views/admin/TopicManagement.vue";
 import FormationManagement from "@/views/admin/FormationManagement.vue";
@@ -71,10 +71,10 @@ const router = useRouter();
 const route = useRoute();
 
 const stepMap = {
-  users: { label: "users", path: "user-management", component: UserManagement },
-  session: { label: "sessions", path: "date-management", component: SessionManagement },
-  topics: { label: "topics", path: "topic-management", component: TopicManagement },
-  formations: { label: "formations", path: "formation-management", component: FormationManagement },
+  candidate: { label: "candidates", path: "candidates", component: CandidateManagement },
+  session: { label: "sessions", path: "sessions", component: SessionManagement },
+  topics: { label: "topics", path: "topics", component: TopicManagement },
+  formations: { label: "formations", path: "formations", component: FormationManagement },
 };
 
 const currentView = ref(route.params.currentView || "users");
