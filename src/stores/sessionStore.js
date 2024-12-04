@@ -36,7 +36,6 @@ export const useSessionStore = defineStore('sessionStore', {
                     isNew: false, // Les sessions existantes ne sont pas nouvelles
                     isModified: false, // Aucune modification initialement
                 }));
-
                 console.log('Sessions fetched successfully');
             } catch (error) {
                 throw new Error(`Error fetching sessions: ${error.message}`);
@@ -134,7 +133,7 @@ export const useSessionStore = defineStore('sessionStore', {
                 }
 
                 if (this.selectedSession && this.selectedSession._id === sessionId) {
-                    this.selectedSession = null;
+                    this.selectSession(null)
                 }
             } catch (error) {
                 throw new Error(`Error deleting session: ${error.message}`);
@@ -151,17 +150,15 @@ export const useSessionStore = defineStore('sessionStore', {
         },
 
         selectSession(session) {
-            if (!session) return;
-
-            this.selectedSession = {
-                ...session,
-                startDate: toDatetimeLocal(session.startDate),
-                endDate: toDatetimeLocal(session.endDate),
-            };
-        },
-
-        clearSelectedSession() {
-            this.selectedSession = null;
-        },
+            if (!session) {
+                this.selectedSession = null;
+            } else {
+                this.selectedSession = {
+                    ...session,
+                    startDate: toDatetimeLocal(session.startDate),
+                    endDate: toDatetimeLocal(session.endDate),
+                };
+            }
+        }
     },
 });

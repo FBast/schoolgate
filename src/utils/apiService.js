@@ -82,10 +82,13 @@ export const ApiService = {
         }
     },
 
-    async uploadReport(pdfFile) {
+    async uploadReport(files) {
         try {
             const formData = new FormData();
-            formData.append('examReport', pdfFile);
+
+            files.forEach((file) => {
+                formData.append(`examReport`, file);
+            });
 
             const response = await axiosInstance.post('/users/me/upload-report', formData, {
                 headers: {

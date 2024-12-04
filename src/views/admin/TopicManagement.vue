@@ -114,7 +114,7 @@ import { useI18n } from "vue-i18n";
 import { useTopicStore } from "@/stores/topicStore";
 import FormInput from "@/components/FormInput.vue";
 import FormTextarea from "@/components/FormTextarea.vue";
-import {defineEmits, onMounted} from "vue";
+import {defineEmits, onMounted, onUnmounted} from "vue";
 
 const { t } = useI18n();
 const topicStore = useTopicStore();
@@ -130,6 +130,10 @@ onMounted(async () => {
     console.error("Error loading topics:", error);
   }
 });
+
+// onUnmounted(() => {
+//   topicStore.selectTopic(null);
+// });
 
 const saveAllChanges = async () => {
   try {

@@ -113,6 +113,8 @@ onMounted(async () => {
       sessionStore.fetchSessions()
     ]);
 
+    console.log(formationStore.formations);
+
   } catch (error) {
     console.error(t('error_initializing_dashboard'), error);
   } finally {

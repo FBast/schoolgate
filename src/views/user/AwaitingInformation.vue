@@ -21,7 +21,7 @@
           <FormInput v-model="authStore.currentUser.lastName" :label="$t('last_name')" type="text" :error="lastNameError" />
           <FormInput v-model="authStore.currentUser.birthDate" :label="$t('birth_date')" type="date" :error="birthDateError" />
           <FormSelect v-model="authStore.currentUser.requestedFormation" :options="formationStore.formationOptions" :label="$t('formation')" :error="formationError" />
-          <FormSelect v-model="authStore.currentUser.requestedGrade" :options="formationStore.gradeOptions" :label="$t('grade')" :error="gradeError" />
+          <FormSelect v-model="authStore.currentUser.requestedGrade" :options="gradeOptions" :label="$t('grade')" :error="gradeError" />
           <FormButton type="submit" :label="$t('update')" :disabled="!isFormValid"></FormButton>
         </div>
       </form>
@@ -48,6 +48,10 @@ const formationStore = useFormationStore();
 const { t } = useI18n();
 
 const emit = defineEmits(['statusChanged']);
+
+const gradeOptions = computed(() =>
+    formationStore.gradeOptions(authStore.currentUser.requestedFormation)
+);
 
 // Validation des champs
 const firstNameError = computed(() =>

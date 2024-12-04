@@ -21,7 +21,7 @@
       <label>{{ $t('last_name') }} : {{ authStore.currentUser.lastName }}</label>
       <label>{{ $t('birth_date') }} : {{ formatDate(authStore.currentUser.birthDate) }}</label>
       <label>{{ $t('requested_formation') }} : {{ formationStore.getFormationTitle(authStore.currentUser.requestedFormation) }}</label>
-      <label>{{ $t('requested_grade') }} : {{ formationStore.getGradeTitle(authStore.currentUser.requestedGrade) }}</label>
+      <label>{{ $t('requested_grade') }} : {{ formationStore.getGradeTitle(authStore.currentUser.requestedFormation, authStore.currentUser.requestedGrade) }}</label>
       <p v-if="authStore.message" :class="{ 'success-message': authStore.success, 'error-message': !authStore.success }">
         {{ authStore.message }}
       </p>

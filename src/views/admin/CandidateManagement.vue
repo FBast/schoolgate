@@ -26,7 +26,7 @@
           >
             <label>{{ user.email }}</label>
             <label>{{ formationStore.getFormationTitle(user.requestedFormation) || $t('formation_error') }}</label>
-            <label>{{ formationStore.getGradeTitle(user.requestedGrade) || $t('grade_error') }}</label>
+            <label>{{ formationStore.getGradeTitle(user.requestedFormation, user.requestedGrade) || $t('grade_error') }}</label>
             <label>{{ $t(user.status) }}</label>
             <div class="actions">
               <a @click.stop="toggleDetails(user)">
@@ -67,7 +67,7 @@
                   />
                   <FormSelect
                       v-model="user.requestedGrade"
-                      :options="getGradeOptions(user.requestedFormation)"
+                      :options="formationStore.gradeOptions(user.requestedFormation)"
                       :label="$t('requested_grade')"
                       @change="userStore.markUserAsModified(user._id)"
                   />
@@ -75,12 +75,12 @@
                     <FormButton
                         v-if="user.examSubject"
                         :label="$t('download_exam_subject')"
-                        @click="downloadFile(user.examSubject, 'ENSI_Examen.pdf')"
+                        @click="downloadFile(user.examSubject, `${user.firstName}_${user.lastName}_Examen`, 'pdf')"
                     />
                     <FormButton
                         v-if="user.examReport"
                         :label="$t('download_exam_report')"
-                        @click="downloadFile(user.examReport, 'ENSI_Rendu.pdf')"
+                        @click="downloadFile(user.examReport, `${user.firstName}_${user.lastName}_Rendu`, 'zip')"
                     />
                   </div>
                 </div>
@@ -160,19 +160,13 @@ onMounted(async () => {
   }
 });
 
-const getGradeOptions = (formationId) => {
-  if (!formationId) return []; // Retourne un tableau vide si l'ID de formation est absent
-
-  const formation = formationStore.getFormationById(formationId);
-  return formation?.grades.map((grade) => ({
-    label: grade.title,
-    value: grade._id,
-  })) || [];
-};
+// onUnmounted(() => {
+//   userStore.selectUser(null);
+// });
 
 const toggleDetails = (user) => {
   if (userStore.selectedUser?._id === user._id) {
-    userStore.clearSelectedUser();
+    userStore.selectUser(null)
   } else {
     userStore.selectUser(user);
   }

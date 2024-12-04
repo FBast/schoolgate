@@ -34,29 +34,38 @@ export const toDatetimeLocal = (isoString) => {
     return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
-export const downloadFile = (pdfBuffer, pdfName) => {
-    // Ajouter la date au nom du fichier
+export const downloadFile = (fileBuffer, fileName, extension) => {
+    if (!extension) {
+        console.error("File extension must be specified.");
+        return;
+    }
+
+    const mimeTypes = {
+        pdf: 'application/pdf',
+        zip: 'application/zip'
+    };
+
+    const mimeType = mimeTypes[extension.toLowerCase()];
+    if (!mimeType) {
+        console.error(`Unsupported file extension: .${extension}`);
+        return;
+    }
+
     const date = new Date().toISOString().slice(0, 10); // Format YYYY-MM-DD
-    const fileName = `${pdfName}_${date}.pdf`;
+    const finalFileName = `${fileName}_${date}.${extension}`;
 
-    // Créer le Blob à partir du buffer
-    const pdfBlob = new Blob([new Uint8Array(pdfBuffer.data)], { type: 'application/pdf' });
+    const fileBlob = new Blob([new Uint8Array(fileBuffer.data)], { type: mimeType });
 
-    // Créer une URL temporaire pour le Blob
-    const url = URL.createObjectURL(pdfBlob);
+    const url = URL.createObjectURL(fileBlob);
 
-    // Créer le lien temporaire
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', fileName);
+    link.setAttribute('download', finalFileName);
 
-    // Ajouter le lien au DOM pour permettre le clic
     document.body.appendChild(link);
 
-    // Déclencher le téléchargement
     link.click();
 
-    // Nettoyer le lien temporaire
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 };

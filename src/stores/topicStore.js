@@ -25,9 +25,6 @@ export const useTopicStore = defineStore('topic', {
                     isNew: false,
                     isModified: false,
                 }));
-                if (this.topics.length > 0) {
-                    this.selectTopic(this.topics[0]);
-                }
                 console.log('Topics fetched successfully');
             } catch (error) {
                 throw new Error(`Error fetching topics: ${error.message}`);
@@ -146,8 +143,7 @@ export const useTopicStore = defineStore('topic', {
 
             // If the deleted topic is the selectedTopic, clear the selection
             if (this.selectedTopic && this.selectedTopic._id === topicId) {
-                this.selectedTopic = null;
-                this.selectedExercise = null;
+                this.selectTopic(null);
             }
 
             console.log(`Topic deleted locally: ${topicId}`);
@@ -199,6 +195,6 @@ export const useTopicStore = defineStore('topic', {
 
         selectExercise(exercise) {
             this.selectedExercise = exercise;
-        },
+        }
     },
 });

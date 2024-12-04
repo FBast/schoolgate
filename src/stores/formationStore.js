@@ -16,11 +16,14 @@ export const useFormationStore = defineStore('formationStore', {
                 value: formation._id,
             })),
 
-        gradeOptions: (state) =>
-            (state.selectedFormation?.grades || []).map((grade) => ({
+        gradeOptions: (state) => (formationId) => {
+            if (!formationId) return [];
+            const formation = state.formations.find((formation) => formation._id === formationId);
+            return formation?.grades.map((grade) => ({
                 label: grade.title,
                 value: grade._id,
-            })),
+            })) || [];
+        },
 
         getFormationById: (state) => (id) =>
             state.formations.find((formation) => formation._id === id),
@@ -38,10 +41,11 @@ export const useFormationStore = defineStore('formationStore', {
             return formation ? formation.title : 'Unknown Formation';
         },
 
-        getGradeTitle: (state) => (gradeId) => {
-            const grade = state.selectedFormation?.grades.find((g) => g._id === gradeId);
+        getGradeTitle: (state) => (formationId, gradeId) => {
+            const formation = state.formations.find(f => f._id === formationId);
+            const grade = formation.grades.find((g) => g._id === gradeId);
             return grade ? grade.title : 'Unknown Grade';
-        },
+        }
     },
 
     actions: {
@@ -59,9 +63,6 @@ export const useFormationStore = defineStore('formationStore', {
                     isNew: false,
                     isModified: false,
                 }));
-                if (this.formations.length > 0) {
-                    this.selectFormation(this.formations[0]);
-                }
                 console.log('Formations fetched successfully');
             } catch (error) {
                 throw new Error(`Error fetching formations: ${error.message}`);
@@ -182,7 +183,7 @@ export const useFormationStore = defineStore('formationStore', {
                 }
 
                 if (this.selectedFormation?._id === id) {
-                    this.selectFormation(this.formations.length > 0 ? this.formations[0] : null);
+                    this.selectFormation(null);
                 }
             } catch (error) {
                 throw new Error(`Error deleting formation: ${error.message}`);
@@ -221,11 +222,11 @@ export const useFormationStore = defineStore('formationStore', {
 
         selectFormation(formation) {
             this.selectedFormation = formation;
-            this.selectedGrade = formation?.grades?.length > 0 ? formation.grades[0] : null;
+            this.selectedGrade = null;
         },
 
         selectGrade(grade) {
             this.selectedGrade = grade;
-        },
+        }
     },
 });

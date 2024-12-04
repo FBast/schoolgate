@@ -84,7 +84,7 @@ import { useI18n } from "vue-i18n";
 import { useSessionStore } from "@/stores/sessionStore.js";
 import FormInput from "@/components/FormInput.vue";
 import { formatDateWithTime } from "@/utils/helpers.js";
-import {onMounted} from "vue";
+import {onMounted, onUnmounted} from "vue";
 
 const { t } = useI18n();
 const sessionStore = useSessionStore();
@@ -101,9 +101,13 @@ onMounted(async () => {
   }
 });
 
+// onUnmounted(() => {
+//   sessionStore.selectSession(null);
+// });
+
 const toggleDetails = (session) => {
   if (sessionStore.selectedSession?._id === session._id) {
-    sessionStore.clearSelectedSession();
+    sessionStore.selectSession(null);
   } else {
     sessionStore.selectSession(session);
   }

@@ -75,7 +75,7 @@ export const useUserStore = defineStore('userStore', {
                 this.users.splice(userIndex, 1);
 
                 if (this.selectedUser && this.selectedUser._id === userId) {
-                    this.selectedUser = null;
+                    this.selectUser(null);
                 }
 
                 console.log('User deleted successfully');
@@ -99,10 +99,6 @@ export const useUserStore = defineStore('userStore', {
             } else {
                 this.selectedUser = { ...user };
             }
-        },
-
-        clearSelectedUser() {
-            this.selectedUser = null;
-        },
+        }
     },
 });

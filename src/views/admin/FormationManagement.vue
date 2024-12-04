@@ -106,7 +106,7 @@
 </template>
 
 <script setup>
-import {defineEmits, onMounted} from "vue";
+import {defineEmits, onMounted, onUnmounted} from "vue";
 import { useI18n } from "vue-i18n";
 import { useFormationStore } from "@/stores/formationStore";
 import { useTopicStore } from "@/stores/topicStore";
@@ -131,6 +131,10 @@ onMounted(async () => {
     console.error("Error loading formations and topics:", error);
   }
 });
+
+// onUnmounted(() => {
+//   formationStore.selectFormation(null);
+// });
 
 const saveAllChanges = async () => {
   try {
