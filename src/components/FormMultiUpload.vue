@@ -12,9 +12,14 @@
         <label>
           {{ file.name }} ({{ (file.size / 1024).toFixed(2) }} KB)
         </label>
-        <a @click.stop="removeFile(index)">
-          <i class="fa-solid fa-trash"></i>
-        </a>
+        <div class="actions">
+          <a @click.stop="downloadFile(index)">
+            <i class="fa-solid fa-download"></i>
+          </a>
+          <a @click.stop="removeFile(index)">
+            <i class="fa-solid fa-trash"></i>
+          </a>
+        </div>
       </li>
     </ul>
     <span v-if="error" class="error-message">{{ error }}</span>
@@ -22,7 +27,12 @@
 </template>
 
 <script>
+import {downloadFileFromBuffer, downloadFileFromFileObject} from "@/utils/helpers.js";
+
 export default {
+  mounted() {
+    console.log('Initial v-model value:', this.modelValue);
+  },
   props: {
     label: String,
     accept: {
@@ -41,8 +51,17 @@ export default {
     };
   },
   methods: {
+    downloadFile(index) {
+      const file = this.files[index];
+      if (!file) {
+        console.error(`No file found at index ${index}`);
+        return;
+      }
+      downloadFileFromFileObject(file);
+    },
     handleFileChange(event) {
       const selectedFiles = Array.from(event.target.files); // Convert FileList to Array
+      console.log('Selected files:', selectedFiles);
       this.files.push(...selectedFiles); // Add files to the list
       this.emitUpdate();
     },
@@ -81,6 +100,13 @@ export default {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+    
+    .actions {
+      flex: 0;
+      display: flex;
+      gap: var(--spacing-md);
+      justify-content: flex-end;
     }
   }
 }

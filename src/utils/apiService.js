@@ -167,19 +167,6 @@ export const ApiService = {
         }
     },
 
-    async getTopics() {
-        try {
-            const response = await axiosInstance.get('/topics', {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error retrieving topics');
-        }
-    },
-
     async getTopic(topicId) {
         try {
             const response = await axiosInstance.get(`/topics/${topicId}`, {
@@ -192,18 +179,56 @@ export const ApiService = {
             throw new Error('Error retrieving topic');
         }
     },
-
-    async updateTopic(topicId, topicData) {
+    
+    async getTopics() {
         try {
-            const response = await axiosInstance.put(`/topics/${topicId}`, topicData, {
+            const response = await axiosInstance.get('/topics', {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('authToken')}`
                 }
             });
             return response.data;
         } catch (error) {
-            throw new Error('Error updating topic');
+            throw new Error('Error retrieving topics');
         }
+    },
+    
+    async updateTopic(topicId, topicData) {
+        const formData = new FormData();
+
+        formData.append('data', JSON.stringify({
+            title: topicData.title,
+            exercises: topicData.exercises.map((exercise) => ({
+                _id: exercise._id,
+                title: exercise.title,
+                text: exercise.text,
+            })),
+        }));
+
+        topicData.exercises.forEach((exercise, exerciseIndex) => {
+            if (exercise.images && exercise.images.length > 0) {
+                exercise.images.forEach((imageFile, imageIndex) => {
+                    if (imageFile instanceof File || imageFile instanceof Blob) {
+                        formData.append(`images[${exerciseIndex}][${imageIndex}]`, imageFile);
+                    } else if (imageFile.data) {
+                        const blob = new Blob([new Uint8Array(imageFile.data)], { type: imageFile.mimeType });
+                        const file = new File([blob], imageFile.name, { type: imageFile.mimeType });
+                        formData.append(`images[${exerciseIndex}][${imageIndex}]`, file);
+                    } else {
+                        console.warn(`Invalid image format for exercise ${exerciseIndex}, image ${imageIndex}`);
+                    }
+                });
+            }
+        });
+
+        const response = await axiosInstance.put(`/topics/${topicId}`, formData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+
+        return response.data;
     },
 
     async deleteTopic(topicId) {

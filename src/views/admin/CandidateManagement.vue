@@ -75,12 +75,12 @@
                     <FormButton
                         v-if="user.examSubject"
                         :label="$t('download_exam_subject')"
-                        @click="downloadFile(user.examSubject, `${user.firstName}_${user.lastName}_Examen`, 'pdf')"
+                        @click="downloadFileFromBuffer(user.examSubject, `${user.firstName}_${user.lastName}_Examen`, 'pdf')"
                     />
                     <FormButton
                         v-if="user.examReport"
                         :label="$t('download_exam_report')"
-                        @click="downloadFile(user.examReport, `${user.firstName}_${user.lastName}_Rendu`, 'zip')"
+                        @click="downloadFileFromBuffer(user.examReport, `${user.firstName}_${user.lastName}_Rendu`, 'zip')"
                     />
                   </div>
                 </div>
@@ -128,7 +128,7 @@ import FormTextarea from '@/components/FormTextarea.vue';
 import { STATUS_OPTIONS } from '@/utils/constants';
 import {onMounted} from "vue";
 import FormButton from "@/components/FormButton.vue";
-import {downloadFile} from "@/utils/helpers.js";
+import {downloadFileFromBuffer} from "@/utils/helpers.js";
 
 const userStore = useUserStore();
 const formationStore = useFormationStore();

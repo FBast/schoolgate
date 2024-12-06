@@ -1,5 +1,5 @@
-﻿import { defineStore } from 'pinia';
-import { ApiService } from '@/utils/apiService.js';
+﻿import {defineStore} from 'pinia';
+import {ApiService} from '@/utils/apiService.js';
 
 export const useTopicStore = defineStore('topic', {
     state: () => ({
@@ -21,7 +21,18 @@ export const useTopicStore = defineStore('topic', {
                 const response = await ApiService.getTopics();
                 this.topics = response.map(topic => ({
                     ...topic,
-                    exercises: topic.exercises || [],
+                    exercises: (topic.exercises || []).map(exercise => ({
+                        ...exercise,
+                        images: (exercise.images || []).map((image, index) => {
+                            if (image.data && image.data.data && image.name && image.mimeType) {
+                                const buffer = Uint8Array.from(image.data.data);
+                                const blob = new Blob([buffer], { type: image.mimeType });
+                                return new File([blob], image.name, {type: image.mimeType});
+                            }
+                            console.warn(`Invalid image format for exercise ${exercise.title}, image ${index}`);
+                            return null;
+                        }).filter(image => image !== null),
+                    })),
                     isNew: false,
                     isModified: false,
                 }));
@@ -98,7 +109,7 @@ export const useTopicStore = defineStore('topic', {
                     });
 
                     updatedTopic = response.topic;
-
+                    
                     console.log('Topic updated successfully:', topic._id);
                 }
 
@@ -120,7 +131,8 @@ export const useTopicStore = defineStore('topic', {
             this.loading = true;
             try {
                 for (const topic of this.getModifiedTopics) {
-                    await this.updateTopic(topic);
+                    const images = topic.images || [];
+                    await this.updateTopic(topic, images);
                 }
                 console.log('All changes saved successfully');
             } catch (error) {

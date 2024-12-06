@@ -90,10 +90,11 @@
                             required
                             @input="markTopicAsModified(topicStore.selectedTopic._id)"
                         />
-                        <FormInput
-                            type="file"
-                            :label="$t('upload_submission')"
-                            @change="handleFileUpload($event, exercise._id)"
+                        <FormMultiUpload
+                            v-model="exercise.images"
+                            :label="$t('upload_images')"
+                            accept=".jpg,.jpeg,.png"
+                            @input="markTopicAsModified(topicStore.selectedTopic._id)"
                         />
                       </div>
                     </div>
@@ -114,7 +115,9 @@ import { useI18n } from "vue-i18n";
 import { useTopicStore } from "@/stores/topicStore";
 import FormInput from "@/components/FormInput.vue";
 import FormTextarea from "@/components/FormTextarea.vue";
-import {defineEmits, onMounted, onUnmounted} from "vue";
+import {defineEmits, onMounted, onUnmounted, ref} from "vue";
+import FormMultiUpload from "@/components/FormMultiUpload.vue";
+import {STATUS_OPTIONS} from "@/utils/constants.js";
 
 const { t } = useI18n();
 const topicStore = useTopicStore();
@@ -186,12 +189,5 @@ const toggleExerciseDetails = (exercise) => {
 
 const markTopicAsModified = (topicId) => {
   topicStore.markTopicAsModified(topicId);
-};
-
-const handleFileUpload = async (event, exerciseId) => {
-  const file = event.target.files[0];
-  if (file) {
-    emit("notify", { success: true, message: t("file_uploaded_successfully") });
-  }
 };
 </script>

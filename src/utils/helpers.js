@@ -34,7 +34,7 @@ export const toDatetimeLocal = (isoString) => {
     return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
-export const downloadFile = (fileBuffer, fileName, extension) => {
+export const downloadFileFromBuffer = (buffer, fileName, extension) => {
     if (!extension) {
         console.error("File extension must be specified.");
         return;
@@ -54,13 +54,33 @@ export const downloadFile = (fileBuffer, fileName, extension) => {
     const date = new Date().toISOString().slice(0, 10); // Format YYYY-MM-DD
     const finalFileName = `${fileName}_${date}.${extension}`;
 
-    const fileBlob = new Blob([new Uint8Array(fileBuffer.data)], { type: mimeType });
+    const fileBlob = new Blob([new Uint8Array(buffer.data)], { type: mimeType });
 
     const url = URL.createObjectURL(fileBlob);
 
     const link = document.createElement('a');
     link.href = url;
     link.setAttribute('download', finalFileName);
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+};
+
+export const downloadFileFromFileObject = (file) => {
+    if (!file || !(file instanceof File)) {
+        console.error("Invalid file object.");
+        return;
+    }
+
+    const url = URL.createObjectURL(file);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', file.name);
 
     document.body.appendChild(link);
 

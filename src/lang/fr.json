@@ -12,6 +12,7 @@
   "awaiting_information_description": "Veuillez entrez vos informations personnelles et selectionner la formation ainsi que l'année pour laquelle vous aimeriez postulez.",
   "exam_in_progress_description": "Votre épreuve est actuellement en cours. Veuillez terminer et soumettre votre rendu avant la fin du délai imparti. Assurez-vous d'avoir téléchargé toutes les ressources nécessaires et de suivre les consignes fournies.",
   "awaiting_interview": "En attente de l'entretien",
+  "upload_images": "Téléverser les images",
   "birth_date": "Date de naissance",
   "birth_date_error": "La date de naissance doit être valide.",
   "information_title": "Informations",

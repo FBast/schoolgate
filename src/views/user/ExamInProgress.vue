@@ -42,7 +42,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useFormationStore } from '@/stores/formationStore';
-import { downloadFile, formatDate } from '@/utils/helpers.js';
+import { downloadFileFromBuffer, formatDate } from '@/utils/helpers.js';
 import FormButton from "@/components/FormButton.vue";
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from "@/stores/authStore.js";
@@ -64,7 +64,7 @@ const uploadedFiles = ref([]);
 // Télécharger le sujet de l'examen
 const handleDownloadExamSubject = () => {
   if (authStore.currentUser.examSubject) {
-    downloadFile(authStore.currentUser.examSubject, `${authStore.currentUser.firstName}_${authStore.currentUser.lastName}_Examen`, 'pdf');
+    downloadFileFromBuffer(authStore.currentUser.examSubject, `${authStore.currentUser.firstName}_${authStore.currentUser.lastName}_Examen`, 'pdf');
     emit("notify", { success: true, message: t("file_download_success") });
   } else {
     emit("notify", { success: false, message: t("file_download_error") });
