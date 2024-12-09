@@ -27,12 +27,9 @@
 </template>
 
 <script>
-import {downloadFileFromBuffer, downloadFileFromFileObject} from "@/utils/helpers.js";
+import {downloadFileFromFileObject} from "@/utils/helpers.js";
 
 export default {
-  mounted() {
-    console.log('Initial v-model value:', this.modelValue);
-  },
   props: {
     label: String,
     accept: {
@@ -63,15 +60,13 @@ export default {
       const selectedFiles = Array.from(event.target.files); // Convert FileList to Array
       console.log('Selected files:', selectedFiles);
       this.files.push(...selectedFiles); // Add files to the list
-      this.emitUpdate();
+      this.$emit('update:modelValue', this.files); // Emit updated file list
     },
     removeFile(index) {
       this.files.splice(index, 1); // Remove file from the list
-      this.emitUpdate();
-    },
-    emitUpdate() {
       this.$emit('update:modelValue', this.files); // Emit updated file list
-    },
+      this.$emit('removed');
+    }
   },
 };
 </script>

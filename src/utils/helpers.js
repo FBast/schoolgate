@@ -89,3 +89,14 @@ export const downloadFileFromFileObject = (file) => {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 };
+
+export const convertBase64ToBufferData = (base64) => {
+    const binaryString = atob(base64);
+    const buffer = new Uint8Array(binaryString.length);
+
+    for (let i = 0; i < binaryString.length; i++) {
+        buffer[i] = binaryString.charCodeAt(i);
+    }
+
+    return { data: buffer };
+};

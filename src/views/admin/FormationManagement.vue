@@ -63,6 +63,10 @@
                     <div class="item-content" :class="{ selected: formationStore.selectedGrade?._id === grade._id }">
                       <label>{{ grade.title }}</label>
                       <div class="actions">
+                        <!-- Generate Exam -->
+                        <a v-if="!formation.isModified" @click.stop="generateExam(formation, grade)">
+                          <i class="fa-solid fa-file"></i>
+                        </a>
                         <!-- Edit Grade -->
                         <a @click.stop="toggleGradeDetails(grade)">
                           <i class="fa-solid fa-pen-to-square"></i>
@@ -89,6 +93,7 @@
                             :options="topicStore.topics.map(topic => ({ label: topic.title, value: topic._id }))"
                             :label="$t('associated_topics')"
                             @input="markFormationAsModified(formationStore.selectedFormation._id)"
+                            @selected="markFormationAsModified(formationStore.selectedFormation._id)"
                         />
                       </div>
                     </div>
@@ -112,6 +117,9 @@ import { useFormationStore } from "@/stores/formationStore";
 import { useTopicStore } from "@/stores/topicStore";
 import FormInput from "@/components/FormInput.vue";
 import FormMultiSelect from "@/components/FormMultiSelect.vue";
+import {ApiService} from "@/utils/apiService.js";
+import {convertBase64ToBufferData, downloadFileFromBuffer} from "@/utils/helpers.js";
+import {AxiosHeaders as Buffer} from "axios";
 
 const { t } = useI18n();
 const formationStore = useFormationStore();
@@ -189,23 +197,13 @@ const markFormationAsModified = (formationId) => {
   formationStore.markFormationAsModified(formationId);
 };
 
-const generateExam = async (gradeId) => {
-  const grade = grades.value.find((g) => g._id === gradeId);
-  if (!grade) return;
-
+const generateExam = async (formation, grade) => {
   try {
-    const response = await formationStore.generateExam(gradeId);
-    const blob = new Blob([response.pdf], { type: "application/pdf" });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${grade.grade}_exam.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const response = await ApiService.generateExam(formation._id, grade._id);
+    const bufferData = convertBase64ToBufferData(response.pdf);
+    downloadFileFromBuffer(bufferData, `Exam_${formation.title}_${grade.title}`, 'pdf');
   } catch (error) {
-    console.error(t("error_generating_exam"), error);
+    console.error("Error generating exam", error);
   }
 };
 

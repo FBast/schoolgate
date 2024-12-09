@@ -45,6 +45,7 @@ export default {
         updated.splice(index, 1);
         this.$emit("update:modelValue", updated);
       }
+      this.$emit("selected");
     },
   },
 };

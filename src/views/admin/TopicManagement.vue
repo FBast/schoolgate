@@ -95,6 +95,7 @@
                             :label="$t('upload_images')"
                             accept=".jpg,.jpeg,.png"
                             @input="markTopicAsModified(topicStore.selectedTopic._id)"
+                            @removed="markTopicAsModified(topicStore.selectedTopic._id)"
                         />
                       </div>
                     </div>
