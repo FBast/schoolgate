@@ -12,40 +12,36 @@ export const useFormationStore = defineStore('formationStore', {
     getters: {
         formationOptions: (state) =>
             state.formations.map((formation) => ({
-                label: formation.title,
-                value: formation._id,
+                label: formation?.title || 'Unknown Formation',
+                value: formation?._id || null,
             })),
 
         gradeOptions: (state) => (formationId) => {
             if (!formationId) return [];
-            const formation = state.formations.find((formation) => formation._id === formationId);
-            return formation?.grades.map((grade) => ({
-                label: grade.title,
-                value: grade._id,
+            const formation = state.formations.find((formation) => formation?._id === formationId);
+            return formation?.grades?.map((grade) => ({
+                label: grade?.title || 'Unknown Grade',
+                value: grade?._id || null,
             })) || [];
         },
 
         getFormationById: (state) => (id) =>
-            state.formations.find((formation) => formation._id === id),
+            state.formations.find((formation) => formation?._id === id) || null,
 
         getGradeById: (state) => (gradeId) =>
-            state.selectedFormation?.grades.find((grade) => grade._id === gradeId) || null,
-
-        getTopicsByGradeId: (state) => (gradeId) => {
-            const grade = state.selectedFormation?.grades.find((g) => g._id === gradeId);
-            return grade ? grade.topics : [];
-        },
+            state.selectedFormation?.grades?.find((grade) => grade?._id === gradeId) || null,
 
         getFormationTitle: (state) => (formationId) => {
-            const formation = state.formations.find(f => f._id === formationId);
-            return formation ? formation.title : 'Unknown Formation';
+            const formation = state.formations.find((f) => f?._id === formationId);
+            return formation?.title || 'Unknown Formation';
         },
 
         getGradeTitle: (state) => (formationId, gradeId) => {
-            const formation = state.formations.find(f => f._id === formationId);
-            const grade = formation.grades.find((g) => g._id === gradeId);
-            return grade ? grade.title : 'Unknown Grade';
-        }
+            const formation = state.formations.find((f) => f?._id === formationId);
+            if (!formation) return 'Unknown Grade';
+            const grade = formation.grades?.find((g) => g?._id === gradeId);
+            return grade?.title || 'Unknown Grade';
+        },
     },
 
     actions: {

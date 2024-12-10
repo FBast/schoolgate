@@ -154,12 +154,46 @@ export const ApiService = {
     },
 
     // Topic API methods
+    topicFormData(topicData) {
+        const formData = new FormData();
+
+        // Ajouter les données JSON pour le titre et les exercices
+        formData.append('data', JSON.stringify({
+            title: topicData.title,
+            exercises: topicData.exercises.map((exercise) => ({
+                _id: exercise._id,
+                title: exercise.title,
+                text: exercise.text,
+            })),
+        }));
+
+        // Ajouter les fichiers associés aux exercices
+        topicData.exercises.forEach((exercise, exerciseIndex) => {
+            if (exercise.images && exercise.images.length > 0) {
+                exercise.images.forEach((imageFile, imageIndex) => {
+                    if (imageFile instanceof File || imageFile instanceof Blob) {
+                        formData.append(`images[${exerciseIndex}][${imageIndex}]`, imageFile);
+                    } else if (imageFile.data) {
+                        const blob = new Blob([new Uint8Array(imageFile.data)], {type: imageFile.mimeType});
+                        const file = new File([blob], imageFile.name, {type: imageFile.mimeType});
+                        formData.append(`images[${exerciseIndex}][${imageIndex}]`, file);
+                    } else {
+                        console.warn(`Invalid image format for exercise ${exerciseIndex}, image ${imageIndex}`);
+                    }
+                });
+            }
+        });
+        return formData;
+    },
+    
     async createTopic(topicData) {
         try {
-            const response = await axiosInstance.post('/topics', topicData, {
+            const formData = this.topicFormData(topicData);
+            const response = await axiosInstance.post('/topics', formData, {
                 headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
-                }
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+                    'Content-Type': 'multipart/form-data',
+                },
             });
             return response.data;
         } catch (error) {
@@ -194,41 +228,18 @@ export const ApiService = {
     },
     
     async updateTopic(topicId, topicData) {
-        const formData = new FormData();
-
-        formData.append('data', JSON.stringify({
-            title: topicData.title,
-            exercises: topicData.exercises.map((exercise) => ({
-                _id: exercise._id,
-                title: exercise.title,
-                text: exercise.text,
-            })),
-        }));
-
-        topicData.exercises.forEach((exercise, exerciseIndex) => {
-            if (exercise.images && exercise.images.length > 0) {
-                exercise.images.forEach((imageFile, imageIndex) => {
-                    if (imageFile instanceof File || imageFile instanceof Blob) {
-                        formData.append(`images[${exerciseIndex}][${imageIndex}]`, imageFile);
-                    } else if (imageFile.data) {
-                        const blob = new Blob([new Uint8Array(imageFile.data)], { type: imageFile.mimeType });
-                        const file = new File([blob], imageFile.name, { type: imageFile.mimeType });
-                        formData.append(`images[${exerciseIndex}][${imageIndex}]`, file);
-                    } else {
-                        console.warn(`Invalid image format for exercise ${exerciseIndex}, image ${imageIndex}`);
-                    }
-                });
-            }
-        });
-
-        const response = await axiosInstance.put(`/topics/${topicId}`, formData, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-                'Content-Type': 'multipart/form-data',
-            },
-        });
-
-        return response.data;
+        try {
+            const formData = this.topicFormData(topicData);
+            const response = await axiosInstance.put(`/topics/${topicId}`, formData, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            return response.data;
+        } catch (error) {
+            throw new Error('Error updating topic');
+        }
     },
 
     async deleteTopic(topicId) {
