@@ -65,7 +65,7 @@
                       <div class="actions">
                         <!-- Generate Exam -->
                         <a v-if="!formation.isModified" @click.stop="generateExam(formation, grade)">
-                          <i class="fa-solid fa-file"></i>
+                          <i class="fa-solid fa-file-pdf"></i>
                         </a>
                         <!-- Edit Grade -->
                         <a @click.stop="toggleGradeDetails(grade)">

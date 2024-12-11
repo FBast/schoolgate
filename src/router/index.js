@@ -10,6 +10,7 @@ import TopicManagement from "@/views/admin/TopicManagement.vue";
 import FormationManagement from "@/views/admin/FormationManagement.vue";
 import { jwtDecode } from "jwt-decode";
 import { ROLES_OPTIONS } from "@/utils/constants";
+import {useModalStore} from "@/stores/modalStore.js";
 
 const routes = [
     {
@@ -83,11 +84,33 @@ router.beforeEach((to, from, next) => {
 
             if (decodedToken.exp < now) {
                 localStorage.removeItem("authToken"); // Expiration du token
-                return next("/auth");
+
+                // Afficher une modale via le store
+                const modalStore = useModalStore();
+                modalStore.showModal({
+                    title: "Déconnexion",
+                    message: "Votre session a expiré. Vous allez être redirigé vers la page de connexion.",
+                    callback: () => {
+                        next("/auth"); // Rediriger après la fermeture de la modale
+                    },
+                });
+
+                return; // Arrêter ici pour attendre la fermeture de la modale
             }
         } catch {
             localStorage.removeItem("authToken"); // Token invalide
-            return next("/auth");
+
+            // Afficher une modale pour token invalide
+            const modalStore = useModalStore();
+            modalStore.showModal({
+                title: "Erreur d'authentification",
+                message: "Votre session est invalide. Vous allez être redirigé vers la page de connexion.",
+                callback: () => {
+                    next("/auth"); // Rediriger après la fermeture de la modale
+                },
+            });
+
+            return; // Arrêter ici pour attendre la fermeture de la modale
         }
     }
 

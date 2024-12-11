@@ -4,6 +4,9 @@
       <div class="header">
         <h2 class="title">{{ $t('candidates') }}</h2>
         <div class="actions">
+          <a @click="exportCsv">
+            <i class="fas fa-file-csv"></i>
+          </a>
           <a @click="saveAllChanges">
             <i class="fas fa-save"></i>
           </a>
@@ -129,6 +132,7 @@ import { STATUS_OPTIONS } from '@/utils/constants';
 import {onMounted} from "vue";
 import FormButton from "@/components/FormButton.vue";
 import {downloadFileFromBuffer} from "@/utils/helpers.js";
+import { saveAs } from 'file-saver';
 
 const userStore = useUserStore();
 const formationStore = useFormationStore();
@@ -178,6 +182,49 @@ const deleteUser = async (userId) => {
     emit("notify", { success: true, message: t("success_deleting_user") });
   } catch (error) {
     emit("notify", { success: true, message: t("error_deleting_user") });
+  }
+};
+
+const exportCsv = async () => {
+  try {
+    await userStore.saveAllChanges();
+    emit("notify", { success: true, message: t("all_changes_saved_successfully") });
+
+    const users = userStore.users;
+
+    if (!users || users.length === 0) {
+      emit("notify", { success: false, message: t("no_users_to_export") });
+      return;
+    }
+
+    const formations = formationStore.formations;
+    const grades = formationStore.formations.flatMap(formation => formation.grades);
+
+    const relevantKeys = ["_id", "firstName", "lastName", "status", "email", "birthDate", "requestedFormation", "requestedGrade"];
+    const headers = ["ID", "First Name", "Last Name", "Status", "Email", "Birth Date", "Requested Formation", "Requested Grade"].join(",");
+
+    const rows = users.map(user =>
+        relevantKeys.map(key => {
+          if (key === "requestedFormation") {
+            const formation = formations.find(f => f._id === user[key]);
+            return `"${formation ? formation.title : "Unknown Formation"}"`;
+          }
+          if (key === "requestedGrade") {
+            const grade = grades.find(g => g._id === user[key]);
+            return `"${grade ? grade.title : "Unknown Grade"}"`;
+          }
+          return `"${String(user[key] || "").replace(/"/g, '""')}"`;
+        }).join(",")
+    );
+
+    const csvContent = [headers, ...rows].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8" });
+    saveAs(blob, `users_export_${new Date().toISOString().slice(0, 10)}.csv`);
+
+    emit("notify", { success: true, message: t("csv_export_success") });
+  } catch (error) {
+    console.error("Error exporting CSV:", error);
+    emit("notify", { success: false, message: t("error_exporting_csv") });
   }
 };
 

@@ -87,7 +87,12 @@ export const useAuthStore = defineStore("authStore", {
                 return "verify";
             } catch (error) {
                 this.success = false;
-                this.message = "Registration failed. Please try again.";
+                if (error.response && error.response.status === 400) {
+                    this.message = "This email is already in use. Please login.";
+                }
+                else {
+                    this.message = "Registration failed. Please try again.";
+                }
                 throw error;
             } finally {
                 this.loading = false;

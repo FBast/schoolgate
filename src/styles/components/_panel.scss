@@ -20,6 +20,7 @@
 }
 
 .panel {
+  background: var(--background-color);
   border: 1px solid var(--border-color);
   padding: var(--spacing-md);
   border-radius: var(--border-radius);
@@ -51,4 +52,8 @@
       align-content: center;
     }
   }
+}
+
+.modal {
+  
 }

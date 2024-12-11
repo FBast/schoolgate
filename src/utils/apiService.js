@@ -3,154 +3,102 @@ import axiosInstance from './axiosInstance';
 export const ApiService = {
     // User API methods
     async createUser(email, password) {
-        try {
-            const response = await axiosInstance.post('/users', { email, password });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error creating user');
-        }
+        const response = await axiosInstance.post('/users', { email, password });
+        return response.data;
     },
 
     async loginUser(email, password) {
-        try {
-            const response = await axiosInstance.post('/users/login', { email, password });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error logging in');
-        }
+        const response = await axiosInstance.post('/users/login', { email, password });
+        return response.data;
     },
 
     async resendVerificationCode(email) {
-        try {
-            const response = await axiosInstance.post('/users/resend-code', { email });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error resending verification code');
-        }
+        const response = await axiosInstance.post('/users/resend-code', { email });
+        return response.data;
     },
 
     async requestPasswordReset(email) {
-        try {
-            const response = await axiosInstance.post('/users/request-password-reset', { email });
-            return response.data;
-        } catch (error) {
-            throw new Error(error.response?.data?.message || 'Error requesting password reset');
-        }
+        const response = await axiosInstance.post('/users/request-password-reset', { email });
+        return response.data;
     },
 
     async resetPassword(email, validationToken, newPassword) {
-        try {
-            const response = await axiosInstance.post('/users/reset-password', { email, validationToken, newPassword });
-            return response.data;
-        } catch (error) {
-            throw new Error(error.response?.data?.message || 'Error resetting password');
-        }
+        const response = await axiosInstance.post('/users/reset-password', { email, validationToken, newPassword });
+        return response.data;
     },
 
     async verifyUser(token, email) {
-        try {
-            const response = await axiosInstance.post('/users/verify', { token, email });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error verifying user');
-        }
+        const response = await axiosInstance.post('/users/verify', { token, email });
+        return response.data;
     },
 
     async getUserProfile() {
-        try {
-            const response = await axiosInstance.get('/users/me', {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error retrieving user profile');
-        }
+        const response = await axiosInstance.get('/users/me', {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`
+            }
+        });
+        return response.data;
     },
 
     async updateUserProfile(userData) {
-        try {
-            const response = await axiosInstance.put('/users/me', userData, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error updating user profile');
-        }
+        const response = await axiosInstance.put('/users/me', userData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`
+            }
+        });
+        return response.data;
     },
 
     async uploadReport(files) {
-        try {
-            const formData = new FormData();
+        const formData = new FormData();
 
-            files.forEach((file) => {
-                formData.append(`examReport`, file);
-            });
+        files.forEach((file) => {
+            formData.append(`examReport`, file);
+        });
 
-            const response = await axiosInstance.post('/users/me/upload-report', formData, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error uploading PDF report');
-        }
+        const response = await axiosInstance.post('/users/me/upload-report', formData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`
+            }
+        });
+        return response.data;
     },
 
     async getUsers() {
-        try {
-            const response = await axiosInstance.get('/users', {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error retrieving users');
-        }
+        const response = await axiosInstance.get('/users', {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`
+            }
+        });
+        return response.data;
     },
 
     async getUser(userId) {
-        try {
-            const response = await axiosInstance.get(`/users/${userId}`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error retrieving user');
-        }
+        const response = await axiosInstance.get(`/users/${userId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`
+            }
+        });
+        return response.data;
     },
 
     async updateUser(userId, userData) {
-        try {
-            const response = await axiosInstance.put(`/users/${userId}`, userData, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error updating user');
-        }
+        const response = await axiosInstance.put(`/users/${userId}`, userData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`
+            }
+        });
+        return response.data;
     },
 
     async deleteUser(userId) {
-        try {
-            const response = await axiosInstance.delete(`/users/${userId}`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error deleting user');
-        }
+        const response = await axiosInstance.delete(`/users/${userId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`
+            }
+        });
+        return response.data;
     },
 
     // Topic API methods
@@ -187,86 +135,62 @@ export const ApiService = {
     },
     
     async createTopic(topicData) {
-        try {
-            const formData = this.topicFormData(topicData);
-            const response = await axiosInstance.post('/topics', formData, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error creating topic');
-        }
+        const formData = this.topicFormData(topicData);
+        const response = await axiosInstance.post('/topics', formData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
     },
 
     async getTopic(topicId) {
-        try {
-            const response = await axiosInstance.get(`/topics/${topicId}`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error retrieving topic');
-        }
+        const response = await axiosInstance.get(`/topics/${topicId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`
+            }
+        });
+        return response.data;
     },
     
     async getTopics() {
-        try {
-            const response = await axiosInstance.get('/topics', {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error retrieving topics');
-        }
+        const response = await axiosInstance.get('/topics', {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`
+            }
+        });
+        return response.data;
     },
     
     async updateTopic(topicId, topicData) {
-        try {
-            const formData = this.topicFormData(topicData);
-            const response = await axiosInstance.put(`/topics/${topicId}`, formData, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error updating topic');
-        }
+        const formData = this.topicFormData(topicData);
+        const response = await axiosInstance.put(`/topics/${topicId}`, formData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
     },
 
     async deleteTopic(topicId) {
-        try {
-            const response = await axiosInstance.delete(`/topics/${topicId}`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error deleting topic');
-        }
+        const response = await axiosInstance.delete(`/topics/${topicId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`
+            }
+        });
+        return response.data;
     },
 
     // Formation API methods
     async createFormation(formationData) {
-        try {
-            const response = await axiosInstance.post('/formations', formationData, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error creating formation');
-        }
+        const response = await axiosInstance.post('/formations', formationData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`
+            }
+        });
+        return response.data;
     },
 
     // async getGrades() {
@@ -283,29 +207,21 @@ export const ApiService = {
     // },
 
     async updateFormation(formationId, formationData) {
-        try {
-            const response = await axiosInstance.put(`/formations/${formationId}`, formationData, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error updating formation');
-        }
+        const response = await axiosInstance.put(`/formations/${formationId}`, formationData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`
+            }
+        });
+        return response.data;
     },
 
     async deleteFormation(formationId) {
-        try {
-            const response = await axiosInstance.delete(`/formations/${formationId}`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error deleting formation');
-        }
+        const response = await axiosInstance.delete(`/formations/${formationId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`
+            }
+        });
+        return response.data;
     },
 
     // Grade API methods
@@ -323,16 +239,12 @@ export const ApiService = {
     // },
 
     async getFormations() {
-        try {
-            const response = await axiosInstance.get('/formations', {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error retrieving formations');
-        }
+        const response = await axiosInstance.get('/formations', {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`
+            }
+        });
+        return response.data;
     },
 
     // async getFormationGrades(formationId) {
@@ -375,68 +287,48 @@ export const ApiService = {
     // },
 
     async generateExam(formationId, gradeId) {
-        try {
-            const response = await axiosInstance.get(`/formations/${formationId}/grades/${gradeId}/generateExam`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error generating exam');
-        }
+        const response = await axiosInstance.get(`/formations/${formationId}/grades/${gradeId}/generateExam`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`
+            }
+        });
+        return response.data;
     },
 
     // Session API Methods
     async getSessions() {
-        try {
-            const response = await axiosInstance.get('/sessions', {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error retrieving sessions');
-        }
+        const response = await axiosInstance.get('/sessions', {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`
+            }
+        });
+        return response.data;
     },
 
     async createSession(sessionData) {
-        try {
-            const response = await axiosInstance.post('/sessions', sessionData, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error creating session');
-        }
+        const response = await axiosInstance.post('/sessions', sessionData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`
+            }
+        });
+        return response.data;
     },
 
     async updateSession(sessionId, sessionData) {
-        try {
-            const response = await axiosInstance.put(`/sessions/${sessionId}`, sessionData, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error updating session');
-        }
+        const response = await axiosInstance.put(`/sessions/${sessionId}`, sessionData, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`
+            }
+        });
+        return response.data;
     },
 
     async deleteSession(sessionId) {
-        try {
-            const response = await axiosInstance.delete(`/sessions/${sessionId}`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('authToken')}`
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw new Error('Error deleting session');
-        }
+        const response = await axiosInstance.delete(`/sessions/${sessionId}`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`
+            }
+        });
+        return response.data;
     }
 };
