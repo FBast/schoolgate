@@ -84,7 +84,17 @@ export const ApiService = {
     },
 
     async updateUser(userId, userData) {
-        const response = await axiosInstance.put(`/users/${userId}`, userData, {
+        const response = await axiosInstance.put(`/users/${userId}`, {
+            status: userData.status,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            birthDate: userData.birthDate,
+            requestedFormation: userData.requestedFormation,
+            requestedGrade: userData.requestedGrade,
+            meetingDate: userData.meetingDate,
+            evaluation: userData.evaluation,
+            decision: userData.decision
+        }, {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem('authToken')}`
             }

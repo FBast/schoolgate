@@ -53,11 +53,4 @@ export default {
   justify-content: center;
   align-items: center;
 }
-
-.modal {
-  background: white;
-  padding: 20px;
-  border-radius: 5px;
-  text-align: center;
-}
 </style>
