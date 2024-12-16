@@ -72,12 +72,12 @@
           <FormButton @click="switchView('login')" :label="$t('existing_account')"></FormButton>
         </div>
       </div>
+    </div>
 
-      <div v-if="authStore.message" class="panel flex-vertical gap-md">
-        <p :class="{ 'error-message': !authStore.success, 'success-message': authStore.success }">
-          {{ authStore.message }}
-        </p>
-      </div>
+    <div v-if="message" class="panel flex-vertical gap-md">
+      <p :class="{ 'error-message': !success, 'success-message': success }">
+        {{ message }}
+      </p>
     </div>
   </main>
 </template>
@@ -100,11 +100,14 @@ const password = ref("");
 const confirmPassword = ref("");
 const verificationCode = ref("");
 const resetToken = ref("");
+const message = ref("");
+const success = ref(false);
 
 // Switch entre les vues
 const switchView = (view) => {
   currentView.value = view;
-  authStore.resetState();
+  message.value = "";
+  success.value = false;
   password.value = "";
   confirmPassword.value = "";
   verificationCode.value = "";
@@ -120,24 +123,45 @@ const login = async () => {
     } else {
       currentView.value = nextView;
     }
+    success.value = true;
+    message.value = t("login_successful");
   } catch (error) {
-    console.error(error);
+    success.value = false;
+    if (error.response?.status === 404) {
+      // Utilisateur non trouvé
+      message.value = t("account_not_found");
+    } else if (error.response?.status === 401) {
+      // Mot de passe incorrect
+      message.value = t("incorrect_password");
+    } else {
+      // Autres erreurs
+      message.value = t("error_occurred");
+    }
   }
 };
 
 // Inscription
 const register = async () => {
   if (password.value !== confirmPassword.value) {
-    authStore.message = t("passwords_do_not_match");
-    authStore.success = false;
+    success.value = false;
+    message.value = t("passwords_do_not_match");
     return;
   }
 
   try {
     await authStore.registerUser(password.value);
     currentView.value = "verify";
+    success.value = true;
+    message.value = t("registration_successful");
   } catch (error) {
-    console.error(error);
+    success.value = false;
+    if (error.response?.status === 400) {
+      // Email déjà utilisé
+      message.value = t("email_already_used");
+    } else {
+      // Autres erreurs
+      message.value = t("error_occurred");
+    }
   }
 };
 
@@ -146,8 +170,11 @@ const submitVerificationCode = async () => {
   try {
     await authStore.verifyUser(verificationCode.value);
     await router.push("/");
-  } catch (error) {
-    console.error(error);
+    success.value = true;
+    message.value = t("verification_successful");
+  } catch {
+    success.value = false;
+    message.value = t("error_occurred");
   }
 };
 
@@ -156,24 +183,30 @@ const resetPassword = async () => {
   try {
     await authStore.requestPasswordReset();
     currentView.value = "confirmResetPassword";
-  } catch (error) {
-    console.error(error);
+    success.value = true;
+    message.value = t("reset_code_sent");
+  } catch {
+    success.value = false;
+    message.value = t("error_occurred");
   }
 };
 
 // Soumission du nouveau mot de passe
 const submitNewPassword = async () => {
   if (password.value !== confirmPassword.value) {
-    authStore.message = t("passwords_do_not_match");
-    authStore.success = false;
+    success.value = false;
+    message.value = t("passwords_do_not_match");
     return;
   }
 
   try {
     await authStore.resetPassword(resetToken.value, password.value);
     currentView.value = "login";
-  } catch (error) {
-    console.error(error);
+    success.value = true;
+    message.value = t("password_reset_successful");
+  } catch {
+    success.value = false;
+    message.value = t("error_occurred");
   }
 };
 
@@ -181,8 +214,11 @@ const submitNewPassword = async () => {
 const resendCode = async () => {
   try {
     await authStore.resendVerificationCode();
-  } catch (error) {
-    console.error(error);
+    success.value = true;
+    message.value = t("code_resent");
+  } catch {
+    success.value = false;
+    message.value = t("error_occurred");
   }
 };
 </script>

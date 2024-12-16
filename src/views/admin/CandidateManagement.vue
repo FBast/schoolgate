@@ -132,7 +132,6 @@ import { STATUS_OPTIONS } from '@/utils/constants';
 import {onMounted} from "vue";
 import FormButton from "@/components/FormButton.vue";
 import {downloadFileFromBuffer} from "@/utils/helpers.js";
-import { saveAs } from 'file-saver';
 
 const userStore = useUserStore();
 const formationStore = useFormationStore();

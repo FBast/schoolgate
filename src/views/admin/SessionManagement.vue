@@ -34,9 +34,6 @@
             <label>{{ formatDateWithTime(session.startDate) }}</label>
             <label>{{ formatDateWithTime(session.endDate) }}</label>
             <div class="actions">
-              <a @click.stop="switchSessionEnabled(session._id)">
-                <i :class="session.enabled ? 'fa-solid fa-calendar-check' : 'fa-solid fa-calendar-times'"></i>
-              </a>
               <a @click.stop="toggleDetails(session)">
                 <i class="fa-solid fa-pen-to-square"></i>
               </a>
@@ -133,17 +130,6 @@ const deleteSession = async (sessionId) => {
     emit("notify", { success: true, message: t("success_deleting_session") });
   } catch (error) {
     emit("notify", { success: false, message: t("error_deleting_session") });
-  }
-};
-
-const switchSessionEnabled = (sessionId) => {
-  const session = sessionStore.getSessionById(sessionId);
-  if (session) {
-    session.enabled = !session.enabled; // Inverse l'état d'activation
-    session.isModified = true; // Marque la session comme modifiée
-    emit("notify", { success: true, message: t("session_status_toggled") });
-  } else {
-    emit("notify", { success: false, message: t("error_session_not_found") });
   }
 };
 </script>

@@ -30,6 +30,7 @@
       </p>
     </div>
   </div>
+
 </template>
 
 <script setup>
@@ -93,8 +94,7 @@ watch(
 // Soumettre le formulaire
 const submitForm = async () => {
   if (!isFormValid.value) {
-    authStore.success = false;
-    authStore.message = t('error_submit_form');
+    emit("notify", { success: false, message: t("error_submit_form") });
     return;
   }
 
@@ -108,11 +108,9 @@ const submitForm = async () => {
       status: STATUS_OPTIONS.awaiting_session,
     });
     emit('statusChanged');
-    authStore.success = true;
-    authStore.message = t('update_success');
+    emit("notify", { success: true, message: t("update_success") });
   } catch (error) {
-    authStore.success = false;
-    authStore.message = t('update_error');
+    emit("notify", { success: false, message: t("update_error") });
   }
 };
 </script>

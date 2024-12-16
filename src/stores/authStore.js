@@ -1,13 +1,11 @@
-﻿import {defineStore} from "pinia";
-import {ApiService} from "@/utils/apiService.js";
+﻿import { defineStore } from "pinia";
+import { ApiService } from "@/utils/apiService.js";
 
 export const useAuthStore = defineStore("authStore", {
     state: () => ({
         email: "",
-        message: "",
-        success: false,
         loading: false,
-        currentUser: null
+        currentUser: null,
     }),
 
     getters: {
@@ -16,14 +14,6 @@ export const useAuthStore = defineStore("authStore", {
     },
 
     actions: {
-        resetState() {
-            this.email = "";
-            this.message = "";
-            this.success = false;
-            this.loading = false;
-            this.currentUser = null;
-        },
-
         decodeToken(token) {
             try {
                 return JSON.parse(atob(token.split(".")[1]));
@@ -34,102 +24,83 @@ export const useAuthStore = defineStore("authStore", {
         },
 
         async fetchCurrentUser() {
+            this.loading = true;
             try {
-                this.loading = true;
                 this.currentUser = await ApiService.getUserProfile();
+                console.log("Current user fetched successfully.");
             } catch (error) {
-                console.error("Error fetching current user:", error);
+                console.error("Error fetching current user:", error.message);
                 this.logout();
-                throw error;
+                throw new Error(`Error fetching current user: ${error.message}`);
             } finally {
                 this.loading = false;
             }
         },
 
         async loginUser(password) {
+            this.loading = true;
             try {
-                this.loading = true;
                 const { token: authToken } = await ApiService.loginUser(this.email, password);
-
-                // Décoder le JWT pour obtenir des informations utilisateur
                 const decodedToken = this.decodeToken(authToken);
 
                 if (decodedToken.status === "unverified" && decodedToken.role !== "admin") {
-                    this.message = "Please verify your email to continue.";
-                    this.success = false;
+                    console.log("User needs to verify their email.");
                     return "verify";
                 }
 
-                // Stockage du token et mise à jour du rôle utilisateur
                 localStorage.setItem("authToken", authToken);
-                
-                // Récupération des données complètes de l'utilisateur depuis l'API
                 await this.fetchCurrentUser();
-                
-                this.success = true;
-                this.message = "Login successful.";
+                console.log("User logged in successfully.");
                 return "dashboard";
             } catch (error) {
-                this.success = false;
-                this.message = "Login failed. Please check your credentials.";
-                throw error;
+                console.error("Login failed:", error.message);
+                throw new Error(`Login failed: ${error.message}`);
             } finally {
                 this.loading = false;
             }
         },
 
         async registerUser(password) {
+            this.loading = true;
             try {
-                this.loading = true;
                 await ApiService.createUser(this.email, password);
-                this.success = true;
-                this.message = "Registration successful. Please verify your email.";
+                console.log("User registered successfully.");
                 return "verify";
             } catch (error) {
-                this.success = false;
                 if (error.response && error.response.status === 400) {
-                    this.message = "This email is already in use. Please login.";
+                    console.error("This email is already in use.");
+                    throw new Error("This email is already in use. Please login.");
                 }
-                else {
-                    this.message = "Registration failed. Please try again.";
-                }
-                throw error;
+                console.error("Registration failed:", error.message);
+                throw new Error(`Registration failed: ${error.message}`);
             } finally {
                 this.loading = false;
             }
         },
 
         async verifyUser(verificationCode) {
+            this.loading = true;
             try {
-                this.loading = true;
                 const { token: authToken } = await ApiService.verifyUser(verificationCode, this.email);
-
-                // Stocker le token après vérification
                 localStorage.setItem("authToken", authToken);
                 await this.fetchCurrentUser();
-
-                this.success = true;
-                this.message = "Verification successful.";
+                console.log("User verified successfully.");
             } catch (error) {
-                this.success = false;
-                this.message = "Verification failed. Please check the code and try again.";
-                throw error;
+                console.error("Verification failed:", error.message);
+                throw new Error(`Verification failed: ${error.message}`);
             } finally {
                 this.loading = false;
             }
         },
 
         async updateCurrentUser(data) {
+            this.loading = true;
             try {
-                this.loading = true;
                 this.currentUser = await ApiService.updateUserProfile(data);
-                this.message = "Profile updated successfully.";
-                this.success = true;
+                console.log("User profile updated successfully.");
             } catch (error) {
-                this.success = false;
-                this.message = "Failed to update profile.";
-                console.error(error);
-                throw error;
+                console.error("Failed to update user profile:", error.message);
+                throw new Error(`Failed to update user profile: ${error.message}`);
             } finally {
                 this.loading = false;
             }
@@ -137,52 +108,47 @@ export const useAuthStore = defineStore("authStore", {
 
         logout() {
             localStorage.removeItem("authToken");
-            this.resetState();
+            this.email = "";
+            console.log("User logged out.");
         },
-        
+
         async resendVerificationCode() {
+            this.loading = true;
             try {
-                this.loading = true;
                 await ApiService.resendVerificationCode(this.email);
-                this.success = true;
-                this.message = "Verification code resent successfully.";
+                console.log("Verification code resent successfully.");
             } catch (error) {
-                this.success = false;
-                this.message = "Failed to resend verification code.";
-                throw error;
+                console.error("Failed to resend verification code:", error.message);
+                throw new Error(`Failed to resend verification code: ${error.message}`);
             } finally {
                 this.loading = false;
             }
         },
 
         async requestPasswordReset() {
+            this.loading = true;
             try {
-                this.loading = true;
                 await ApiService.requestPasswordReset(this.email);
-                this.success = true;
-                this.message = "Password reset code sent successfully.";
+                console.log("Password reset code sent successfully.");
             } catch (error) {
-                this.success = false;
-                this.message = "Failed to send password reset code.";
-                throw error;
+                console.error("Failed to send password reset code:", error.message);
+                throw new Error(`Failed to send password reset code: ${error.message}`);
             } finally {
                 this.loading = false;
             }
         },
 
         async resetPassword(resetToken, newPassword) {
+            this.loading = true;
             try {
-                this.loading = true;
                 await ApiService.resetPassword(this.email, resetToken, newPassword);
-                this.success = true;
-                this.message = "Password reset successfully.";
+                console.log("Password reset successfully.");
             } catch (error) {
-                this.success = false;
-                this.message = "Failed to reset password.";
-                throw error;
+                console.error("Failed to reset password:", error.message);
+                throw new Error(`Failed to reset password: ${error.message}`);
             } finally {
                 this.loading = false;
             }
-        }
+        },
     },
 });
